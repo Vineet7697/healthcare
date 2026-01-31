@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaPlay, FaPhoneAlt, FaUserClock, FaSun, FaMoon } from "react-icons/fa";
-
+import { toast } from "react-toastify";
 import {
   getTodayQueue,
   startAppointment,
@@ -42,11 +42,12 @@ const LiveQueuePage = () => {
   /* ================= CALL NEXT TOKEN ================= */
   const handleCallNext = async () => {
     if (callingNext) return;
-
+    
     try {
       setCallingNext(true);
 
       const res = await callNextToken(slot);
+      console.log("API response:", res.data);
       toast.success(res.data.message || "Next token called");
 
       await loadQueue();
