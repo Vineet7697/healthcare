@@ -42,7 +42,7 @@ const DoctorQRCodePage = () => {
 
         {loading ? (
           <p>Loading QR...</p>
-        ) : (
+        ) : qrValue ? (
           <div className="flex justify-center mb-4">
             <QRCodeCanvas
               id="doctor-qr"
@@ -52,6 +52,8 @@ const DoctorQRCodePage = () => {
               includeMargin
             />
           </div>
+        ) : (
+          <p className="text-red-500">QR not available</p>
         )}
 
         <p className="text-sm text-gray-600 mb-4">

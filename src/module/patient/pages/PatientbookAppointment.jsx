@@ -20,6 +20,27 @@ import {
 } from "react-icons/fa";
 import { GiTooth } from "react-icons/gi";
 
+// 👇 ADD THIS ABOVE PatientbookAppointment component
+function extractDoctorId(scannedData) {
+  if (!scannedData) return null;
+
+  const cleanData = scannedData.trim();
+
+  try {
+    // Absolute URL
+    const url = new URL(cleanData);
+    return url.searchParams.get("doctorId");
+  } catch {
+    // Relative URL fallback
+    try {
+      const url = new URL(cleanData, window.location.origin);
+      return url.searchParams.get("doctorId");
+    } catch {
+      return null;
+    }
+  }
+}
+
 const PatientbookAppointment = () => {
   const webcamRef = useRef(null);
   const qrScannerRef = useRef(null);
@@ -104,6 +125,7 @@ const PatientbookAppointment = () => {
   /* ================= QR SCAN ================= */
   useEffect(() => {
     if (!scanning) return;
+    if (qrScannerRef.current) return;
 
     const video = webcamRef.current?.video;
     if (!video) return;
@@ -111,23 +133,20 @@ const PatientbookAppointment = () => {
     const scanner = new QrScanner(
       video,
       (result) => {
-        const scannedData = result.data;
 
         scanner.stop();
         qrScannerRef.current = null;
         setScanning(false);
 
-        try {
-          const url = new URL(scannedData);
-          const doctorId = url.searchParams.get("doctorId");
+        setDatas(result.data);
 
-          if (!doctorId) throw new Error();
-
-          navigate(`/client/book-appointment?doctorId=${doctorId}`);
-        } catch (err) {
-          console.error(err);
+        const doctorId = extractDoctorId(result.data);
+        if (!doctorId) {
           alert("Invalid QR code");
+          return;
         }
+
+        navigate(`/client/bookappointmentpage/${doctorId}`);
       },
       { returnDetailedScanResult: true },
     );
@@ -137,6 +156,7 @@ const PatientbookAppointment = () => {
 
     return () => {
       scanner.stop();
+      qrScannerRef.current = null;
     };
   }, [scanning, navigate]);
 
@@ -145,16 +165,18 @@ const PatientbookAppointment = () => {
     if (!file) return;
 
     try {
-      const result = await QrScanner.scanImage(file);
+      const result = await QrScanner.scanImage(file, {
+        returnDetailedScanResult: true,
+      });
 
-      const scannedData = typeof result === "string" ? result : result.data;
+      const doctorId = extractDoctorId(result.data);
+      setDatas(result.data);
+      if (!doctorId) {
+        alert("Invalid QR code");
+        return;
+      }
 
-      const url = new URL(scannedData);
-      const doctorId = url.searchParams.get("doctorId");
-
-      if (!doctorId) throw new Error();
-
-      navigate(`/client/book-appointment?doctorId=${doctorId}`);
+      navigate(`/client/bookappointmentpage/${doctorId}`);
     } catch (err) {
       alert("Invalid QR code");
     }
@@ -277,7 +299,9 @@ const PatientbookAppointment = () => {
             <h2 className="text-base sm:text-lg font-bold">Scan any QR code</h2>
 
             <div
-              onClick={() => setScanning(true)}
+              onClick={() => {
+                if (!scanning) setScanning(true);
+              }}
               className="flex items-center justify-center p-4 bg-gray-100 rounded-full w-16 h-16 shadow-md hover:scale-105 transition cursor-pointer"
             >
               <FaQrcode size={40} color="green" />
