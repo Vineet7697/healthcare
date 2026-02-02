@@ -1,13 +1,19 @@
 import { useLanguage } from "../context/LanguageContext";
 
-
 const Service = () => {
+  const { language, lang } = useLanguage();
+  const t = lang[language];
   return (
     <>
       <section className="py-20 px-6 md:px-16 bg-blue-50 text-gray-800">
         <div className="max-w-7xl mx-auto text-center md:text-left">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 text-center">
-            Our <span className="text-[#0072BC]">Core & Support</span> Services
+            {t.services_title_main}{" "}
+            <span className="text-[#0072BC]">
+              {" "}
+              {t.services_title_highlight}{" "}
+            </span>{" "}
+            {t.services_title_end}
           </h2>
 
           {/* Services Grid */}
@@ -15,7 +21,7 @@ const Service = () => {
             {/* ✅ Core Services */}
             <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
               <h3 className="text-2xl font-semibold text-[#0072BC]">
-                Core Services
+                {t.core_services}
               </h3>
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
@@ -25,8 +31,8 @@ const Service = () => {
                     className="w-8 h-8 mt-1 rounded"
                   />
                   <p>
-                    <strong>Online Appointment Booking:</strong> View a calendar
-                    and choose your preferred date and time.
+                    <strong>{t.online_booking_title}:</strong>{" "}
+                    {t.online_booking_desc}
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -36,8 +42,8 @@ const Service = () => {
                     className="w-8 h-8 mt-1 rounded"
                   />
                   <p>
-                    <strong>Video Consultation / Telemedicine:</strong> Consult
-                    with a doctor online from your home.
+                    <strong>{t.video_consult_title}:</strong>{" "}
+                    {t.video_consult_desc}
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -47,8 +53,8 @@ const Service = () => {
                     className="w-8 h-8 mt-1 rounded"
                   />
                   <p>
-                    <strong>In-Clinic Consultation:</strong> Visit the clinic or
-                    hospital to meet your doctor in person.
+                    <strong>{t.clinic_consult_title}:</strong>{" "}
+                    {t.clinic_consult_desc}
                   </p>
                 </li>
               </ul>
@@ -57,7 +63,7 @@ const Service = () => {
             {/* ✅ Informational Services (fixed layout) */}
             <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
               <h3 className="text-2xl font-semibold text-[#0072BC]">
-                Informational Services
+                {t.info_services}
               </h3>
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
@@ -67,8 +73,8 @@ const Service = () => {
                     className="w-8 h-8 mt-1 rounded"
                   />
                   <p>
-                    <strong>Doctor Profiles:</strong> View qualifications,
-                    experience, and specializations.
+                    <strong>{t.doctor_profile_title}:</strong>{" "}
+                    {t.doctor_profile_desc}
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -78,8 +84,7 @@ const Service = () => {
                     className="w-8 h-8 mt-1 rounded"
                   />
                   <p>
-                    <strong>Specialties/Departments:</strong> Cardiology,
-                    Dermatology, Pediatrics, General Medicine, and more.
+                    <strong>{t.specialties_title}:</strong> {t.specialties_desc}
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -89,8 +94,7 @@ const Service = () => {
                     className="w-8 h-8 mt-1 rounded"
                   />
                   <p>
-                    <strong>Treatments Offered:</strong> Health check-ups, minor
-                    surgeries, and other procedures.
+                    <strong>{t.treatment_title}:</strong> {t.treatment_desc}
                   </p>
                 </li>
               </ul>
@@ -99,7 +103,8 @@ const Service = () => {
             {/* Patient Conveniences */}
             <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
               <h3 className="text-2xl font-semibold text-[#0072BC]">
-                Patient Conveniences
+                {t.patient_convenience}
+                
               </h3>
 
               <ul className="space-y-4 text-gray-700">
@@ -110,8 +115,8 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>View Lab Reports:</strong> Access your test results
-                    online.
+                    <strong>{t.lab_report_title}: </strong>{t.lab_report_desc}
+                  
                   </p>
                 </li>
 
@@ -122,8 +127,8 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>Prescription Management:</strong> View past
-                    prescriptions or request refills easily.
+                    <strong>{t.prescription_title}:</strong> {t.prescription_desc}
+                    
                   </p>
                 </li>
 
@@ -134,8 +139,7 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>Health Packages:</strong> Full-body check-ups and
-                    preventive care bundles.
+                    <strong>{t.health_package_title}:</strong> {t.health_package_desc}
                   </p>
                 </li>
 
@@ -146,8 +150,7 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>Home Care Services:</strong> At-home sample
-                    collection and nursing care.
+                    <strong>{t.home_care_title}:</strong> {t.home_care_desc}
                   </p>
                 </li>
               </ul>
@@ -156,7 +159,7 @@ const Service = () => {
             {/* Additional Services */}
             <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
               <h3 className="text-2xl font-semibold text-[#0072BC]">
-                Additional Services
+                {t.additional_services}
               </h3>
 
               <ul className="space-y-4 text-gray-700">
@@ -167,8 +170,7 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>Emergency Services:</strong> 24/7 emergency care
-                    contacts.
+                    <strong>{t.emergency_title}: </strong> {t.emergency_desc}
                   </p>
                 </li>
 
@@ -179,8 +181,7 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>Health Blog & Articles:</strong> Helpful tips and
-                    wellness information.
+                    <strong>{t.blog_title}: </strong> {t.blog_desc}
                   </p>
                 </li>
 
@@ -191,8 +192,7 @@ const Service = () => {
                     className="w-8 h-8 rounded"
                   />
                   <p>
-                    <strong>Book Ambulance:</strong> Request an ambulance
-                    instantly.
+                    <strong>{t.ambulance_title}: </strong> {t.ambulance_desc}
                   </p>
                 </li>
               </ul>

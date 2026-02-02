@@ -4,6 +4,9 @@ import { FaEnvelope, FaMobileAlt } from "react-icons/fa";
 import { useLanguage } from "../context/LanguageContext";
 
 const Contact = () => {
+
+  const { language, lang } = useLanguage();
+  const t = lang[language];
   return (
     <>
       {/* -------- SUPPORT FORM SECTION -------- */}
@@ -17,17 +20,17 @@ const Contact = () => {
               className="mx-auto md:mx-0 mb-6 w-64 md:w-80"
             />
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Need Assistance? We’re Here for You
+              {t.contact_support_title}
             </h2>
             <p className="text-blue-100 text-lg">
-              Share your query with us and our team will reach out shortly.
+              {t.contact_support_desc}
             </p>
           </div>
 
           {/* Right Section (Form) */}
           <div className="bg-white rounded-2xl shadow-lg p-8 text-gray-800 mt-5">
             <h1 className="text-2xl font-semibold mb-6">
-              Enter your details so we can connect with you
+             {t.contact_form_title}
             </h1>
 
             <form className="space-y-5">
@@ -39,15 +42,15 @@ const Contact = () => {
                   required
                   className="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-[#0072BC] focus:outline-none"
                 >
-                  <option value="">Choose Your Concern</option>
-                  <option value="healthcheck">Health Services</option>
-                  <option value="lab">Lab Test Booking</option>
-                  <option value="medicine">Medicine Purchase</option>
-                  <option value="consultation">Doctor Consultation</option>
-                  <option value="app">Application Support</option>
-                  <option value="coupons">Offers & Discounts</option>
-                  <option value="subscription">Plans & Membership</option>
-                  <option value="security">Privacy & Security</option>
+                  <option value="">{t.choose_concern}</option>
+                  <option value="healthcheck">{t.health_services}</option>
+                  <option value="lab">{t.lab_booking}</option>
+                  <option value="medicine">{t.medicine_purchase}</option>
+                  <option value="consultation">{t.doctor_consultation}</option>
+                  <option value="app">{t.app_support}</option>
+                  <option value="coupons">{t.offers}</option>
+                  <option value="subscription">{t.plans}</option>
+                  <option value="security">{t.privacy}</option>
                 </select>
               </div>
 
@@ -59,15 +62,16 @@ const Contact = () => {
                   required
                   className="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-[#0072BC] focus:outline-none"
                 >
-                  <option value="">Select Specific Issue</option>
-                  <option value="order">Track My Order</option>
-                  <option value="cancellation">Cancel My Order</option>
-                  <option value="reschedule">Reschedule Booking</option>
-                  <option value="prize">Reward Related Issue</option>
-                  <option value="app">App Not Working</option>
-                  <option value="reports">Report Delivery Delay</option>
-                  <option value="cancel">Request Order Cancellation</option>
-                </select>
+                  <option value="">{t.select_issue}</option>
+                  <option value="order">{t.track_order}r</option>
+                  <option value="cancellation">{t.cancel_order}</option>
+                  <option value="reschedule">{t.reschedule}</option>
+                  <option value="prize">{t.reward_issue}</option>
+                  <option value="app">{t.app_not_working}</option>
+                  <option value="reports">{t.report_delay}</option>
+                  <option value="cancel">{t.request_cancel}</option>
+ </select>
+      
               </div>
 
               {/* Name */}
@@ -76,7 +80,7 @@ const Contact = () => {
                   htmlFor="name"
                   className="block text-sm font-medium mb-1"
                 >
-                  Full Name <span className="text-red-600">*</span>
+                  {t.full_name} <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -93,7 +97,7 @@ const Contact = () => {
                   htmlFor="number"
                   className="block text-sm font-medium mb-1"
                 >
-                  Mobile Number <span className="text-red-600">*</span>
+                 {t.mobile_number} <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="tel"
@@ -110,7 +114,7 @@ const Contact = () => {
                   htmlFor="email"
                   className="block text-sm font-medium mb-1"
                 >
-                  Email Address (Optional)
+                  {t.email_optional}
                 </label>
                 <input
                   type="email"
@@ -126,7 +130,7 @@ const Contact = () => {
                   htmlFor="text"
                   className="block text-sm font-medium mb-1"
                 >
-                  Describe Your Concern (Optional)
+                  {t.describe_issue}
                 </label>
                 <textarea
                   name="text"
@@ -141,7 +145,7 @@ const Contact = () => {
                 type="submit"
                 className="w-full bg-[#0072BC] text-white font-semibold py-2 rounded-lg hover:bg-[#005a99] transition duration-300"
               >
-                Submit Request
+                {t.submit_request}
               </button>
             </form>
           </div>
@@ -153,30 +157,29 @@ const Contact = () => {
         <div className="max-w-5xl mx-auto space-y-12 flex flex-col items-center">
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Your Well-Being Comes First
+              {t.wellbeing_title}
             </h2>
             <p className="text-gray-700 text-lg max-w-2xl mx-auto">
-              Explore trusted hospitals and reputed clinics around you that are
-              known for quality treatment and compassionate care.
+              {t.wellbeing_desc}
             </p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-10">
             <div className="flex flex-col items-center bg-white shadow-2xl rounded-xl p-6 w-56 hover:scale-105 transition-transform">
               <FaLocationDot className="text-[#0072BC] text-4xl mb-3" />
-              <span className="font-bold text-gray-800 text-lg">Location</span>
+              <span className="font-bold text-gray-800 text-lg">{t.location}</span>
               <p className="text-gray-600">Bhopal, MP</p>
             </div>
 
             <div className="flex flex-col items-center bg-white shadow-2xl rounded-xl p-6 w-56 hover:scale-105 transition-transform">
               <FaEnvelope className="text-[#0072BC] text-4xl mb-3" />
-              <span className="font-bold text-gray-800 text-lg">Email Us</span>
+              <span className="font-bold text-gray-800 text-lg">{t.email_us}</span>
               <p className="text-gray-600">support@yodoctor.com</p>
             </div>
 
             <div className="flex flex-col items-center bg-white shadow-2xl rounded-xl p-6 w-56 hover:scale-105 transition-transform">
               <FaMobileAlt className="text-[#0072BC] text-4xl mb-3" />
-              <span className="font-bold text-gray-800 text-lg">Call Us</span>
+              <span className="font-bold text-gray-800 text-lg">{t.call_us}</span>
               <p className="text-gray-600">+91 88390 03275</p>
             </div>
           </div>
@@ -188,23 +191,18 @@ const Contact = () => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1 space-y-6">
             <h3 className="text-2xl md:text-3xl font-semibold text-gray-800 leading-snug">
-              Talk to Certified Doctors Online with{" "}
+              {t.talk_doctor_title}{" "}
               <span className="text-[#0072BC] font-bold">Yo</span>
               <span className="text-green-500 font-bold">Doctor</span>
             </h3>
 
             <p className="text-gray-700 leading-relaxed">
-              At <strong>YoDoctor</strong>, our focus is to make quality medical
-              care accessible for everyone. Tight schedules, traffic, long
-              waiting lines, and rising medical costs should never stop you from
-              getting professional advice. That’s why we connect you with
-              experienced doctors from leading hospitals across India.
+               {/* <strong>YoDoctor</strong>,  */}
+               {t.talk_doctor_desc1}
             </p>
 
             <p className="text-gray-700 leading-relaxed">
-              Make healthcare simple for you and your family. Start your first
-              online consultation today and get expert guidance for any health
-              concern right from your home.
+              {t.talk_doctor_desc2}
             </p>
           </div>
 

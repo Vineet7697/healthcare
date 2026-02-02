@@ -60,6 +60,10 @@ import AdminAppointments from "../admin/AdminAppointments";
 import VisitSummaryPage from "../module/doctor/pages/VisitSummaryPage";
 // import ConsultationTabs from "../module/patient/pages/ConsultationTabs";
 
+import AdminDoctor from "../admin/AdminDoctor";
+// import ProtectedRoute from "../routes/ProtectedRoute";
+
+
 const Router = () => {
   return (
     <BrowserRouter>
@@ -84,35 +88,7 @@ const Router = () => {
           <Route path="forgotpassword" element={<ForgotPasswordPage />} />
         </Route>
 
-        {/* admin page */}
         {/* <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/patients"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminPatients />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/appointments"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminAppointments />
-            </ProtectedRoute>
-          }
-        /> */}
-
-        <Route
           path="/admin"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
@@ -123,6 +99,22 @@ const Router = () => {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="patients" element={<AdminPatients />} />
           <Route path="appointments" element={<AdminAppointments />} />
+        </Route> */}
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="patients" element={<AdminPatients />} />
+          <Route path="appointments" element={<AdminAppointments />} />
+           <Route path="doctors" element={<AdminDoctor />} />
+
         </Route>
 
         {/* 🩺 Doctor Dashboard Layout (with HeaderDashboard + Sidebar) */}

@@ -1,29 +1,3 @@
-// import { createContext, useContext, useEffect, useState } from "react";
-// import { lang } from "../context/language";
-
-// const LanguageContext = createContext();
-
-// export const LanguageProvider = ({ children }) => {
-//   const [language, setLanguage] = useState("en");
-
-//   useEffect(() => {
-//     const saved = localStorage.getItem("lang");
-//     if (saved) setLanguage(saved);
-//   }, []);
-
-//   const changeLanguage = (l) => {
-//     setLanguage(l);
-//     localStorage.setItem("lang", l);
-//   };
-
-//   return (
-//     <LanguageContext.Provider value={{ language, changeLanguage, lang }}>
-//       {children}
-//     </LanguageContext.Provider>
-//   );
-// };
-
-// export const useLanguage = () => useContext(LanguageContext);
 
 
 
@@ -36,9 +10,9 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("lang");
-    if (saved && lang[saved]) {
-      setLanguage(saved);
+    const savedLang = localStorage.getItem("lang");
+    if (savedLang && lang[savedLang]) {
+      setLanguage(savedLang);
     }
   }, []);
 

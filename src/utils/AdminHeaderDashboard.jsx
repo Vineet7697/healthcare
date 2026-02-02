@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBars, FaBell,FaSignOutAlt  } from "react-icons/fa";
+import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 
 /* ================= SAFE STORAGE ================= */
@@ -17,36 +17,33 @@ const getStoredUser = () => {
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
-const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
+const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
 
-  /* 🔴 ALL HOOKS MUST BE HERE (TOP LEVEL) */
-  const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
+  /* ================= STATES ================= */
   const [profileImage, setProfileImage] = useState(
     localStorage.getItem("profileImage") || DEFAULT_AVATAR
   );
-
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
   const notifications = [
-    { id: 1, text: "New appointment booked", time: "2 mins ago" },
-    { id: 2, text: "Profile updated successfully", time: "1 hour ago" },
+    { id: 1, text: "New doctor registered", time: "5 mins ago" },
+    { id: 2, text: "Doctor approved successfully", time: "1 hour ago" },
   ];
 
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
-  console.log("HEADER mounted, user 👉", loggedInUser);
+  /* ================= HELPERS ================= */
+  const handleNavigate = (path) => {
+    setProfileOpen(false);
+    setNotificationOpen(false);
+    navigate(path);
+  };
 
-  /* ================= SYNC PROFILE IMAGE ================= */
-const handleNavigate = (path) => {
-  setProfileOpen(false);
-  setNotificationOpen(false);
-  navigate(path);
-};
-
-
+  /* ================= PROFILE IMAGE SYNC ================= */
   useEffect(() => {
     const syncImage = () => {
       const img = localStorage.getItem("profileImage");
@@ -56,21 +53,6 @@ const handleNavigate = (path) => {
     window.addEventListener("profileImageUpdated", syncImage);
     return () =>
       window.removeEventListener("profileImageUpdated", syncImage);
-  }, []);
-
-  /* ================= USER SYNC ================= */
-  useEffect(() => {
-    const syncUser = () => setLoggedInUser(getStoredUser());
-
-    window.addEventListener("storage", syncUser);
-    window.addEventListener("userLogin", syncUser);
-    window.addEventListener("userLogout", syncUser);
-
-    return () => {
-      window.removeEventListener("storage", syncUser);
-      window.removeEventListener("userLogin", syncUser);
-      window.removeEventListener("userLogout", syncUser);
-    };
   }, []);
 
   /* ================= OUTSIDE CLICK ================= */
@@ -86,18 +68,27 @@ const handleNavigate = (path) => {
       setNotificationOpen(false);
     };
 
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        setProfileOpen(false);
+        setNotificationOpen(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleOutsideClick);
-    return () =>
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEsc);
+    };
   }, []);
 
-  /* ================= HANDLERS ================= */
+  /* ================= LOGOUT ================= */
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("profileImage");
-
-    setLoggedInUser(null);
-    setProfileImage(DEFAULT_AVATAR);
+    localStorage.removeItem("token");
 
     window.dispatchEvent(new Event("userLogout"));
     navigate("/");
@@ -116,29 +107,18 @@ const handleNavigate = (path) => {
     >
       <div className="h-full px-4 flex items-center">
         {/* ⬅️ Sidebar Toggle */}
-        <div className="flex items-center">
-          <button
-            onClick={toggleSidebar}
-            className="text-xl text-gray-700 hover:text-blue-600 transition"
-          >
-            <FaBars />
-          </button>
-        </div>
+        <button
+          onClick={toggleSidebar}
+          className="text-xl text-gray-700 hover:text-blue-600 transition"
+        >
+          <FaBars />
+        </button>
 
-        {/* 🎯 Center */}
-        <div className="flex-1 flex justify-center gap-4">
-          <button
-            onClick={() => navigate("/client/book-appointment")}
-            className="hidden md:flex px-6 py-2 rounded-full
-            bg-linear-to-br from-[#2277f7] to-[#52abd4]
-            text-white text-sm font-medium"
-          >
-            Book Appointment
-          </button>
-        </div>
+        {/* 🔵 SPACER (important for right alignment) */}
+        <div className="flex-1" />
 
-        {/* ➡️ Right */}
-        <div className="flex items-center gap-3 relative">
+        {/* ➡️ Right Section */}
+        <div className="flex items-center gap-4 relative">
           {/* 🔔 Notifications */}
           <div className="relative" ref={notificationRef}>
             <button
@@ -149,12 +129,16 @@ const handleNavigate = (path) => {
               className="relative text-xl text-gray-700 hover:text-blue-600"
             >
               <FaBell />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+              )}
             </button>
 
             {notificationOpen && (
               <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-lg border z-20">
-                <div className="p-3 font-semibold border-b">Notifications</div>
+                <div className="p-3 font-semibold border-b">
+                  Admin Notifications
+                </div>
                 <ul className="max-h-64 overflow-y-auto">
                   {notifications.map((note) => (
                     <li
@@ -183,31 +167,31 @@ const handleNavigate = (path) => {
                 src={profileImage}
                 alt="avatar"
                 className="w-8 h-8 rounded-full border object-cover"
-                onError={(e) => {
-                  e.target.src =
-                    "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                }}
+                onError={(e) => (e.target.src = DEFAULT_AVATAR)}
               />
             </button>
 
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-20">
                 <ul className="py-2 text-sm">
+                  {/* Uncomment when routes exist */}
+                  {/*
                   <li
-                    onClick={() => handleNavigate("/client/profile")}
+                    onClick={() => handleNavigate("/admin/profile")}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   >
-                    👤 My Profile
+                    👤 Admin Profile
                   </li>
                   <li
-                    onClick={() => handleNavigate("/client/changepassword")}
+                    onClick={() => handleNavigate("/admin/changepassword")}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   >
                     🔒 Change Password
                   </li>
+                  */}
                   <li
                     onClick={() => setIsLogoutModalOpen(true)}
-                    className="flex items-center gap-3 w-full text-sm px-5 py-2  text-red-600 hover:bg-gray-100 cursor-pointer border-t"
+                    className="flex items-center gap-3 px-5 py-2 text-red-600 hover:bg-gray-100 cursor-pointer border-t"
                   >
                     <FaSignOutAlt /> Logout
                   </li>
@@ -218,6 +202,7 @@ const handleNavigate = (path) => {
         </div>
       </div>
 
+      {/* 🚪 Logout Modal */}
       <LogoutModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
@@ -227,4 +212,4 @@ const handleNavigate = (path) => {
   );
 };
 
-export default PatientHeaderDashboard;
+export default AdminHeaderDashboard;
