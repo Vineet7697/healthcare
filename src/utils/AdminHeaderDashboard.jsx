@@ -175,7 +175,7 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-20">
                 <ul className="py-2 text-sm">
                   {/* Uncomment when routes exist */}
-                  {/*
+                  
                   <li
                     onClick={() => handleNavigate("/admin/profile")}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -188,7 +188,7 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
                   >
                     🔒 Change Password
                   </li>
-                  */}
+                 
                   <li
                     onClick={() => setIsLogoutModalOpen(true)}
                     className="flex items-center gap-3 px-5 py-2 text-red-600 hover:bg-gray-100 cursor-pointer border-t"
