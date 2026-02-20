@@ -223,19 +223,19 @@ const LandingPage = () => {
 
         <SwiperSlide>
           <img
-            src="/images/download2.png"
+            src="/images/download4.png"
             alt="img"
             className="rounded-2xl w-full"
           />
         </SwiperSlide>
 
-        <SwiperSlide>
+        {/* <SwiperSlide>
           <img
             src="/images/download3.png"
             alt="img"
             className="rounded-2xl w-full"
           />
-        </SwiperSlide>
+        </SwiperSlide> */}
       </Swiper>
     </>
   );

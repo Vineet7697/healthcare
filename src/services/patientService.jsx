@@ -47,3 +47,11 @@ export const getNotifications = () =>
 
 export const markNotificationRead = (id) =>
   api.put(`/patient/notifications/${id}/read`);
+
+export const getDoctorById = (doctorId) => {
+  if (!doctorId) {
+    console.warn("getDoctorById called without doctorId");
+    return Promise.reject("Doctor ID missing");
+  }
+  return api.get(`/getDoctorById/${doctorId}`);
+};
