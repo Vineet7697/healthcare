@@ -105,46 +105,55 @@ const Appointments = () => {
     <div className="bg-sky-50 text-gray-800">
       <div className="max-w-5xl mx-auto min-h-screen flex flex-col">
         {/* FILTER PILLS */}
-        <div className="flex gap-3 px-8 py-6 flex-wrap">
-          <button
-            onClick={() => setFilter("ALL")}
-            className={`px-6 py-2 rounded-full font-medium shadow ${
-              filter === "ALL"
-                ? "bg-sky-600 text-white"
-                : "bg-white border border-sky-200 text-sky-600"
-            }`}
-          >
-            All
-            <span className="ml-2 bg-sky-100 px-2 py-0.5 rounded-full text-sm">
-              {appointments.length}
-            </span>
-          </button>
+        {/* FILTER PILLS */}
+        <div className="flex justify-between items-center px-8 py-6 flex-wrap">
+          {/* LEFT SIDE - FILTER BUTTONS */}
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() => setFilter("ALL")}
+              className={`px-6 py-2 rounded-full font-medium shadow ${
+                filter === "ALL"
+                  ? "bg-sky-600 text-white"
+                  : "bg-white border border-sky-200 text-sky-600"
+              }`}
+            >
+              All
+              <span className="ml-2 bg-sky-100 px-2 py-0.5 rounded-full text-sm">
+                {appointments.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setFilter("TODAY")}
-            className={`px-6 py-2 rounded-full font-medium ${
-              filter === "TODAY"
-                ? "bg-sky-600 text-white"
-                : "bg-white border border-sky-200 text-sky-600"
-            }`}
-          >
-            Today
-          </button>
+            <button
+              onClick={() => setFilter("TODAY")}
+              className={`px-6 py-2 rounded-full font-medium ${
+                filter === "TODAY"
+                  ? "bg-sky-600 text-white"
+                  : "bg-white border border-sky-200 text-sky-600"
+              }`}
+            >
+              Today
+            </button>
 
-          <button
-            onClick={() => setFilter("MORNING")}
-            className={`px-6 py-2 rounded-full font-medium ${
-              filter === "MORNING"
-                ? "bg-sky-600 text-white"
-                : "bg-white border border-sky-200 text-sky-600"
-            }`}
-          >
-            Morning
+            <button
+              onClick={() => setFilter("MORNING")}
+              className={`px-6 py-2 rounded-full font-medium ${
+                filter === "MORNING"
+                  ? "bg-sky-600 text-white"
+                  : "bg-white border border-sky-200 text-sky-600"
+              }`}
+            >
+              Morning
+            </button>
+          </div>
+
+          {/* RIGHT SIDE - AUTO ACCEPT */}
+          <button className="px-4 py-2 bg-sky-600 text-white rounded-lg shadow hover:bg-sky-700 transition">
+            Auto Accept
           </button>
         </div>
 
         {/* LIST AREA */}
-        <div className="flex-1 px-8  pb-20 space-y-6 overflow-auto"> 
+        <div className="flex-1 px-8  pb-20 space-y-6 overflow-auto">
           <div className="grid grid-cols-5  font-semibold text-bold px-6 pb-2 ">
             <div>Patient Name</div>
             <div className="pl-6">Shift</div>
@@ -167,10 +176,10 @@ const Appointments = () => {
               >
                 <div className="grid grid-cols-5 items-center gap-6">
                   {/* 1️⃣ Patient Name + Avatar */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 mb-2">
                       {a.familyMemberName ? (
-                        <div className="w-12 h-12  rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
+                        <div className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
                           {getInitial(displayName)}
                         </div>
                       ) : a.patientImage ? (
