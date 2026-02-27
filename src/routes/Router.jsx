@@ -14,7 +14,7 @@ import DoctorChangePassword from "../module/doctor/pages/DoctorChangePassword";
 import Notification from "../module/doctor/pages/Notification";
 import DoctorProfileSection from "../module/doctor/pages/DoctorProfileSection";
 import DoctorDashboard from "../module/doctor/DoctorDashboard";
-import LiveQueuePage from "../module/doctor/pages/LiveQueuePage";
+import TodaysQueue from "../module/doctor/pages/TodaysQueue";
 import DoctorQRCodePage from "../module/doctor/pages/DoctorQRCodePage";
 import ManualBookingPage from "../module/doctor/pages/ManualBookingPage";
 
@@ -34,8 +34,6 @@ import FamilyMembers from "../module/patient/pages/FamilyMembers";
 import Cards from "../module/patient/pages/Cards";
 import BookAppointmentPage from "../module/patient/pages/BookAppointmentPage";
 import AddFamilyPage from "../module/patient/pages/AddFamilyPage";
-import HealthTimeline from "../module/patient/pages/HealthTimeline";
-import MedicalRecords from "../module/patient/pages/MedicalRecords";
 
 import About from "../landingpage/About";
 import Service from "../landingpage/Service";
@@ -45,23 +43,19 @@ import ChangePassword from "../module/patient/pages/ChangePassword";
 
 // 🧭 New Dashboard Layout (for logged-in users)
 import DashboardLayout from "../utils/Layout/DashboardLayout";
-import AdminLayout from "../utils/Layout/AdminLayout";
 import LogoutModal from "../utils/LogoutModal";
 import AppointmentsPage from "../module/doctor/pages/AppointmentsPage";
 import DoctorNotesPage from "../module/doctor/pages/DoctorNotesPage";
 import Myappointmentpage from "../module/patient/pages/Myappointmentpage";
-// import OnlineConsultation from "../module/patient/pages/OnlineConsultation";
 import PatientbookAppointment from "../module/patient/pages/PatientbookAppointment";
 import IncomingAppointments from "../module/doctor/pages/IncomingAppointments";
 import AdminDashboard from "../admin/AdminDashboard";
 import ProtectedRoute from "../routes/ProtectedRoute";
-import AdminPatients from "../admin/AdminPatients";
-import AdminAppointments from "../admin/AdminAppointments";
 import VisitSummaryPage from "../module/doctor/pages/VisitSummaryPage";
-// import ConsultationTabs from "../module/patient/pages/ConsultationTabs";
 
 import AdminDoctor from "../admin/AdminDoctor";
-// import ProtectedRoute from "../routes/ProtectedRoute";
+import AdminDoctorVerification from "../admin/AdminDoctorVerification";
+import Doctordetails from "../admin/Doctordetails";
 
 
 const Router = () => {
@@ -88,18 +82,7 @@ const Router = () => {
           <Route path="forgotpassword" element={<ForgotPasswordPage />} />
         </Route>
 
-        {/* <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="patients" element={<AdminPatients />} />
-          <Route path="appointments" element={<AdminAppointments />} />
-        </Route> */}
+       
 
         <Route
           path="/admin"
@@ -111,9 +94,12 @@ const Router = () => {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="patients" element={<AdminPatients />} />
-          <Route path="appointments" element={<AdminAppointments />} />
+          {/* <Route path="patients" element={<AdminPatients />} /> */}
+          {/* <Route path="appointments" element={<AdminAppointments />} /> */}
            <Route path="doctors" element={<AdminDoctor />} />
+           <Route path="doctorsverification" element={<AdminDoctorVerification />} />
+           <Route path="doctorsdetails" element={<Doctordetails />} />
+
 
         </Route>
 
@@ -137,7 +123,7 @@ const Router = () => {
             path="doctorchangepassword"
             element={<DoctorChangePassword />}
           />
-          <Route path="livequeue" element={<LiveQueuePage />} />
+          <Route path="livequeue" element={<TodaysQueue />} />
           <Route path="qrcode" element={<DoctorQRCodePage />} />
           <Route path="manualbooking" element={<ManualBookingPage />} />
           <Route path="appointment" element={<AppointmentsPage />} />
@@ -153,9 +139,7 @@ const Router = () => {
           <Route path="myappointment" element={<Myappointmentpage />} />
           <Route path="addfamilypage" element={<AddFamilyPage />} />
           <Route path="edit-family/:id" element={<AddFamilyPage />} />
-          <Route path="medicalrecords" element={<MedicalRecords />} />
           <Route path="patientqueuepage" element={<PatientQueuePage />} />
-          <Route path="timeline" element={<HealthTimeline />} />
         </Route>
 
         {/* 👩‍🦰 Client Dashboard Layout (with HeaderDashboard*/}

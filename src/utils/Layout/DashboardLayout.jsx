@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate,useLocation  } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "../Sidebar";
 import PatientHeaderDashboard from "../PatientHeaderDashboard";
@@ -19,10 +19,11 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
 
   const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
   const role = loggedInUser?.role;
+  const location = useLocation();
+  const activeNav = location.pathname.split("/").pop();
 
   /* ================= AUTH GUARD ================= */
   useEffect(() => {
@@ -43,17 +44,16 @@ const DashboardLayout = () => {
   }, []);
 
   /* ================= RESPONSIVE HANDLER ================= */
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      setIsSidebarOpen(!mobile); // mobile = closed, desktop = open
-    };
+useEffect(() => {
+  const handleResize = () => {
+    const mobile = window.innerWidth < 768;
+    setIsMobile(mobile);
+  };
 
-    handleResize(); // initial run
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  handleResize();
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,7 +63,8 @@ const DashboardLayout = () => {
           className={`fixed top-0 left-0 h-screen z-40 transition-all duration-300
           ${isSidebarOpen ? "w-64" : "w-20"}`}
         >
-          <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+          <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen}  activeNav={activeNav}
+  />
         </aside>
       )}
 
@@ -78,7 +79,8 @@ const DashboardLayout = () => {
 
           {/* drawer */}
           <div className="fixed top-0 left-0 z-50 w-64 h-screen bg-white">
-            <Sidebar isOpen={true} setIsOpen={setIsSidebarOpen} />
+            <Sidebar isOpen={true} setIsOpen={setIsSidebarOpen}  activeNav={activeNav}
+  />
           </div>
         </>
       )}
@@ -86,7 +88,7 @@ const DashboardLayout = () => {
       {/* ================= CONTENT ================= */}
       <div
         className={`transition-all duration-300
-        ${!isMobile ? (isSidebarOpen ? "ml-60" : "ml-16") : "ml-0"}`}
+        ${!isMobile ? (isSidebarOpen ? "ml-64" : "ml-20") : "ml-0"}`}
       >
         {/* HEADER */}
         {role === "PATIENT" && (

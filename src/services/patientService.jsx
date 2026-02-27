@@ -55,3 +55,7 @@ export const getDoctorById = (doctorId) => {
   }
   return api.get(`/getDoctorById/${doctorId}`);
 };
+
+/* ================= TOKEN STATUS ================= */
+export const getTokenStatus = (appointmentId) =>
+  api.get(`/patient/visit/token-status/${appointmentId}`);

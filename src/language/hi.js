@@ -1,4 +1,5 @@
 const hi = {
+  home:"होम",
   about: "बारे में",
   services: "सेवाएं",
   contact: "संपर्क",
@@ -67,7 +68,7 @@ const hi = {
   core_services: "मुख्य सेवाएं",
   info_services: "जानकारी सेवाएं",
   patient_convenience: "रोगी सुविधाएं",
-  additional_services: "अतिरिक्त सेवाएं",
+  // additional_services: "अतिरिक्त सेवाएं",
 
   online_booking_title: "ऑनलाइन अपॉइंटमेंट बुकिंग",
   online_booking_desc:

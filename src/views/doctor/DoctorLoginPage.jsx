@@ -75,13 +75,16 @@ const handleLogin = async (e) => {
       <div className="bg-white shadow-2xl rounded-3xl overflow-hidden w-11/12 max-w-5xl md:flex">
         {/* LEFT */}
         <div className="w-full md:w-1/2 p-10 flex flex-col justify-center">
-          <h1 className="text-3xl font-bold text-[#2277f7] mb-6 text-center">
-            Yo Doctor
+       <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Login to{" "}
+            <img
+              src="/images/yo.png"
+              alt="YoDoctor"
+              className="h-10 inline align-middle"
+            />
           </h1>
-
-          <h2 className="text-2xl font-semibold text-gray-700 mb-8 text-center">
-            Doctor / Clinic Login
-          </h2>
+        </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
             {/* EMAIL / MOBILE */}

@@ -173,7 +173,7 @@ const BookAppointmentPage = () => {
 
   /* ================= UI ================= */
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 to-blue-300 px-3 sm:px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-3 sm:px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-4 sm:p-8">
         <h3 className="text-2xl font-semibold text-center mb-6">
           Book Appointment for {doctor.doctorName}

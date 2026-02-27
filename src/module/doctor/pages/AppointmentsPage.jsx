@@ -1,15 +1,5 @@
 // import React, { useEffect, useMemo, useState } from "react";
-// import {
-//   FaSearch,
-//   FaNotesMedical,
-//   FaFilePdf,
-//   FaFileExcel,
-// } from "react-icons/fa";
 // import { useNavigate } from "react-router-dom";
-// import jsPDF from "jspdf";
-// import * as XLSX from "xlsx";
-// import Calendar from "react-calendar";
-// import "react-calendar/dist/Calendar.css";
 // import api from "../../../services/api";
 
 // /* ================= STATUS MAP ================= */
@@ -20,30 +10,18 @@
 //     case "REJECTED":
 //     case "CANCELLED":
 //       return "Cancelled";
+//     case "ACCEPTED":
+//       return "In Queue";
 //     default:
 //       return status;
 //   }
 // };
 
-// const statusStyle = (status) => {
-//   switch (status) {
-//     case "Completed":
-//       return "bg-green-50 text-green-700 ring-green-200";
-//     case "Cancelled":
-//       return "bg-red-50 text-red-700 ring-red-200";
-//     default:
-//       return "bg-gray-100 text-gray-600 ring-gray-200";
-//   }
-// };
-
-// /* ================= COMPONENT ================= */
-// const AppointmentsPage = () => {
+// const AppointmentHistory = () => {
 //   const navigate = useNavigate();
 
 //   const [appointments, setAppointments] = useState([]);
-//   const [search, setSearch] = useState("");
-//   const [filterStatus, setFilterStatus] = useState("All");
-//   const [view, setView] = useState("list"); // list | calendar
+//   const [filter, setFilter] = useState("TODAY");
 //   const [loading, setLoading] = useState(false);
 
 //   /* ================= LOAD HISTORY ================= */
@@ -59,13 +37,15 @@
 
 //       const normalized = (res.data.appointments || []).map((a) => ({
 //         id: a.id,
+//         aptId: `APT-${a.id}`,
 //         patientName:
 //           a.familyMemberName || a.patientEmail || "Walk-in Patient",
 //         token: a.token_number,
 //         slot: a.appointment_slot,
+//         time: a.time || "--",
 //         date: a.appointment_date,
-//         rawStatus: a.status,
 //         status: mapStatus(a.status),
+//         rawStatus: a.status,
 //       }));
 
 //       setAppointments(normalized);
@@ -76,177 +56,203 @@
 //     }
 //   };
 
-//   /* ================= FILTER ================= */
+//   /* ================= DATE FILTER ================= */
+//   const isToday = (date) => {
+//     const d = new Date(date);
+//     const t = new Date();
+//     return (
+//       d.getDate() === t.getDate() &&
+//       d.getMonth() === t.getMonth() &&
+//       d.getFullYear() === t.getFullYear()
+//     );
+//   };
+
+//   const isLast7Days = (date) => {
+//     const d = new Date(date);
+//     const now = new Date();
+//     const diff = (now - d) / (1000 * 60 * 60 * 24);
+//     return diff <= 7;
+//   };
+
 //   const filteredAppointments = useMemo(() => {
 //     return appointments
-//       .filter((a) =>
-//         a.patientName.toLowerCase().includes(search.toLowerCase()),
-//       )
-//       .filter((a) =>
-//         filterStatus === "All" ? true : a.status === filterStatus,
-//       )
+//       .filter((a) => {
+//         if (filter === "TODAY") return isToday(a.date);
+//         if (filter === "7DAYS") return isLast7Days(a.date);
+//         return true;
+//       })
 //       .sort((a, b) => new Date(b.date) - new Date(a.date));
-//   }, [appointments, search, filterStatus]);
+//   }, [appointments, filter]);
 
-//   /* ================= EXPORT ================= */
-//   const exportPDF = () => {
-//     const doc = new jsPDF();
-//     filteredAppointments.forEach((a, i) => {
-//       doc.text(
-//         `${i + 1}. ${a.patientName} | Token ${a.token} | ${a.status}`,
-//         10,
-//         10 + i * 8,
-//       );
-//     });
-//     doc.save("appointment-history.pdf");
+//   /* ================= STATUS STYLE ================= */
+//   const statusStyle = (status) => {
+//     switch (status) {
+//       case "Completed":
+//         return "bg-green-100 text-green-600";
+//       case "Cancelled":
+//         return "bg-red-100 text-red-500";
+//       case "In Queue":
+//         return "bg-blue-100 text-sky-600";
+//       default:
+//         return "bg-gray-100 text-gray-600";
+//     }
 //   };
 
-//   const exportExcel = () => {
-//     const ws = XLSX.utils.json_to_sheet(filteredAppointments);
-//     const wb = XLSX.utils.book_new();
-//     XLSX.utils.book_append_sheet(wb, ws, "History");
-//     XLSX.writeFile(wb, "appointment-history.xlsx");
-//   };
-
-//   /* ================= UI ================= */
 //   return (
-//     <div className="min-h-screen bg-gray-50 p-6">
-//       <div className="max-w-7xl mx-auto">
-//         {/* HEADER */}
+//     <div className="bg-sky-50 font-sans min-h-screen">
+//       <main className="max-w-7xl mx-auto p-6">
+
+//         {/* Page Title */}
 //         <div className="flex justify-between items-center mb-6">
 //           <div>
-//             <h2 className="text-3xl font-bold text-gray-800">
+//             <h2 className="text-3xl font-bold text-gray-700">
 //               Appointment History
 //             </h2>
-//             <p className="text-sm text-gray-500">
-//               Completed, cancelled and rejected appointments
+//             <p className="text-gray-500">
+//               Track all completed, cancelled and queued appointments
 //             </p>
 //           </div>
-
-//           <div className="flex gap-2">
-//             <button
-//               onClick={exportPDF}
-//               className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg"
-//             >
-//               <FaFilePdf /> PDF
-//             </button>
-//             <button
-//               onClick={exportExcel}
-//               className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg"
-//             >
-//               <FaFileExcel /> Excel
-//             </button>
-//           </div>
 //         </div>
 
-//         {/* FILTER BAR */}
-//         <div className="bg-white p-4 rounded-xl shadow flex flex-wrap gap-4 mb-6">
-//           <div className="flex items-center gap-2 border rounded-lg px-3 py-2">
-//             <FaSearch className="text-gray-400" />
-//             <input
-//               className="outline-none text-sm"
-//               placeholder="Search patient"
-//               value={search}
-//               onChange={(e) => setSearch(e.target.value)}
-//             />
-//           </div>
-
-//           <select
-//             className="border rounded-lg px-3 py-2 text-sm"
-//             value={filterStatus}
-//             onChange={(e) => setFilterStatus(e.target.value)}
+//         {/* Filter Tabs */}
+//         <div className="flex gap-3 mb-6">
+//           <button
+//             onClick={() => setFilter("TODAY")}
+//             className={`px-5 py-2 rounded-lg ${
+//               filter === "TODAY"
+//                 ? "bg-sky-500 text-white"
+//                 : "bg-white border hover:bg-sky-50"
+//             }`}
 //           >
-//             <option value="All">All Status</option>
-//             <option value="Completed">Completed</option>
-//             <option value="Cancelled">Cancelled</option>
-//           </select>
+//             Today
+//           </button>
 
-//           <div className="ml-auto flex gap-2">
-//             <button
-//               onClick={() => setView("list")}
-//               className={`px-4 py-2 rounded-lg ${
-//                 view === "list" ? "bg-teal-500 text-white" : "border"
-//               }`}
-//             >
-//               List
-//             </button>
-//             <button
-//               onClick={() => setView("calendar")}
-//               className={`px-4 py-2 rounded-lg ${
-//                 view === "calendar" ? "bg-teal-500 text-white" : "border"
-//               }`}
-//             >
-//               Calendar
-//             </button>
-//           </div>
+//           <button
+//             onClick={() => setFilter("7DAYS")}
+//             className={`px-5 py-2 rounded-lg ${
+//               filter === "7DAYS"
+//                 ? "bg-sky-500 text-white"
+//                 : "bg-white border hover:bg-sky-50"
+//             }`}
+//           >
+//             Last 7 Days
+//           </button>
+
+//           <button
+//             onClick={() => setFilter("ALL")}
+//             className={`px-5 py-2 rounded-lg ${
+//               filter === "ALL"
+//                 ? "bg-sky-500 text-white"
+//                 : "bg-white border hover:bg-sky-50"
+//             }`}
+//           >
+//             All Time
+//           </button>
 //         </div>
 
-//         {/* CALENDAR */}
-//         {view === "calendar" && (
-//           <div className="bg-white rounded-xl shadow p-4 mb-6">
-//             <Calendar className="mx-auto" />
-//           </div>
-//         )}
+//         {/* History Cards */}
+//         <div className="space-y-6">
 
-//         {/* LIST */}
-//         {view === "list" &&
-//           (loading ? (
+//           {loading ? (
 //             <p className="text-gray-500">Loading history...</p>
 //           ) : filteredAppointments.length === 0 ? (
-//             <p className="text-gray-400">No appointment history found</p>
+//             <p className="text-gray-400">
+//               No appointment history found
+//             </p>
 //           ) : (
 //             filteredAppointments.map((a) => (
 //               <div
 //                 key={a.id}
-//                 className="bg-white rounded-xl shadow p-4 mb-4"
+//                 className={`bg-white p-6 rounded-xl shadow-sm border ${
+//                   a.status === "Cancelled" ? "opacity-70" : ""
+//                 }`}
 //               >
-//                 <div className="flex justify-between items-center">
+//                 <div className="flex justify-between items-center mb-4">
 //                   <div>
-//                     <h3 className="font-semibold text-lg">
+//                     <p className="text-sm text-gray-400">
+//                       {a.aptId}
+//                     </p>
+//                     <h3
+//                       className={`text-xl font-semibold ${
+//                         a.status === "Cancelled"
+//                           ? "text-gray-500"
+//                           : "text-gray-700"
+//                       }`}
+//                     >
 //                       {a.patientName}
 //                     </h3>
-//                     <p className="text-sm text-gray-500">
-//                       Token #{a.token} • {a.slot}
-//                     </p>
-//                     <p className="text-xs text-gray-400">
-//                       {new Date(a.date).toDateString()}
-//                     </p>
 //                   </div>
 
 //                   <span
-//                     className={`px-3 py-1 rounded-full text-sm font-medium ring-1 ${statusStyle(
-//                       a.status,
+//                     className={`px-4 py-1 rounded-full text-sm ${statusStyle(
+//                       a.status
 //                     )}`}
 //                   >
 //                     {a.status}
 //                   </span>
 //                 </div>
 
-//                 {a.rawStatus === "COMPLETED" && (
-//                   <div className="mt-4">
-//                     <button
-//                       onClick={() =>
-//                         navigate(
-//                           `/doctordashboard/visit-summary/${a.id}`,
-//                         )
-//                       }
-//                       className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center gap-2 cursor-pointer hover:bg-purple-600"
-//                     >
-//                       <FaNotesMedical />
-//                       View Visit Summary
-//                     </button>
+//                 <div className="grid grid-cols-4 gap-6 text-gray-600">
+//                   <div>
+//                     <p className="text-sm">Shift</p>
+//                     <p className="font-medium text-gray-800">
+//                       {a.slot}
+//                     </p>
 //                   </div>
-//                 )}
+
+//                   <div>
+//                     <p className="text-sm">Time</p>
+//                     <p className="font-medium text-gray-800">
+//                       {new Date(a.date).toLocaleTimeString([], {
+//                         hour: "2-digit",
+//                         minute: "2-digit",
+//                       })}
+//                     </p>
+//                   </div>
+
+//                   <div>
+//                     <p className="text-sm">Token</p>
+//                     <p className="font-medium text-sky-600">
+//                       #{a.token}
+//                     </p>
+//                   </div>
+
+//                   <div className="flex items-end justify-end">
+//                     {a.rawStatus === "COMPLETED" && (
+//                       <button
+//                         onClick={() =>
+//                           navigate(
+//                             `/doctordashboard/visit-summary/${a.id}`
+//                           )
+//                         }
+//                         className="text-sky-600 font-medium hover:underline"
+//                       >
+//                         View Details →
+//                       </button>
+//                     )}
+
+//                     {a.rawStatus === "ACCEPTED" && (
+//                       <button
+//                         onClick={() =>
+//                           navigate("/doctordashboard/livequeue")
+//                         }
+//                         className="text-sky-600 font-medium hover:underline"
+//                       >
+//                         Start Session →
+//                       </button>
+//                     )}
+//                   </div>
+//                 </div>
 //               </div>
 //             ))
-//           ))}
-//       </div>
+//           )}
+//         </div>
+//       </main>
 //     </div>
 //   );
 // };
 
-// export default AppointmentsPage;
-
+// export default AppointmentHistory;
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -258,6 +264,7 @@ const mapStatus = (status) => {
     case "COMPLETED":
       return "Completed";
     case "REJECTED":
+      return "Rejected";
     case "CANCELLED":
       return "Cancelled";
     case "ACCEPTED":
@@ -267,35 +274,59 @@ const mapStatus = (status) => {
   }
 };
 
+const BASE_URL = "http://localhost:4000";
+
+/* ================= IMAGE BUILDER ================= */
+const buildImageUrl = (path) => {
+  if (!path) return "/images/default-avatar.png";
+  if (path.startsWith("http")) return path;
+  return `${BASE_URL}${path}`;
+};
+
+const getInitials = (name) => {
+  if (!name) return "U";
+
+  const words = name.trim().split(" ");
+  if (words.length === 1) return words[0][0].toUpperCase();
+
+  return words[0][0].toUpperCase() + words[1][0].toUpperCase();
+};
+
 const AppointmentHistory = () => {
   const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
-  const [filter, setFilter] = useState("TODAY");
+  const [filter, setFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
 
-  /* ================= LOAD HISTORY ================= */
-  useEffect(() => {
-    loadHistory();
-  }, []);
+  /* ================= BACKEND FILTER MAPPING ================= */
+  const getBackendFilter = () => {
+    if (filter === "TODAY") return "today";
+    if (filter === "7DAYS") return "last7";
+    return "all";
+  };
 
+  /* ================= LOAD HISTORY ================= */
   const loadHistory = async () => {
     try {
       setLoading(true);
 
-      const res = await api.get("/doctor/appointments/history");
+      const res = await api.get(
+        `/doctor/appointments/history?filter=${getBackendFilter()}`,
+      );
 
       const normalized = (res.data.appointments || []).map((a) => ({
         id: a.id,
-        aptId: `APT-${a.id}`,
-        patientName:
-          a.familyMemberName || a.patientEmail || "Walk-in Patient",
         token: a.token_number,
-        slot: a.appointment_slot,
-        time: a.time || "--",
+        patientName: a.familyMemberName || a.patientName || "Walk-in Patient",
+
+        image: a.patientImage || null,
+
+        type: a.appointment_type || "Consultation",
         date: a.appointment_date,
-        status: mapStatus(a.status),
+        slot: a.appointment_slot,
         rawStatus: a.status,
+        status: mapStatus(a.status),
       }));
 
       setAppointments(normalized);
@@ -306,33 +337,16 @@ const AppointmentHistory = () => {
     }
   };
 
-  /* ================= DATE FILTER ================= */
-  const isToday = (date) => {
-    const d = new Date(date);
-    const t = new Date();
-    return (
-      d.getDate() === t.getDate() &&
-      d.getMonth() === t.getMonth() &&
-      d.getFullYear() === t.getFullYear()
-    );
-  };
+  useEffect(() => {
+    loadHistory();
+  }, [filter]);
 
-  const isLast7Days = (date) => {
-    const d = new Date(date);
-    const now = new Date();
-    const diff = (now - d) / (1000 * 60 * 60 * 24);
-    return diff <= 7;
-  };
-
+  /* ================= SORTED LIST ================= */
   const filteredAppointments = useMemo(() => {
-    return appointments
-      .filter((a) => {
-        if (filter === "TODAY") return isToday(a.date);
-        if (filter === "7DAYS") return isLast7Days(a.date);
-        return true;
-      })
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [appointments, filter]);
+    return [...appointments].sort(
+      (a, b) => new Date(b.date) - new Date(a.date),
+    );
+  }, [appointments]);
 
   /* ================= STATUS STYLE ================= */
   const statusStyle = (status) => {
@@ -340,162 +354,148 @@ const AppointmentHistory = () => {
       case "Completed":
         return "bg-green-100 text-green-600";
       case "Cancelled":
-        return "bg-red-100 text-red-500";
+        return "bg-red-100 text-red-600";
       case "In Queue":
-        return "bg-blue-100 text-sky-600";
+        return "bg-orange-100 text-orange-600";
       default:
         return "bg-gray-100 text-gray-600";
     }
   };
 
   return (
-    <div className="bg-sky-50 font-sans min-h-screen">
-      <main className="max-w-7xl mx-auto p-6">
-
-        {/* Page Title */}
+    <div className="flex min-h-screen bg-gray-100 font-sans">
+      <main className="flex-1 p-8">
+        {/* ================= HEADER ================= */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-700">
-              Appointment History
-            </h2>
-            <p className="text-gray-500">
-              Track all completed, cancelled and queued appointments
+            <h1 className="text-3xl font-bold">Appointment History</h1>
+            <p className="text-gray-500 mt-1">
+              View and manage records of past patient consultations.
             </p>
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-3 mb-6">
-          <button
-            onClick={() => setFilter("TODAY")}
-            className={`px-5 py-2 rounded-lg ${
-              filter === "TODAY"
-                ? "bg-sky-500 text-white"
-                : "bg-white border hover:bg-sky-50"
-            }`}
-          >
-            Today
-          </button>
-
-          <button
-            onClick={() => setFilter("7DAYS")}
-            className={`px-5 py-2 rounded-lg ${
-              filter === "7DAYS"
-                ? "bg-sky-500 text-white"
-                : "bg-white border hover:bg-sky-50"
-            }`}
-          >
-            Last 7 Days
-          </button>
-
-          <button
-            onClick={() => setFilter("ALL")}
-            className={`px-5 py-2 rounded-lg ${
-              filter === "ALL"
-                ? "bg-sky-500 text-white"
-                : "bg-white border hover:bg-sky-50"
-            }`}
-          >
-            All Time
-          </button>
+        {/* ================= FILTER TABS ================= */}
+        <div className="flex gap-6  mb-6">
+          {["TODAY", "7DAYS", "ALL"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setFilter(tab)}
+              className={`pb-3 ${
+                filter === tab
+                  ? "border-b-2 border-teal-500 text-teal-600 font-medium"
+                  : "text-gray-500 hover:text-black"
+              }`}
+            >
+              {tab === "TODAY"
+                ? "Today"
+                : tab === "7DAYS"
+                  ? "Last 7 Days"
+                  : "All Appointments"}
+            </button>
+          ))}
         </div>
 
-        {/* History Cards */}
-        <div className="space-y-6">
+        {/* ================= TABLE ================= */}
+        <div className="bg-white rounded-xl shadow overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 text-gray-500 text-sm uppercase">
+              <tr>
+                <th className="p-4">Patient Name</th>
+                <th className="p-4">Type</th>
+                <th className="p-4">Token</th>
+                <th className="p-4">Date & Time</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
 
-          {loading ? (
-            <p className="text-gray-500">Loading history...</p>
-          ) : filteredAppointments.length === 0 ? (
-            <p className="text-gray-400">
-              No appointment history found
-            </p>
-          ) : (
-            filteredAppointments.map((a) => (
-              <div
-                key={a.id}
-                className={`bg-white p-6 rounded-xl shadow-sm border ${
-                  a.status === "Cancelled" ? "opacity-70" : ""
-                }`}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <p className="text-sm text-gray-400">
-                      {a.aptId}
-                    </p>
-                    <h3
-                      className={`text-xl font-semibold ${
-                        a.status === "Cancelled"
-                          ? "text-gray-500"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {a.patientName}
-                    </h3>
-                  </div>
+            <tbody className="divide-y">
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="p-6 text-center text-gray-400">
+                    Loading...
+                  </td>
+                </tr>
+              ) : filteredAppointments.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-6 text-center text-gray-400">
+                    No appointment history found
+                  </td>
+                </tr>
+              ) : (
+                filteredAppointments.map((a) => (
+                  <tr key={a.id}>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {a.image ? (
+                          <img
+                            src={buildImageUrl(a.image)}
+                            alt={a.patientName}
+                            className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                            onError={(e) => {
+                              e.target.src = "/images/default-avatar.png";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-semibold">
+                            {getInitials(a.patientName)}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium">{a.patientName}</p>
+                          <p className="text-sm text-gray-400">{a.slot}</p>
+                        </div>
+                      </div>
+                    </td>
 
-                  <span
-                    className={`px-4 py-1 rounded-full text-sm ${statusStyle(
-                      a.status
-                    )}`}
-                  >
-                    {a.status}
-                  </span>
-                </div>
+                    <td className="p-4">{a.type}</td>
 
-                <div className="grid grid-cols-4 gap-6 text-gray-600">
-                  <div>
-                    <p className="text-sm">Shift</p>
-                    <p className="font-medium text-gray-800">
-                      {a.slot}
-                    </p>
-                  </div>
+                    <td className="p-4 text-gray-500">#{a.token}</td>
 
-                  <div>
-                    <p className="text-sm">Time</p>
-                    <p className="font-medium text-gray-800">
-                      {new Date(a.date).toLocaleTimeString([], {
+                    <td className="p-4">
+                      {new Date(a.date).toLocaleString([], {
+                        day: "2-digit",
+                        month: "short",
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                    </p>
-                  </div>
+                    </td>
 
-                  <div>
-                    <p className="text-sm">Token</p>
-                    <p className="font-medium text-sky-600">
-                      #{a.token}
-                    </p>
-                  </div>
-
-                  <div className="flex items-end justify-end">
-                    {a.rawStatus === "COMPLETED" && (
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/doctordashboard/visit-summary/${a.id}`
-                          )
-                        }
-                        className="text-sky-600 font-medium hover:underline"
+                    <td className="p-4">
+                      <span
+                        className={`px-3 py-1 text-sm rounded-full ${statusStyle(
+                          a.status,
+                        )}`}
                       >
-                        View Details →
-                      </button>
-                    )}
+                        {a.status}
+                      </span>
+                    </td>
 
-                    {a.rawStatus === "ACCEPTED" && (
-                      <button
-                        onClick={() =>
-                          navigate("/doctordashboard/livequeue")
-                        }
-                        className="text-sky-600 font-medium hover:underline"
-                      >
-                        Start Session →
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+                    <td className="p-4 text-right text-teal-600 hover:underline cursor-pointer">
+                      {a.rawStatus === "COMPLETED" && (
+                        <span
+                          onClick={() =>
+                            navigate(`/doctordashboard/visit-summary/${a.id}`)
+                          }
+                        >
+                          Prescribe
+                        </span>
+                      )}
+
+                      {a.rawStatus === "ACCEPTED" && (
+                        <span
+                          onClick={() => navigate("/doctordashboard/livequeue")}
+                        >
+                          Start Session
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </main>
     </div>

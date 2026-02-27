@@ -362,17 +362,6 @@ const PatientbookAppointment = () => {
         </div>
       </section>
 
-      {/* ================= SERVICES ================= */}
-      <section className="relative w-full bg-[#2277f7] text-white py-8">
-        <div className="flex flex-wrap justify-center items-center gap-6 text-sm md:text-base">
-          <FaUserMd /> Online Doctor Consultation
-          <FaShoppingCart /> Medicine Home Delivery
-          <FaFileMedical /> Digital Health Records
-          <FaFlask /> Diagnostic Lab Tests
-          <FaBriefcase /> Hospital & Clinics
-        </div>
-      </section>
-
       {/* ================= SECURITY ================= */}
 
       <section className="bg-[#f5f6fa] py-16 px-6 md:px-20 min-h-screen">

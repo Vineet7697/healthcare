@@ -28,6 +28,10 @@ export const getTodayQueue = (slot) =>
 export const callNextToken = (slot) =>
   api.post("/doctor/appointments/next-token", { slot });
 
+export const markPatientAbsent = (id) => {
+  return api.put(`/doctor/appointments/${id}/absent`);
+};
+
 /* ================= HISTORY ================= */
 export const getAppointmentHistory = (filter = "all") =>
   api.get(`/doctor/appointments/history?filter=${filter}`);

@@ -11,12 +11,12 @@ const mapFromApi = (a) => ({
   doctorId: a.doctor_id || a.doctorId,
   doctorName: a.doctor_name || a.doctorName,
   specialization: a.specialization || "",
-
+ profile_image: a.profile_image || null,
   // appointment
   date: a.appointment_date
     ? a.appointment_date.slice(0, 10)
     : "",
-  time: a.token_number
+  token: a.token_number
     ? `Token #${a.token_number}`
     : a.appointment_time || "--",
 
@@ -29,9 +29,7 @@ const mapFromApi = (a) => ({
 
 /* ================= SERVICE ================= */
 const AppointmentService = {
-  /* 🔹 MY APPOINTMENTS (backend: /patient/visit/appointments/history)
-     Backend returns: { appointments: [...] }
-  */
+
   getHistory: async () => {
     const res = await api.get(
       "/patient/visit/appointments/history"

@@ -157,7 +157,7 @@ const Service = () => {
             </div>
 
             {/* Additional Services */}
-            <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
+            {/* <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
               <h3 className="text-2xl font-semibold text-[#0072BC]">
                 {t.additional_services}
               </h3>
@@ -196,7 +196,7 @@ const Service = () => {
                   </p>
                 </li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

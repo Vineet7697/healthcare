@@ -1,6 +1,6 @@
 const en = {
-
-   about: "About",
+    home:"Home",
+    about: "About",
     services: "Services",
     contact: "Contact",
     help: "Help",
@@ -64,7 +64,7 @@ const en = {
   core_services: "Core Services",
   info_services: "Informational Services",
   patient_convenience: "Patient Conveniences",
-  additional_services: "Additional Services",
+  // additional_services: "Additional Services",
 
   online_booking_title: "Online Appointment Booking",
   online_booking_desc:
