@@ -472,15 +472,16 @@ const AppointmentHistory = () => {
                       </span>
                     </td>
 
-                    <td className="p-4 text-right text-teal-600 hover:underline cursor-pointer">
+                    <td className="p-4 text-right">
                       {a.rawStatus === "COMPLETED" && (
-                        <span
+                        <button
                           onClick={() =>
                             navigate(`/doctordashboard/visit-summary/${a.id}`)
                           }
+                          className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition shadow-sm"
                         >
                           Prescribe
-                        </span>
+                        </button>
                       )}
 
                       {a.rawStatus === "ACCEPTED" && (

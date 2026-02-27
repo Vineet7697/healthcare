@@ -44,7 +44,7 @@ import ChangePassword from "../module/patient/pages/ChangePassword";
 // 🧭 New Dashboard Layout (for logged-in users)
 import DashboardLayout from "../utils/Layout/DashboardLayout";
 import LogoutModal from "../utils/LogoutModal";
-import AppointmentsPage from "../module/doctor/pages/AppointmentsPage";
+import AppointmentHistory from "../module/doctor/pages/AppointmentHistory";
 import DoctorNotesPage from "../module/doctor/pages/DoctorNotesPage";
 import Myappointmentpage from "../module/patient/pages/Myappointmentpage";
 import PatientbookAppointment from "../module/patient/pages/PatientbookAppointment";
@@ -126,7 +126,7 @@ const Router = () => {
           <Route path="livequeue" element={<TodaysQueue />} />
           <Route path="qrcode" element={<DoctorQRCodePage />} />
           <Route path="manualbooking" element={<ManualBookingPage />} />
-          <Route path="appointment" element={<AppointmentsPage />} />
+          <Route path="appointment" element={<AppointmentHistory />} />
           <Route path="doctornotes" element={<DoctorNotesPage />} />
         </Route>
 
