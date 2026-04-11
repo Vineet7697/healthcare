@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 
-/* ================= SAFE STORAGE ================= */
+const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
 const getStoredUser = () => {
   const raw = localStorage.getItem("loggedInUser");
   if (!raw || raw === "undefined") return null;
@@ -14,48 +15,78 @@ const getStoredUser = () => {
   }
 };
 
-const DEFAULT_AVATAR =
-  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-
 const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
 
-  /* ================= STATES ================= */
   const [profileImage, setProfileImage] = useState(
     localStorage.getItem("profileImage") || DEFAULT_AVATAR
   );
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-
-  const notifications = [
-    { id: 1, text: "New doctor registered", time: "5 mins ago" },
-    { id: 2, text: "Doctor approved successfully", time: "1 hour ago" },
-  ];
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
-  /* ================= HELPERS ================= */
   const handleNavigate = (path) => {
     setProfileOpen(false);
     setNotificationOpen(false);
     navigate(path);
   };
 
-  /* ================= PROFILE IMAGE SYNC ================= */
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (data.notifications) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.notifications.filter((n) => !n.is_read).length);
+      }
+    } catch (error) {
+      console.error("Notification fetch error:", error);
+    }
+  };
+
+  const markNotificationRead = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch(`${import.meta.env.VITE_API_URL}/admin/notifications/${id}/read`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error("Mark read error:", error);
+    }
+  };
+
   useEffect(() => {
     const syncImage = () => {
       const img = localStorage.getItem("profileImage");
       if (img) setProfileImage(img);
     };
-
     window.addEventListener("profileImageUpdated", syncImage);
-    return () =>
-      window.removeEventListener("profileImageUpdated", syncImage);
+    return () => window.removeEventListener("profileImageUpdated", syncImage);
   }, []);
 
-  /* ================= OUTSIDE CLICK ================= */
+  useEffect(() => {
+    fetchNotifications();
+
+    const interval = setInterval(() => {
+      if (!notificationOpen) {
+        fetchNotifications();
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [notificationOpen]);
+
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (
@@ -63,7 +94,6 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
         notificationRef.current?.contains(e.target)
       )
         return;
-
       setProfileOpen(false);
       setNotificationOpen(false);
     };
@@ -84,84 +114,98 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     };
   }, []);
 
-  /* ================= LOGOUT ================= */
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("profileImage");
     localStorage.removeItem("token");
 
-    window.dispatchEvent(new Event("userLogout"));
+    window.dispatchEvent(new CustomEvent("userLogout", { detail: { role: "admin" } }));
     navigate("/");
   };
 
   return (
     <nav
       className={`fixed top-0 z-50 h-20 bg-white border-b border-gray-200
-      transition-all duration-300
-      ${
-        isSidebarOpen
-          ? "md:left-64 md:w-[calc(100%-16rem)]"
-          : "md:left-20 md:w-[calc(100%-5rem)]"
-      }
-      left-0 w-full`}
+        transition-all duration-300
+        ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-20 md:w-[calc(100%-5rem)]"}
+        left-0 w-full`}
     >
       <div className="h-full px-4 flex items-center">
-        {/* ⬅️ Sidebar Toggle */}
+
         <button
           onClick={toggleSidebar}
-          className="text-xl text-gray-700 hover:text-blue-600 transition"
+          className="md:hidden text-xl text-gray-700 mr-4"
+          aria-label="Toggle Sidebar"
         >
           <FaBars />
         </button>
 
-        {/* 🔵 SPACER (important for right alignment) */}
         <div className="flex-1" />
 
-        {/* ➡️ Right Section */}
         <div className="flex items-center gap-4 relative">
-          {/* 🔔 Notifications */}
+
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {
-                setNotificationOpen((p) => !p);
+                setNotificationOpen((prev) => !prev);
                 setProfileOpen(false);
               }}
-              className="relative text-xl text-gray-700 hover:text-blue-600"
+              className="relative text-xl text-gray-700 hover:text-blue-600 transition"
+              aria-label="Notifications"
             >
               <FaBell />
-              {notifications.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                  {unreadCount}
+                </span>
               )}
             </button>
 
             {notificationOpen && (
               <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-lg border z-20">
-                <div className="p-3 font-semibold border-b">
-                  Admin Notifications
-                </div>
-                <ul className="max-h-64 overflow-y-auto">
-                  {notifications.map((note) => (
-                    <li
-                      key={note.id}
-                      className="px-4 py-2 text-sm border-b hover:bg-gray-50"
-                    >
-                      <p>{note.text}</p>
-                      <p className="text-xs text-gray-400">{note.time}</p>
+                <div className="p-3 font-semibold border-b">Admin Notifications</div>
+                <ul className="max-h-72 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <li className="px-4 py-6 text-center text-gray-500 text-sm">
+                      🔔 No notifications
                     </li>
-                  ))}
+                  ) : (
+                    notifications.map((note) => (
+                      <li
+                        key={note.id}
+                        onClick={() => markNotificationRead(note.id)}
+                        className={`flex gap-3 px-4 py-3 border-b hover:bg-cyan-50 cursor-pointer transition ${
+                          !note.is_read ? "bg-cyan-50 border-l-4 border-cyan-500" : ""
+                        }`}
+                      >
+                        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-cyan-100 text-cyan-600 text-lg">
+                          🔔
+                        </div>
+                        <div className="flex-1">
+                          <p className={`${!note.is_read ? "font-semibold" : ""}`}>
+                            {note.title}
+                          </p>
+                          <p className="text-xs text-gray-500">{note.message}</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(note.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </li>
+                    ))
+                  )}
                 </ul>
               </div>
             )}
           </div>
 
-          {/* 👤 Profile */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => {
-                setProfileOpen((p) => !p);
+                setProfileOpen((prev) => !prev);
                 setNotificationOpen(false);
               }}
               className="p-1 rounded-full hover:bg-gray-100 transition"
+              aria-label="Profile Menu"
             >
               <img
                 src={profileImage}
@@ -174,8 +218,6 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-20">
                 <ul className="py-2 text-sm">
-                  {/* Uncomment when routes exist */}
-                  
                   <li
                     onClick={() => handleNavigate("/admin/profile")}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -188,9 +230,11 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
                   >
                     🔒 Change Password
                   </li>
-                 
                   <li
-                    onClick={() => setIsLogoutModalOpen(true)}
+                    onClick={() => {
+                      setProfileOpen(false);
+                      setIsLogoutModalOpen(true);
+                    }}
                     className="flex items-center gap-3 px-5 py-2 text-red-600 hover:bg-gray-100 cursor-pointer border-t"
                   >
                     <FaSignOutAlt /> Logout
@@ -202,7 +246,6 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
         </div>
       </div>
 
-      {/* 🚪 Logout Modal */}
       <LogoutModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}

@@ -19,9 +19,7 @@ import DoctorQRCodePage from "../module/doctor/pages/DoctorQRCodePage";
 import ManualBookingPage from "../module/doctor/pages/ManualBookingPage";
 
 import ApprovalStatusPage from "../views/doctor/ApprovalStatusPage";
-import ForgotPasswordPage from "../views/doctor/ForgotPasswordPage";
 import DoctorLoginPage from "../views/doctor/DoctorLoginPage";
-import DoctorRegistrationPage from "../views/doctor/DoctorRegistrationPage";
 
 import ClientLoginPage from "../views/patients/PatientLoginPage";
 import ClientRegisterPage from "../views/patients/PatientRegisterPage";
@@ -45,18 +43,25 @@ import ChangePassword from "../module/patient/pages/ChangePassword";
 import DashboardLayout from "../utils/Layout/DashboardLayout";
 import LogoutModal from "../utils/LogoutModal";
 import AppointmentHistory from "../module/doctor/pages/AppointmentHistory";
-import DoctorNotesPage from "../module/doctor/pages/DoctorNotesPage";
 import Myappointmentpage from "../module/patient/pages/Myappointmentpage";
 import PatientbookAppointment from "../module/patient/pages/PatientbookAppointment";
 import IncomingAppointments from "../module/doctor/pages/IncomingAppointments";
 import AdminDashboard from "../admin/AdminDashboard";
 import ProtectedRoute from "../routes/ProtectedRoute";
-import VisitSummaryPage from "../module/doctor/pages/VisitSummaryPage";
 
 import AdminDoctor from "../admin/AdminDoctor";
 import AdminDoctorVerification from "../admin/AdminDoctorVerification";
 import Doctordetails from "../admin/Doctordetails";
-
+import DoctorRegistration from "../views/doctor/DoctorRegistration";
+import ComingSoon from "../landingpage/commingsoon/ComingSoon";
+import AddPrescription from "../module/doctor/pages/AddPrescription";
+import DoctorReviews from "../module/doctor/pages/DoctorReviews";
+import ForgotPassword from "../views/doctor/ForgotPassword";
+import ResetPassword from "../views/doctor/ResetPassword";
+import AdminHeaderDashboard from "../utils/AdminHeaderDashboard";
+import QRRedirect from "../module/doctor/pages/QRRedirect";
+import ContactRequests from "../admin/ContactRequests";
+import Mycertificate from "../module/patient/pages/Mycertificate";
 
 const Router = () => {
   return (
@@ -68,21 +73,25 @@ const Router = () => {
 
           <Route path="clientloginpage" element={<ClientLoginPage />} />
           <Route path="clientregisterpage" element={<ClientRegisterPage />} />
-
+          <Route path="/qr-redirect" element={<QRRedirect />} />
           <Route path="about" element={<About />} />
           <Route path="service" element={<Service />} />
           <Route path="contact" element={<Contact />} />
           <Route path="help" element={<Help />} />
           <Route path="doctorloginpage" element={<DoctorLoginPage />} />
-          <Route
-            path="doctorregistrationpage"
-            element={<DoctorRegistrationPage />}
-          />
+
+          <Route path="doctorregistration" element={<DoctorRegistration />} />
           <Route path="approvalstatuspage" element={<ApprovalStatusPage />} />
-          <Route path="forgotpassword" element={<ForgotPasswordPage />} />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
-       
+        {/* comming soon section */}
+        <Route path="/lab-test" element={<ComingSoon />} />
+        <Route path="/medicine" element={<ComingSoon />} />
+        <Route path="/home-consultation" element={<ComingSoon />} />
+        <Route path="/blood-donor" element={<ComingSoon />} />
 
         <Route
           path="/admin"
@@ -94,26 +103,32 @@ const Router = () => {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
-          {/* <Route path="patients" element={<AdminPatients />} /> */}
-          {/* <Route path="appointments" element={<AdminAppointments />} /> */}
-           <Route path="doctors" element={<AdminDoctor />} />
-           <Route path="doctorsverification" element={<AdminDoctorVerification />} />
-           <Route path="doctorsdetails" element={<Doctordetails />} />
 
-
+          <Route path="doctors" element={<AdminDoctor />} />
+          <Route
+            path="doctorsverification/:id"
+            element={<AdminDoctorVerification />}
+          />
+          <Route path="doctorsdetails/:id" element={<Doctordetails />} />
+          <Route path="changepassword" element={<AdminHeaderDashboard />} />
+          <Route path="contact-requests" element={<ContactRequests />} />
+         
         </Route>
 
         {/* 🩺 Doctor Dashboard Layout (with HeaderDashboard + Sidebar) */}
-        <Route path="/doctordashboard" element={<DashboardLayout />}>
+        <Route
+          path="/doctordashboard"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<DoctorDashboard />} />
           <Route path="dashboard" element={<DoctorDashboard />} />
           <Route path="patients" element={<PatientListPage />} />
           <Route path="queue" element={<CurrentQueuePage />} />
-          <Route path="visit-summary/:id" element={<VisitSummaryPage />} />
-          <Route
-            path="/doctordashboard/incoming"
-            element={<IncomingAppointments />}
-          />
+          <Route path="incoming" element={<IncomingAppointments />} />
           <Route path="notifications" element={<Notification />} />
           <Route
             path="doctorprofilesection"
@@ -127,32 +142,41 @@ const Router = () => {
           <Route path="qrcode" element={<DoctorQRCodePage />} />
           <Route path="manualbooking" element={<ManualBookingPage />} />
           <Route path="appointment" element={<AppointmentHistory />} />
-          <Route path="doctornotes" element={<DoctorNotesPage />} />
+          <Route path="prescription/:id" element={<AddPrescription />} />
+
+          <Route path="reviews" element={<DoctorReviews />} />
         </Route>
 
         {/* 👩‍🦰 Client Dashboard Layout (Sidebar) */}
 
-        <Route path="/client" element={<DashboardLayout />}>
+        <Route
+          path="/client"
+          element={
+            <ProtectedRoute allowedRoles={["PATIENT"]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<PatientDashboard />} />
           <Route path="dashboard" element={<PatientDashboard />} />
-          <Route path="book-appointment" element={<PatientbookAppointment />} />
-          <Route path="myappointment" element={<Myappointmentpage />} />
-          <Route path="addfamilypage" element={<AddFamilyPage />} />
-          <Route path="edit-family/:id" element={<AddFamilyPage />} />
-          <Route path="patientqueuepage" element={<PatientQueuePage />} />
-        </Route>
 
-        {/* 👩‍🦰 Client Dashboard Layout (with HeaderDashboard*/}
-        <Route path="/client" element={<DashboardLayout />}>
-          <Route index element={<ProfileSection />} />
           <Route path="profile" element={<ProfileSection />} />
           <Route path="family" element={<FamilyMembers />} />
           <Route path="changepassword" element={<ChangePassword />} />
           <Route path="cards" element={<Cards />} />
+
+          <Route path="book-appointment" element={<PatientbookAppointment />} />
           <Route
-            path="bookappointmentpage/:id"
+            path="bookappointmentpage/:doctorId"
             element={<BookAppointmentPage />}
           />
+
+          <Route path="myappointment" element={<Myappointmentpage />} />
+          <Route path="mycertificate" element={<Mycertificate />} />
+          <Route path="addfamilypage" element={<AddFamilyPage />} />
+          <Route path="edit-family/:id" element={<AddFamilyPage />} />
+
+          <Route path="patientqueuepage" element={<PatientQueuePage />} />
 
           <Route path="doctor-profile/:id" element={<DoctorDetailPage />} />
         </Route>

@@ -1,139 +1,10 @@
-// import React, { useState } from "react";
-// import { toast } from "react-toastify";
-// import { createManualBookingApi } from "../../../services/doctor/ManualBookingApi";
-
-// const ManualBookingPage = () => {
-//   // 🔑 LOGIN ke time saved doctor
-//   const doctor = JSON.parse(localStorage.getItem("loggedInUser")) || {};
-
-//   const [form, setForm] = useState({
-//     patientName: "",
-//     patientMobile: "",
-//     patientAge: "",
-//     appointmentType: "CLINIC",
-//     slot: "MORNING",
-//   });
-
-//   const [loading, setLoading] = useState(false);
-
-//   const handleChange = (e) => {
-//     setForm((prev) => ({
-//       ...prev,
-//       [e.target.name]: e.target.value,
-//     }));
-//   };
-
-//   /* ================= SUBMIT ================= */
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     if (!doctor?.id) {
-//       toast.error("Doctor not logged in");
-//       return;
-//     }
-
-//     setLoading(true);
-
-//     try {
-//       const payload = {
-//         doctorId: doctor.id, // 🔥 backend expects this
-//         appointmentType: form.appointmentType,
-//         slot: form.slot,
-//         patientName: form.patientName,
-//         patientMobile: form.patientMobile,
-//         patientAge: form.patientAge || null,
-//       };
-
-//       const { data } = await createManualBookingApi(payload);
-
-//       toast.success(
-//         `Token #${data.token} booked (${data.slot} shift)`
-//       );
-
-//       // reset form
-//       setForm({
-//         patientName: "",
-//         patientMobile: "",
-//         patientAge: "",
-//         appointmentType: "CLINIC",
-//         slot: "MORNING",
-//       });
-//     } catch (err) {
-//       toast.error(
-//         err?.response?.data?.message || "Booking failed"
-//       );
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   /* ================= UI ================= */
-//   return (
-//     <div className="p-6 max-w-md mx-auto">
-//       <h2 className="text-xl font-semibold mb-4">
-//         Manual Appointment Booking
-//       </h2>
-
-//       <form onSubmit={handleSubmit} className="space-y-4">
-//         <input
-//           name="patientName"
-//           value={form.patientName}
-//           onChange={handleChange}
-//           placeholder="Patient Name"
-//           required
-//           className="w-full border p-2 rounded"
-//         />
-
-//         <input
-//           name="patientMobile"
-//           value={form.patientMobile}
-//           onChange={handleChange}
-//           placeholder="Mobile Number"
-//           required
-//           className="w-full border p-2 rounded"
-//         />
-
-//         <input
-//           name="patientAge"
-//           type="number"
-//           value={form.patientAge}
-//           onChange={handleChange}
-//           placeholder="Age (optional)"
-//           className="w-full border p-2 rounded"
-//         />
-
-//         <select
-//           name="slot"
-//           value={form.slot}
-//           onChange={handleChange}
-//           className="w-full border p-2 rounded"
-//         >
-//           <option value="MORNING">Morning</option>
-//           <option value="EVENING">Evening</option>
-//         </select>
-
-//         <button
-//           disabled={loading}
-//           className="w-full py-2  bg-linear-to-br from-[#2277f7] to-[#52abd4] text-white rounded cursor-pointer hover:opacity-90 "
-//         >
-//           {loading ? "Creating..." : "Create & Add to Queue"}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default ManualBookingPage;
-
-import React, { useState } from "react";
-import { toast } from "react-toastify";
+import React, { useState, useEffect } from "react";
+import { notify } from "../../../utils/notify";
 import { createManualBookingApi } from "../../../services/doctor/ManualBookingApi";
+import { FaUser, FaPhone, FaBirthdayCake, FaClock } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function ManualVisitBooking() {
-
-  // 🔑 Logged-in doctor (same as first code logic)
-  const doctor = JSON.parse(localStorage.getItem("loggedInUser")) || {};
-
   const [formData, setFormData] = useState({
     appointmentType: "CLINIC",
     slot: "MORNING",
@@ -141,148 +12,169 @@ export default function ManualVisitBooking() {
     patientMobile: "",
     patientAge: "",
   });
-
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  /* ================= HANDLE CHANGE ================= */
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!doctor?.id) {
-      toast.error("Doctor not logged in");
+    if (!formData.patientName.trim()) {
+      notify.error("Patient name is required");
       return;
     }
-
-    if (!formData.patientName || !formData.patientMobile) {
-      toast.error("Please fill all required fields");
+    if (!/^\d{10}$/.test(formData.patientMobile)) {
+      notify.error("Enter valid 10-digit mobile number");
       return;
     }
-
+    if (
+      formData.patientAge &&
+      (Number(formData.patientAge) <= 0 || Number(formData.patientAge) > 120)
+    ) {
+      notify.error("Enter valid age (1-120)");
+      return;
+    }
     try {
       setLoading(true);
-
-      const payload = {
-        doctorId: doctor.id, // 🔥 from login
+      const { data } = await createManualBookingApi({
         appointmentType: formData.appointmentType,
         slot: formData.slot,
-        patientName: formData.patientName,
+        patientName: formData.patientName.trim(),
         patientMobile: formData.patientMobile,
-        patientAge: formData.patientAge || null,
-      };
-
-      const { data } = await createManualBookingApi(payload);
-
-      toast.success(
-        `Token #${data.token} booked successfully (${data.slot} shift)`
+        patientAge: formData.patientAge ? Number(formData.patientAge) : null,
+      });
+      notify.success(
+        `Token #${data.token} booked successfully (${data.slot} shift)`,
       );
+      navigate("/doctordashboard");
 
-      // Reset form
-      setFormData({
+      setFormData((prev) => ({
         appointmentType: "CLINIC",
-        slot: "MORNING",
+        ...prev,
         patientName: "",
         patientMobile: "",
         patientAge: "",
-      });
-
+      }));
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Booking failed"
-      );
+      notify.error(err?.response?.data?.message || "Booking failed");
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    const currentHour = new Date().getHours();
 
-  /* ================= UI (UNCHANGED) ================= */
+    if (currentHour < 12) {
+      setFormData((prev) => ({ ...prev, slot: "MORNING" }));
+    } else {
+      setFormData((prev) => ({ ...prev, slot: "EVENING" }));
+    }
+  }, []);
   return (
-    <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-2xl p-8 border border-sky-100">
-      <h2 className="text-2xl font-bold text-sky-700 mb-6">
-        Manual Visit Booking
-      </h2>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-
-        
-
-        {/* Patient Name */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Patient Name *
-          </label>
-          <input
-            type="text"
-            name="patientName"
-            value={formData.patientName}
-            onChange={handleChange}
-            placeholder="Enter patient name"
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-sky-400 outline-none"
-          />
+    <div
+      className="font-dm min-h-screen bg-[#f5f3ef] flex items-start justify-center px-4 py-12"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 10% 5%, rgba(14,116,144,0.05) 0%, transparent 50%)",
+      }}
+    >
+      <div className="w-full max-w-[520px]">
+        {/* HEADER */}
+        <div className="animate-fade-up mb-8">
+          <h1 className="font-playfair text-[clamp(24px,3.5vw,34px)] font-bold text-[#1c2b33] leading-tight m-0">
+            Manual Booking
+          </h1>
+          <p className="font-dm text-[13px] text-[#6b7f8a] mt-1">
+            Register a walk-in patient appointment manually.
+          </p>
         </div>
 
-        {/* Mobile */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Mobile Number *
-          </label>
-          <input
-            type="tel"
-            name="patientMobile"
-            value={formData.patientMobile}
-            onChange={handleChange}
-            placeholder="Enter mobile number"
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-sky-400 outline-none"
-          />
-        </div>
-
-        {/* Age */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Age
-          </label>
-          <input
-            type="number"
-            name="patientAge"
-            value={formData.patientAge}
-            onChange={handleChange}
-            placeholder="Enter age"
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-sky-400 outline-none"
-          />
-        </div>
-        {/* Shift */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Select Shift *
-          </label>
-          <select
-            name="slot"
-            value={formData.slot}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-sky-400 outline-none"
-          >
-            <option value="MORNING">Morning</option>
-            <option value="EVENING">Evening</option>
-          </select>
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold transition"
+        {/* FORM CARD */}
+        <div
+          className="animate-fade-up [animation-delay:0.08s] bg-white border border-black/[0.07] rounded-[22px] p-8"
+          style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}
         >
-          {loading ? "Booking..." : "Book Appointment"}
-        </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Patient Name */}
+            <Field label="Patient Name" icon={<FaUser />} required>
+              <input
+                type="text"
+                name="patientName"
+                value={formData.patientName}
+                onChange={handleChange}
+                placeholder="Enter patient name"
+                className="font-dm flex-1 bg-transparent border-none outline-none text-[14px] text-[#1c2b33] placeholder-[#c4cdd4]"
+              />
+            </Field>
 
-      </form>
+            {/* Mobile */}
+            <Field label="Mobile Number" icon={<FaPhone />} required>
+              <input
+                type="tel"
+                name="patientMobile"
+                value={formData.patientMobile}
+                onChange={handleChange}
+                placeholder="10-digit mobile number"
+                maxLength={10}
+                className="font-dm flex-1 bg-transparent border-none outline-none text-[14px] text-[#1c2b33] placeholder-[#c4cdd4]"
+              />
+            </Field>
+
+            {/* Age */}
+            <Field label="Age" icon={<FaBirthdayCake />} optional>
+              <input
+                type="number"
+                name="patientAge"
+                value={formData.patientAge}
+                onChange={handleChange}
+                placeholder="1 – 120"
+                min={1}
+                max={120}
+                className="font-dm flex-1 bg-transparent border-none outline-none text-[14px] text-[#1c2b33] placeholder-[#c4cdd4]"
+              />
+            </Field>
+
+            {/* Slot */}
+            <Field label="Shift" icon={<FaClock />} required>
+              <div className="font-dm text-[14px] text-[#1c2b33]">
+                {formData.slot === "MORNING"
+                  ? "🌅 Morning Shift"
+                  : "🌙 Evening Shift"}
+              </div>
+            </Field>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="font-dm w-full py-3.5 rounded-full text-[14px] font-semibold text-white bg-[#0e7490] border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#0c5f75] hover:-translate-y-px transition mt-2"
+              style={{ boxShadow: "0 4px 16px rgba(14,116,144,0.22)" }}
+            >
+              {loading ? "Booking…" : "Book Appointment"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
+
+const Field = ({ label, icon, children, required, optional }) => (
+  <div className="flex flex-col gap-[5px]">
+    <label className="font-dm text-[10px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] flex items-center gap-1">
+      {label}
+      {required && <span className="text-red-400">*</span>}
+      {optional && (
+        <span className="text-[#9fb0b8] normal-case tracking-normal font-normal">
+          (optional)
+        </span>
+      )}
+    </label>
+    <div className="flex items-center gap-2.5 px-3.5 py-[11px] rounded-[10px] border border-black/[0.08] bg-[#f8f9fb] focus-within:border-[#0e7490] focus-within:ring-2 focus-within:ring-[rgba(14,116,144,0.12)] focus-within:bg-white transition-all duration-200">
+      <span className="text-[#0e7490] opacity-70 flex-shrink-0 text-[13px]">
+        {icon}
+      </span>
+      {children}
+    </div>
+  </div>
+);

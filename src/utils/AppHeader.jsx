@@ -3,7 +3,6 @@ import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaTimes, FaGlobe } from "react-icons/fa";
 import { useLanguage } from "../context/LanguageContext";
 
-/* ================= SAFE USER FETCH ================= */
 const getStoredUser = () => {
   const raw = localStorage.getItem("loggedInUser");
   if (!raw || raw === "undefined") return null;
@@ -28,12 +27,10 @@ const AppHeader = () => {
 
   const { language, changeLanguage, lang } = useLanguage();
 
-  /* ================= CLOSE MENU ON ROUTE CHANGE ================= */
   useEffect(() => {
     setMenuOpen(false);
   }, [location]);
 
-  /* ================= SCROLL LOCK ================= */
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -46,9 +43,7 @@ const AppHeader = () => {
     <>
       <nav className="fixed top-0 left-0 w-full bg-white shadow-md px-6 py-3 flex items-center justify-between z-50">
         
-        {/* ================= LEFT ================= */}
         <div className="flex items-center gap-3">
-          {/* Mobile Hamburger */}
           <div className="md:hidden mr-2">
             {menuOpen ? (
               <FaTimes
@@ -65,13 +60,11 @@ const AppHeader = () => {
             )}
           </div>
 
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/images/yo.png" alt="Yo Doctor" className="h-10" />
+            <img src="/images/logo.webp" alt="Yo Doctor" className="h-10" />
           </Link>
         </div>
 
-        {/* ================= CENTER (Desktop Nav) ================= */}
         <div className="hidden md:flex gap-8 font-medium">
           {[
             { name: lang[language].home, path: "/" },
@@ -87,7 +80,7 @@ const AppHeader = () => {
                 `relative text-black hover:text-blue-600 transition
                 ${
                   isActive
-                    ? "text-blue-600 after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[2px] after:bg-[#14BEF0]"
+                    ? "text-blue-600 after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-[#14BEF0]"
                     : ""
                 }`
               }
@@ -97,9 +90,7 @@ const AppHeader = () => {
           ))}
         </div>
 
-        {/* ================= RIGHT ================= */}
         <div className="flex items-center gap-4">
-          {/* Language Toggle */}
           <button
             onClick={() => changeLanguage(language === "en" ? "hi" : "en")}
             title={language === "en" ? "Switch to Hindi" : "Switch to English"}
@@ -108,14 +99,12 @@ const AppHeader = () => {
             <FaGlobe size={18} className="text-gray-700" />
           </button>
 
-          {/* Download Button */}
           <button className="px-5 py-2 rounded-full bg-[#00b3ff] text-white hover:bg-[#009ee0] transition">
             {lang[language].download}
           </button>
         </div>
       </nav>
 
-      {/* ================= OVERLAY ================= */}
       {menuOpen && (
         <div
           onClick={() => setMenuOpen(false)}
@@ -123,7 +112,6 @@ const AppHeader = () => {
         />
       )}
 
-      {/* ================= MOBILE MENU ================= */}
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 z-40 md:hidden ${
           menuOpen ? "translate-x-0" : "-translate-x-full"

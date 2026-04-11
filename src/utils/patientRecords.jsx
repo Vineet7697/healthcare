@@ -6,5 +6,3 @@ export const getPatientHistory = (patientId) => {
 };
 
 
-// Use
-// const history = getPatientHistory(patientId);

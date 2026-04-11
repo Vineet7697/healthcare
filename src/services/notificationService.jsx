@@ -1,27 +1,27 @@
-// import api from "./api";
+import api from "./api";
 
-// /* ================= FETCH NOTIFICATIONS ================= */
-// export const fetchNotifications = async (role) => {
-//   if (role === "PATIENT") {
-//     return api.get("/patient/notifications");
-//   }
+/* ================= DOCTOR ================= */
 
-//   if (role === "DOCTOR") {
-//     return api.get("/doctor/notifications");
-//   }
+export const getDoctorNotifications = () =>
+  api.get("/doctor/notifications");
 
-//   throw new Error("Invalid role");
-// };
+export const getDoctorUnreadCount = () =>
+  api.get("/doctor/notifications/unread-count");
 
-// /* ================= MARK AS READ ================= */
-// export const markNotificationRead = async (role, id) => {
-//   if (role === "PATIENT") {
-//     return api.put(`/patient/notifications/${id}/read`);
-//   }
+export const markDoctorNotificationRead = (id) =>
+  api.put(`/doctor/notifications/${id}/read`);
 
-//   if (role === "DOCTOR") {
-//     return api.put(`/doctor/notifications/${id}/read`);
-//   }
+export const markAllDoctorNotificationsRead = () =>
+  api.put("/doctor/notifications/read-all");
 
-//   throw new Error("Invalid role");
-// };
+
+/* ================= PATIENT ================= */
+
+export const getPatientNotifications = () =>
+  api.get("/patient/notifications");
+
+export const markPatientNotificationRead = (id) =>
+  api.put(`/patient/notifications/${id}/read`);
+
+export const getPatientUnreadCount = () =>
+  api.get("/patient/notifications/unread-count");

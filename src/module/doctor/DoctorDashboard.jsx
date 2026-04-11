@@ -1,660 +1,524 @@
-// import React, { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import {
-//   FaUsers,
-//   FaQrcode,
-//   FaPlus,
-//   FaUserClock,
-//   FaToggleOn,
-//   FaToggleOff,
-//   FaCheckCircle,
-// } from "react-icons/fa";
-// import api from "../../services/api"; // ✅ AXIOS INSTANCE
-
-// const DoctorDashboardHome = () => {
-//   const navigate = useNavigate();
-
-//   // 🔑 IMPORTANT: loggedInUser (NOT loggedInDoctor)
-//   const doctor = JSON.parse(localStorage.getItem("loggedInUser")) || {};
-//   const [doctorName, setDoctorName] = useState("");
-
-//   /* ================= STATE ================= */
-//   const [dashboard, setDashboard] = useState({
-//     pendingRequests: 0,
-//     todayQueue: 0,
-//     completedToday: 0,
-//   });
-
-//   const [isOnline, setIsOnline] = useState(true);
-//   const [loading, setLoading] = useState(true);
-
-//   /* ================= LOAD DASHBOARD ================= */
-//   useEffect(() => {
-//     const loadDashboard = async () => {
-//       try {
-//         const res = await api.get("/doctor/dashboard");
-
-//         setDashboard({
-//           pendingRequests: res.data.pendingRequests || 0,
-//           todayQueue: res.data.todayQueue || 0,
-//           completedToday: res.data.completedToday || 0,
-//         });
-//         setDoctorName(res.data.doctorName || "");
-//         // backend me isOnline nahi aata, default true
-//         setIsOnline(true);
-//       } catch (error) {
-//         console.error("Dashboard load failed", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     loadDashboard();
-//   }, []);
-
-//   /* ================= DERIVED VALUES ================= */
-//   const totalToday =
-//     dashboard.pendingRequests + dashboard.todayQueue + dashboard.completedToday;
-
-//   /* ================= TOGGLE ONLINE ================= */
-//   const toggleAvailability = async () => {
-//     const newStatus = !isOnline;
-
-//     try {
-//       // ✅ backend expects isAvailable
-//       await api.put("/doctor/availability", {
-//         isAvailable: newStatus,
-//       });
-
-//       setIsOnline(newStatus);
-//     } catch (error) {
-//       console.error("Status update failed", error);
-//       alert("Unable to update status. Try again.");
-//     }
-//   };
-
-//   /* ================= LOADING ================= */
-//   if (loading) {
-//     return (
-//       <div className="p-6 text-center text-gray-500">Loading dashboard...</div>
-//     );
-//   }
-
-//   return (
-//     <div className="p-6 max-w-7xl mx-auto">
-//       {/* ================= HEADER ================= */}
-//       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-//         <div>
-//           <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
-//             Welcome, {doctorName || "Doctor"}
-//           </h2>
-//           <p className="text-sm text-gray-500">
-//             Here’s today’s overview of your clinic
-//           </p>
-//         </div>
-
-//         <button
-//           onClick={toggleAvailability}
-//           className={`flex items-center gap-2 px-4 py-2 rounded-full text-white transition w-full sm:w-auto justify-center ${
-//             isOnline ? "bg-green-500" : "bg-gray-400"
-//           }`}
-//         >
-//           {isOnline ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
-//           {isOnline ? "Online" : "Offline"}
-//         </button>
-//       </div>
-
-//       {/* ================= STATS ================= */}
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-//         <StatCard
-//           title="Incoming Appointments"
-//           value={dashboard.pendingRequests}
-//           icon={<FaUsers />}
-//           onClick={() => navigate("/doctordashboard/incoming")}
-//         />
-
-//         <StatCard
-//           title="Today Queue"
-//           value={dashboard.todayQueue}
-//           icon={<FaUserClock />}
-//         />
-
-//         <StatCard
-//           title="Completed Today"
-//           value={dashboard.completedToday}
-//           icon={<FaCheckCircle />}
-//         />
-
-//         <StatCard
-//           title="Today Total Patients"
-//           value={totalToday}
-//           icon={<FaUsers />}
-//         />
-//       </div>
-
-//       {/* ================= QUICK ACTIONS ================= */}
-//       <h3 className="text-lg font-semibold mb-3">Quick Actions</h3>
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-//         <ActionBtn
-//           label="Live Queue"
-//           icon={<FaUserClock />}
-//           onClick={() => navigate("/doctordashboard/livequeue")}
-//         />
-
-//         <ActionBtn
-//           label="QR Walk-In"
-//           icon={<FaQrcode />}
-//           onClick={() => navigate("/doctordashboard/qrcode")}
-//         />
-
-//         <ActionBtn
-//           label="Manual Booking"
-//           icon={<FaPlus />}
-//           onClick={() => navigate("/doctordashboard/manualbooking")}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// /* ================= SMALL COMPONENTS ================= */
-
-// const StatCard = ({ title, value, icon, onClick }) => (
-//   <div
-//     onClick={onClick}
-//     className="bg-white p-4 rounded-xl shadow border flex justify-between items-center
-//                cursor-pointer hover:bg-gray-50 active:scale-[0.98] transition"
-//   >
-//     <div>
-//       <p className="text-sm text-gray-500">{title}</p>
-//       <p className="text-xl sm:text-2xl font-semibold text-gray-800">{value}</p>
-//     </div>
-//     <div className="text-[#2277f7] text-xl sm:text-2xl">{icon}</div>
-//   </div>
-// );
-
-// const ActionBtn = ({ label, icon, onClick }) => (
-//   <button
-//     type="button"
-//     onClick={onClick}
-//     className="flex items-center justify-center gap-3 p-4 sm:p-5
-//                bg-linear-to-br from-[#2277f7] to-[#52abd4]
-//                text-white rounded-xl cursor-pointer hover:opacity-90
-//                text-sm sm:text-base"
-//   >
-//     {icon}
-//     {label}
-//   </button>
-// );
-
-// export default DoctorDashboardHome;
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import api from "../../services/api";
-// import { FaClock, FaPlus, FaQrcode, FaList } from "react-icons/fa";
-
-// const DoctorDashboard = () => {
-//   const navigate = useNavigate();
-
-//   /* ================= STATE ================= */
-//   const [dashboard, setDashboard] = useState({
-//     pendingRequests: 0,
-//     todayQueue: 0,
-//     completedToday: 0,
-//     totalPatients: 0,
-//   });
-
-//   const [doctorName, setDoctorName] = useState("");
-//   const [isOnline, setIsOnline] = useState(true);
-//   const [nextPatient, setNextPatient] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   /* ================= LOAD DASHBOARD ================= */
-//   useEffect(() => {
-//     const loadDashboard = async () => {
-//       try {
-//         const res = await api.get("/doctor/dashboard");
-
-//         setDashboard({
-//           pendingRequests: res.data.pendingRequests || 0,
-//           todayQueue: res.data.todayQueue || 0,
-//           completedToday: res.data.completedToday || 0,
-//           totalPatients:
-//             (res.data.pendingRequests || 0) +
-//             (res.data.todayQueue || 0) +
-//             (res.data.completedToday || 0),
-//         });
-
-//         setDoctorName(res.data.doctorName || "");
-
-//         // Next patient if backend sends
-//         if (res.data.nextPatient) {
-//           setNextPatient(res.data.nextPatient);
-//         }
-
-//         setIsOnline(true);
-//       } catch (error) {
-//         console.error("Dashboard load failed", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     loadDashboard();
-//   }, []);
-
-//   /* ================= TOGGLE ONLINE ================= */
-//   const toggleAvailability = async () => {
-//     const newStatus = !isOnline;
-
-//     try {
-//       await api.put("/doctor/availability", {
-//         isAvailable: newStatus,
-//       });
-
-//       setIsOnline(newStatus);
-//     } catch (error) {
-//       console.error("Status update failed", error);
-//       alert("Unable to update status. Try again.");
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="bg-[#f4f8fb] min-h-screen flex items-center justify-center text-gray-500">
-//         Loading dashboard...
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="bg-[#f4f8fb] font-sans text-gray-700 min-h-screen flex">
-//       <main className="flex-1 p-8">
-//         <div className="flex justify-between items-center mb-4">
-//           <h3 className="text-xl font-semibold">
-//             Welcome {doctorName || "Doctor"}
-//           </h3>
-
-//           <button
-//             onClick={toggleAvailability}
-//             className={`px-4 py-2 rounded-full text-white ${
-//               isOnline ? "bg-green-500" : "bg-gray-400"
-//             }`}
-//           >
-//             {isOnline ? "Online" : "Offline"}
-//           </button>
-//         </div>
-
-//         {/* ================= STATS ================= */}
-//         <div className="grid grid-cols-4 gap-6 mb-10">
-//           <div
-//             onClick={() => navigate("/doctordashboard/incoming")}
-//             className="bg-gradient-to-r from-sky-500 to-sky-400 text-white p-6 rounded-xl shadow cursor-pointer"
-//           >
-//             <p className="text-sm">Pending Requests</p>
-//             <h3 className="text-3xl font-bold mt-2">
-//               {dashboard.pendingRequests}
-//             </h3>
-//           </div>
-
-//           <div
-//             onClick={() => navigate("/doctordashboard/livequeue")}
-//             className="bg-white p-6 rounded-xl shadow cursor-pointer"
-//           >
-//             <p className="text-sm text-gray-400">Today’s Queue</p>
-//             <h3 className="text-3xl font-bold text-sky-600 mt-2">
-//               {dashboard.todayQueue}
-//             </h3>
-//           </div>
-
-//           <div className="bg-white p-6 rounded-xl shadow">
-//             <p className="text-sm text-gray-400">Completed</p>
-//             <h3 className="text-3xl font-bold text-sky-600 mt-2">
-//               {dashboard.completedToday}
-//             </h3>
-//           </div>
-
-//           <div className="bg-white p-6 rounded-xl shadow">
-//             <p className="text-sm text-gray-400">Total Patients</p>
-//             <h3 className="text-3xl font-bold text-sky-600 mt-2">
-//               {dashboard.totalPatients}
-//             </h3>
-//           </div>
-//         </div>
-
-//         {/* ================= QUICK ACTIONS ================= */}
-
-//         <div className="grid grid-cols-4 gap-6 mb-10">
-//           <div
-//             onClick={() => navigate("/doctordashboard/incoming")}
-//             className="bg-white p-6 rounded-xl shadow text-center hover:shadow-lg cursor-pointer"
-//           >
-//             <div className="flex flex-col items-center justify-center">
-//             <FaClock className="text-2xl text-sky-600 mb-3" />
-//             <p>Incoming Appointments</p>
-//             </div>
-//           </div>
-
-//           <div
-//             onClick={() => navigate("/doctordashboard/livequeue")}
-//             className="bg-white p-6 rounded-xl shadow text-center hover:shadow-lg cursor-pointer transition"
-//           >
-//             <div className="flex flex-col items-center justify-center">
-//               <FaList className="text-2xl text-sky-600 mb-3" />
-//               <p className="font-medium text-gray-700">Today Queue</p>
-//             </div>
-//           </div>
-
-//           <div
-//             onClick={() => navigate("/doctordashboard/qrcode")}
-//             className="bg-white p-6 rounded-xl shadow text-center hover:shadow-lg cursor-pointer"
-//           >
-//             <div className="flex flex-col items-center justify-center">
-//             <FaQrcode className="text-2xl text-sky-600 mb-3" />
-//             <p>QR Code</p>
-//             </div>
-//           </div>
-
-//           <div
-//             onClick={() => navigate("/doctordashboard/manualbooking")}
-//             className="bg-white p-6 rounded-xl shadow text-center hover:shadow-lg cursor-pointer"
-//           >
-//             <div className="flex flex-col items-center justify-center">
-//             <FaPlus className="text-2xl text-sky-600 mb-3" />
-//             <p>Manual Booking</p>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* ================= NEXT PATIENT + CHART ================= */}
-//         <div className="grid grid-cols-3 gap-6">
-//           {/* NEXT PATIENT */}
-//           <div className="col-span-1 bg-gradient-to-r from-sky-500 to-sky-400 text-white p-6 rounded-xl shadow">
-//             <p className="text-sm mb-4">
-//               NEXT PATIENT – {nextPatient?.time || "No upcoming"}
-//             </p>
-
-//             <div className="flex items-center justify-between">
-//               <div className="flex items-center gap-3">
-//                 <img
-//                   src={nextPatient?.image || "https://i.pravatar.cc/100?img=5"}
-//                   alt="patient"
-//                   className="w-12 h-12 rounded-lg"
-//                 />
-//                 <div>
-//                   <p className="font-semibold">
-//                     {nextPatient?.name || "No Patient"}
-//                   </p>
-//                   <p className="text-sm text-sky-100">
-//                     {nextPatient?.reason || "—"}
-//                   </p>
-//                 </div>
-//               </div>
-
-//               <button
-//                 onClick={() => navigate("/doctordashboard/livequeue")}
-//                 className="bg-white text-sky-600 p-3 rounded-full"
-//               >
-//                 <i className="fa-solid fa-play"></i>
-//               </button>
-//             </div>
-//           </div>
-
-//           {/* CHART (UI untouched static) */}
-//           <div className="col-span-2 bg-white p-6 rounded-xl shadow">
-//             <div className="flex justify-between mb-6">
-//               <h3 className="font-semibold">Patient Trends</h3>
-//               <span className="text-sky-600 text-sm">Weekly</span>
-//             </div>
-
-//             <div className="flex items-end gap-4 h-52">
-//               <div className="w-8 bg-sky-200 h-24 rounded"></div>
-//               <div className="w-8 bg-sky-300 h-32 rounded"></div>
-//               <div className="w-8 bg-sky-400 h-20 rounded"></div>
-//               <div className="w-8 bg-sky-500 h-44 rounded"></div>
-//               <div className="w-8 bg-sky-300 h-28 rounded"></div>
-//               <div className="w-8 bg-sky-200 h-16 rounded"></div>
-//               <div className="w-8 bg-gray-200 h-20 rounded"></div>
-//             </div>
-
-//             <div className="flex justify-between text-sm text-gray-400 mt-3">
-//               <span>MON</span>
-//               <span>TUE</span>
-//               <span>WED</span>
-//               <span>THU</span>
-//               <span>FRI</span>
-//               <span>SAT</span>
-//               <span>SUN</span>
-//             </div>
-//           </div>
-//         </div>
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default DoctorDashboard;
-
-
-
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import {
-  FaClock,
-  FaQrcode,
-  FaList,
+  FaBook,
   FaExclamationTriangle,
   FaToggleOn,
   FaToggleOff,
+  FaList,
+  FaStar,
+  FaUser,
+  FaCheckCircle,
+  FaQrcode,
+  FaDownload,
+  FaTimes,
 } from "react-icons/fa";
+// import { QRCodeCanvas } from "qrcode.react";
+import { useNavigate } from "react-router-dom";
+import { notify } from "../../utils/notify";
+import api from "../../services/api";
+import {
+  cancelRemainingAppointments,
+  updateClinicStatus,
+  getMyQR,
+} from "../../services/doctorService";
+import useDoctorProfile from "../../hooks/doctorHooks/useDoctorProfile";
+
+const QRCodeCanvas = lazy(() =>
+  import("qrcode.react").then(module => ({
+    default: module.QRCodeCanvas,
+  }))
+);
+
+const FALLBACK_IMAGE =
+  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+const StatCard = ({ icon, label, value, tag, tagColor, iconColor }) => (
+  <div
+    className="bg-white border border-black/[0.07] rounded-[18px] p-6"
+    style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
+  >
+    <div className="flex items-center justify-between mb-4">
+      <div
+        className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${iconColor}`}
+      >
+        {icon}
+      </div>
+      <span
+        className={`text-[11px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full ${tagColor}`}
+      >
+        {tag}
+      </span>
+    </div>
+    <p className=" text-[30px] font-semibold text-[#1c2b33] leading-none mb-1">
+      {value}
+    </p>
+    <p className="font-dm text-[13px] text-[#6b7f8a]">{label}</p>
+  </div>
+);
+
+const ActionCard = ({ icon, title, subtitle, onClick, accent = false }) => (
+  <div
+    onClick={onClick}
+    className={`rounded-[18px] p-6 flex flex-col gap-3 cursor-pointer transition hover:-translate-y-0.5 hover:shadow-lg
+      ${
+        accent
+          ? "bg-gradient-to-br from-[#0e7490] to-[#0891b2] text-white"
+          : "bg-white border border-black/[0.07] text-[#1c2b33]"
+      }`}
+    style={{
+      boxShadow: accent
+        ? "0 8px 28px rgba(14,116,144,0.22)"
+        : "0 4px 20px rgba(0,0,0,0.06)",
+    }}
+  >
+    <div
+      className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl
+      ${accent ? "bg-white/20" : "bg-[#ecfeff] text-[#0e7490]"}`}
+    >
+      {icon}
+    </div>
+    <div>
+      <p
+        className={`font-dm font-semibold text-[15px] ${accent ? "text-white" : "text-[#1c2b33]"}`}
+      >
+        {title}
+      </p>
+      {subtitle && (
+        <p
+          className={`font-dm text-[12px] mt-0.5 leading-relaxed ${accent ? "text-white/70" : "text-[#6b7f8a]"}`}
+        >
+          {subtitle}
+        </p>
+      )}
+    </div>
+  </div>
+);
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
 
-  /* ================= STATE ================= */
   const [dashboard, setDashboard] = useState({
     pendingRequests: 0,
     todayQueue: 0,
-    tomorrow: 0,
-    nextDay: 0,
     completedToday: 0,
-    totalPatients: 0,
   });
-
   const [doctorName, setDoctorName] = useState("");
   const [isOnline, setIsOnline] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [slot, setSlot] = useState("MORNING");
+  const [reason, setReason] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
 
-  /* ================= LOAD DASHBOARD ================= */
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        const res = await api.get("/doctor/dashboard");
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrValue, setQrValue] = useState("");
+  const [doctorId, setDoctorId] = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
 
-        const pending = res.data.pendingRequests || 0;
-        const queue = res.data.todayQueue || 0;
-        const completed = res.data.completedToday || 0;
+  const { profile, profileImage } = useDoctorProfile();
 
-        setDashboard({
-          pendingRequests: pending,
-          todayQueue: queue,
-          tomorrow: res.data.tomorrow || 0,
-          nextDay: res.data.nextDay || 0,
-          completedToday: completed,
-          totalPatients: pending + queue + completed,
-        });
-
-        setDoctorName(res.data.doctorName || "Doctor");
-        setIsOnline(true);
-      } catch (error) {
-        console.error("Dashboard load failed", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboard();
-  }, []);
-
-  /* ================= TOGGLE ONLINE ================= */
-  const toggleAvailability = async () => {
-    const newStatus = !isOnline;
-
+  const loadDashboard = async () => {
     try {
-      await api.put("/doctor/availability", {
-        isAvailable: newStatus,
+      const res = await api.get("/doctor/dashboard");
+      setDashboard({
+        pendingRequests: res.data.pendingRequests || 0,
+        todayQueue: res.data.todayQueue || 0,
+        completedToday: res.data.completedToday || 0,
       });
-
-      setIsOnline(newStatus);
-    } catch (error) {
-      console.error("Status update failed", error);
-      alert("Unable to update status. Try again.");
+      setDoctorName(res.data.doctorName || "Doctor");
+      setIsOnline(res.data.isAvailable ?? true);
+    } catch (err) {
+      console.error("Dashboard load failed", err);
     }
   };
 
-  /* ================= LOADING ================= */
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen text-lg font-medium">
-        Loading Dashboard...
-      </div>
-    );
-  }
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const toggleAvailability = async () => {
+    const newStatus = !isOnline;
+    try {
+      await updateClinicStatus(newStatus);
+      setIsOnline(newStatus);
+      notify.success(
+        `Clinic is now ${newStatus ? "AVAILABLE" : "UNAVAILABLE"}`,
+      );
+    } catch {
+      notify.error("Unable to update status");
+    }
+  };
+
+  const handleEmergencyCancel = async () => {
+    if (!reason.trim()) {
+      notify.error("Please enter cancellation reason");
+      return;
+    }
+    try {
+      setCancelLoading(true);
+      const res = await cancelRemainingAppointments(slot, reason);
+      notify.success(res.data.message || "Appointments cancelled");
+      setShowCancelModal(false);
+      setReason("");
+      loadDashboard();
+    } catch {
+      notify.error("Cancellation failed");
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  const openQRModal = async () => {
+    setShowQRModal(true);
+    if (qrValue) return;
+    setQrLoading(true);
+    try {
+      const res = await getMyQR();
+      setQrValue(res.data.qrUrl);
+      setDoctorId(res.data.doctorId);
+    } catch {
+      notify.error("Doctor not approved or unauthorized");
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const downloadQR = () => {
+    const canvas = document.getElementById("doctor-qr-modal");
+    if (!canvas || !doctorId) return;
+    const pngUrl = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = pngUrl;
+    a.download = `doctor-${doctorId}-qr.png`;
+    a.click();
+  };
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good Morning";
+    if (h < 17) return "Good Afternoon";
+    return "Good Evening";
+  })();
 
   return (
-    <div className="px-6 md:px-12 py-8 space-y-12 bg-gray-50 min-h-screen">
+    <div
+      className="font-dm min-h-screen bg-[#f0f4f8] px-4 sm:px-6 py-10"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 10% 5%, rgba(14,116,144,0.05) 0%, transparent 50%), radial-gradient(ellipse at 90% 90%, rgba(14,116,144,0.04) 0%, transparent 50%)",
+      }}
+    >
+      <div className="max-w-7xl mx-auto">
+        <div className="animate-fade-up flex items-end justify-between mb-8 flex-wrap gap-4">
+          <div>
+            <p
+              className="font-[family-name:var(--font-dm)] text-[13px] font-semibold uppercase tracking-widest mb-1"
+              style={{ color: "#0086C3" }}
+            >
+              {greeting}
+            </p>
+            <h1 className="font-[family-name:var(--font-playfair)] text-[26px] sm:text-[30px] font-extrabold text-[#0c1e3a]">
+              {doctorName || "Doctor"}
+            </h1>
+          </div>
+          <button
+            onClick={toggleAvailability}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition hover:-translate-y-px
+              ${
+                isOnline
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                  : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200"
+              }`}
+          >
+            {isOnline ? <FaToggleOn size={18} /> : <FaToggleOff size={18} />}
+            {isOnline ? "Available" : "Offline"}
+          </button>
+        </div>
 
-      {/* ================= HEADER (UI SAME) ================= */}
-      <div className="flex justify-between items-center">
-        <h3 className="text-3xl font-semibold text-gray-800">
-          Welcome {doctorName}
-        </h3>
+        <div className=" [animation-delay:0.07s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+          <div
+            className="bg-white border border-black/[0.07] rounded-[18px] p-6 flex gap-4 items-center"
+            style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
+          >
+            <div
+              className="w-[72px] h-[72px] rounded-[14px] p-[2.5px] flex-shrink-0 bg-gradient-to-br from-[#0e7490] to-[#67e8f9]"
+              style={{ boxShadow: "0 4px 14px rgba(14,116,144,0.18)" }}
+            >
+              <img
+                src={profileImage || FALLBACK_IMAGE}
+                alt="doctor"
+                className="w-full h-full rounded-[12px] object-cover border-2 border-white block"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = FALLBACK_IMAGE;
+                }}
+              />
+            </div>
+            <div className="min-w-0">
+              <span className="inline-block text-[10px] font-semibold tracking-widest uppercase text-[#0e7490] bg-[#ecfeff] border border-[rgba(14,116,144,0.15)] px-2.5 py-0.5 rounded-full mb-1.5">
+                Verified Specialist
+              </span>
+              <h2 className="font-playfair text-[17px] font-bold text-[#1c2b33] m-0 truncate">
+                {doctorName}
+              </h2>
+              <p className="font-dm text-[12px] text-[#6b7f8a] mt-0.5 truncate">
+                {profile.specialization}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[11px] text-[#9fb0b8]">
+                  {profile.experience_years} yrs exp
+                </span>
+                <span className="w-1 h-1 bg-[#d1dde3] rounded-full" />
+                <span className="text-[11px] text-[#9fb0b8]">
+                  {profile.rating ? Number(profile.rating).toFixed(1) : "N/A"}{" "}
+                  ⭐
+                </span>
+              </div>
+            </div>
+          </div>
 
-        <button
-          onClick={toggleAvailability}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-white ${
-            isOnline ? "bg-green-500" : "bg-gray-400"
-          }`}
-        >
-          {isOnline ? <FaToggleOn /> : <FaToggleOff />}
-          {isOnline ? "Online" : "Offline"}
-        </button>
-      </div>
-
-      {/* ================= STATS (UNCHANGED UI) ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
-        <StatCard label="Pending Requests" value={dashboard.pendingRequests} />
-        <StatCard label="Today's Queue" value={dashboard.todayQueue} />
-        <StatCard label="Tomorrow" value={dashboard.tomorrow} />
-        <StatCard label="Next Day" value={dashboard.nextDay} />
-        <StatCard label="Today's Completed" value={dashboard.completedToday} />
-        <StatCard label="Total Patients" value={dashboard.totalPatients} />
-      </div>
-
-      {/* ================= QUICK ACTIONS (UNCHANGED UI) ================= */}
-      <div>
-        <h2 className="text-lg font-semibold mb-6 text-gray-700">
-          Quick Actions
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <QuickCard
-            icon={<FaClock className="text-3xl text-sky-600" />}
-            title="Incoming Appointments"
-            onClick={() => navigate("/doctordashboard/incoming")}
-          />
-
-          <QuickCard
-            icon={<FaList className="text-3xl text-sky-600" />}
+          <ActionCard
+            icon={<FaList />}
             title="Today's Queue"
+            subtitle="View and manage live patient queue"
             onClick={() => navigate("/doctordashboard/livequeue")}
           />
-
-          <QuickCard
-            icon={<FaQrcode className="text-3xl text-sky-600" />}
-            title="QR Code"
-            onClick={() => navigate("/doctordashboard/qrcode")}
+          <ActionCard
+            icon={<FaBook />}
+            title="Manual Booking"
+            subtitle="Register a walk-in patient manually"
+            onClick={() => navigate("/doctordashboard/manualbooking")}
           />
+        </div>
 
-          <QuickCard
-            icon={<FaExclamationTriangle className="text-3xl text-red-600" />}
-            title="Emergency"
+        <div className="[animation-delay:0.13s] grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+          <StatCard
+            icon={<FaBook />}
+            label="Pending Requests"
+            value={dashboard.pendingRequests}
+            tag="New"
+            tagColor="bg-orange-50 text-orange-500"
+            iconColor="bg-orange-50 text-orange-500"
+          />
+          <StatCard
+            icon={<FaUser />}
+            label="Today's Queue"
+            value={dashboard.todayQueue}
+            tag="Today"
+            tagColor="bg-[#ecfeff] text-[#0e7490]"
+            iconColor="bg-[#ecfeff] text-[#0e7490]"
+          />
+          <StatCard
+            icon={<FaCheckCircle />}
+            label="Completed Today"
+            value={dashboard.completedToday}
+            tag="Done"
+            tagColor="bg-emerald-50 text-emerald-600"
+            iconColor="bg-emerald-50 text-emerald-600"
+          />
+        </div>
+
+        <div className=" [animation-delay:0.19s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            className="rounded-[18px] p-6 flex flex-col justify-between gap-4 text-white"
+            style={{
+              background:
+                "linear-gradient(135deg, #0e7490 0%, #0891b2 60%, #06b6d4 100%)",
+              boxShadow: "0 8px 28px rgba(14,116,144,0.25)",
+            }}
+          >
+            <div>
+              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-xl mb-3">
+                <FaQrcode />
+              </div>
+              <p className="font-playfair text-[18px] font-bold leading-snug">
+                Patient Direct Booking
+              </p>
+              <p className="font-dm text-[12px] text-white/70 mt-1.5 leading-relaxed">
+                Share QR code with patients for easy walk-in appointments and
+                digital registration.
+              </p>
+            </div>
+            <button
+              onClick={openQRModal}
+              className="self-start bg-white text-[#0e7490] font-dm font-semibold text-[13px] px-5 py-2 rounded-full hover:bg-white/90 transition"
+            >
+              Show QR Code
+            </button>
+          </div>
+
+          <ActionCard
+            icon={<FaExclamationTriangle className="text-red-500" />}
+            title="Emergency Cancellations"
+            subtitle="Cancel remaining slot appointments"
+            onClick={() => setShowCancelModal(true)}
+          />
+          <ActionCard
+            icon={<FaStar />}
+            title="Patient Reviews"
+            subtitle="Read feedback from your patients"
             onClick={() => navigate("/doctordashboard/reviews")}
           />
         </div>
       </div>
 
-      {/* ================= LOWER SECTION (UNCHANGED UI) ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {showQRModal && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-[6px] flex items-center justify-center z-50 animate-fade-in"
+          onClick={() => setShowQRModal(false)}
+        >
+          <div
+            className="bg-white rounded-[24px] w-[90%] max-w-[400px] p-8 flex flex-col items-center relative animate-scale-in"
+            style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.16)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowQRModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f3f4f6] flex items-center justify-center text-[#6b7f8a] hover:bg-[#e5e7eb] transition"
+            >
+              <FaTimes size={13} />
+            </button>
 
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl h-64 shadow-lg"></div>
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4"
+              style={{
+                background: "linear-gradient(135deg, #0e7490, #06b6d4)",
+                color: "white",
+                boxShadow: "0 4px 14px rgba(14,116,144,0.25)",
+              }}
+            >
+              <FaQrcode />
+            </div>
+            <h2 className="font-playfair text-[20px] font-bold text-[#1c2b33] mb-1 text-center">
+              Clinic Walk-In QR
+            </h2>
+            <p className="font-dm text-[12px] text-[#6b7f8a] mb-6 text-center">
+              Patients can scan this to book appointments directly
+            </p>
 
-        <div className="bg-white rounded-2xl shadow border p-6">
-          <div className="flex justify-between mb-6">
-            <h3 className="font-semibold text-gray-700">
-              Patient Trends
-            </h3>
-            <span className="text-blue-600 text-sm font-medium">
-              Weekly
-            </span>
-          </div>
+            <div className="mb-5">
+              {qrLoading ? (
+                <div className="flex flex-col items-center justify-center w-[220px] h-[220px] gap-3">
+                  <div className="w-9 h-9 border-4 border-[#0e7490] border-t-transparent rounded-full animate-spin" />
+                  <p className="font-dm text-[12px] text-[#9fb0b8]">
+                    Loading QR...
+                  </p>
+                </div>
+              ) : qrValue ? (
+                <div
+                  className="p-3 rounded-[14px] border-2 border-[#e0f2fe]"
+                  style={{ boxShadow: "0 4px 16px rgba(14,116,144,0.10)" }}
+                >
+                  <Suspense fallback={<div>Loading QR...</div>}>
+                    <QRCodeCanvas
+                      id="doctor-qr-modal"
+                      value={qrValue}
+                      size={200}
+                      level="H"
+                    />
+                  </Suspense>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-[220px] h-[120px]">
+                  <p className="font-dm text-[13px] text-red-400">
+                    QR not available
+                  </p>
+                </div>
+              )}
+            </div>
 
-          <div className="flex items-end justify-between h-40">
-            <Bar height="h-24" />
-            <Bar height="h-32" />
-            <Bar height="h-20" />
-            <Bar height="h-36" />
-            <Bar height="h-28" />
-            <Bar height="h-16" />
-            <Bar height="h-20" gray />
-          </div>
-
-          <div className="flex justify-between text-xs text-gray-400 mt-4">
-            <span>MON</span>
-            <span>TUE</span>
-            <span>WED</span>
-            <span>THU</span>
-            <span>FRI</span>
-            <span>SAT</span>
-            <span>SUN</span>
+            <button
+              onClick={downloadQR}
+              disabled={!qrValue || qrLoading}
+              className="inline-flex items-center gap-2 font-dm font-semibold text-[13px] text-white px-6 py-2.5 rounded-full transition hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              style={{
+                background: "linear-gradient(135deg, #0e7490, #0891b2)",
+                boxShadow: "0 4px 14px rgba(14,116,144,0.28)",
+              }}
+            >
+              <FaDownload size={12} />
+              Download QR
+            </button>
           </div>
         </div>
-      </div>
+      )}
+
+      {showCancelModal && (
+        <div
+          className="animate-fade-in fixed inset-0 bg-black/25 backdrop-blur-[6px] flex items-center justify-center z-50"
+          onClick={() => setShowCancelModal(false)}
+        >
+          <div
+            className="animate-scale-in bg-white rounded-[22px] w-[90%] max-w-[440px] p-8"
+            style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.14)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center text-xl mx-auto mb-5">
+              <FaExclamationTriangle />
+            </div>
+            <h2 className="font-playfair text-[22px] font-bold text-[#1c2b33] text-center m-0 mb-2">
+              Emergency Cancellation
+            </h2>
+            <p className="font-dm text-[12px] text-red-500 text-center mb-6 leading-relaxed">
+              ⚠️ All remaining appointments for this slot will be cancelled and
+              patients will be notified.
+            </p>
+
+            <div className="mb-4">
+              <label className="block font-dm text-[10px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] mb-1.5">
+                Select Slot
+              </label>
+              <div className="flex items-center gap-2.5 px-3.5 py-[11px] rounded-[10px] border border-black/[0.08] bg-[#f8f9fb] focus-within:border-[#0e7490] focus-within:ring-2 focus-within:ring-[rgba(14,116,144,0.12)] focus-within:bg-white transition-all">
+                <select
+                  value={slot}
+                  onChange={(e) => setSlot(e.target.value)}
+                  className="font-dm flex-1 bg-transparent border-none outline-none text-[14px] text-[#1c2b33] cursor-pointer appearance-none"
+                >
+                  <option value="MORNING">Morning</option>
+                  <option value="EVENING">Evening</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block font-dm text-[10px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] mb-1.5">
+                Reason
+              </label>
+              <div className="px-3.5 py-[11px] rounded-[10px] border border-black/[0.08] bg-[#f8f9fb] focus-within:border-[#0e7490] focus-within:ring-2 focus-within:ring-[rgba(14,116,144,0.12)] focus-within:bg-white transition-all">
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Enter cancellation reason…"
+                  rows={3}
+                  className="font-dm w-full bg-transparent border-none outline-none text-[14px] text-[#1c2b33] placeholder-[#c4cdd4] resize-none leading-relaxed"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setReason("");
+                  setSlot("MORNING");
+                }}
+                className="font-dm px-6 py-2.5 rounded-full text-[13px] font-medium text-[#6b7f8a] bg-[#f3f4f6] border-none cursor-pointer hover:bg-[#e8eaed] transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleEmergencyCancel}
+                disabled={cancelLoading}
+                className="font-dm px-6 py-2.5 rounded-full text-[13px] font-semibold text-white bg-red-500 border-none cursor-pointer hover:bg-red-600 disabled:opacity-50 transition"
+                style={{ boxShadow: "0 4px 14px rgba(239,68,68,0.25)" }}
+              >
+                {cancelLoading ? "Cancelling…" : "Cancel Appointments"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-/* ================= COMPONENTS (UNCHANGED UI) ================= */
-
-const StatCard = ({ label, value }) => (
-  <div className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition text-center">
-    <p className="text-sm text-gray-500">{label}</p>
-    <h2 className="text-3xl font-bold text-blue-600 mt-2">{value}</h2>
-  </div>
-);
-
-const QuickCard = ({ icon, title, onClick }) => (
-  <div
-    onClick={onClick}
-    className="bg-white border rounded-2xl p-8 text-center hover:shadow-xl hover:scale-105 transition cursor-pointer"
-  >
-    <div className="mb-4 flex justify-center">{icon}</div>
-    <p className="font-medium text-gray-700">{title}</p>
-  </div>
-);
-
-const Bar = ({ height, gray }) => (
-  <div
-    className={`w-6 rounded ${
-      gray ? "bg-gray-300" : "bg-blue-400"
-    } ${height}`}
-  />
-);
 
 export default DoctorDashboard;

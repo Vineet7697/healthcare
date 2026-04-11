@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
-import { toast } from "react-toastify";
+import { notify } from "../utils/notify";
 import { FiSearch } from "react-icons/fi";
 
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = "VITE_API_URL";
 const PAGE_SIZE = 9;
 
 const getPatientName = (p) => p.patientName || p.fullName || p.name || "Unknown";
@@ -32,7 +32,7 @@ const AdminPatients = () => {
       const res = await api.get("/admin/patients");
       setPatients(res.data?.patients || []);
     } catch {
-      toast.error("Failed to load patients");
+      notify.error("Failed to load patients");
     }
   };
 
@@ -41,7 +41,7 @@ const AdminPatients = () => {
   }, []);
 
   const toggleBlock = async (patient) => {
-    if (!patient?.id) return toast.error("Invalid patient");
+    if (!patient?.id) return notify.error("Invalid patient");
 
     try {
       setProcessingId(patient.id);
@@ -52,13 +52,13 @@ const AdminPatients = () => {
 
       await api.put(endpoint);
 
-      toast.success(
+      notify.success(
         patient.is_active ? "Patient blocked" : "Patient unblocked"
       );
 
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Action failed");
+      notify.error(err.response?.data?.message || "Action failed");
     } finally {
       setProcessingId(null);
       setConfirmModal({ open: false, patient: null });

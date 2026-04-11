@@ -1,58 +1,52 @@
 import api from "./api";
 
-/* ================= API → UI MAPPER =================
-   Backend truth:
-   status = PENDING | ACCEPTED | IN_PROGRESS | COMPLETED | CANCELLED | REJECTED
---------------------------------------------------- */
-const mapFromApi = (a) => ({
-  id: a.id,
-
-  // doctor
-  doctorId: a.doctor_id || a.doctorId,
-  doctorName: a.doctor_name || a.doctorName,
-  specialization: a.specialization || "",
- profile_image: a.profile_image || null,
-  // appointment
-  date: a.appointment_date
-    ? a.appointment_date.slice(0, 10)
-    : "",
-  token: a.token_number
-    ? `Token #${a.token_number}`
-    : a.appointment_time || "--",
-
-  status: a.status, // 👈 backend status as-is
-
-  // optional
-  hospital: a.hospital || "N/A",
-  prescription: a.prescription || null,
-});
-
-/* ================= SERVICE ================= */
 const AppointmentService = {
 
-  getHistory: async () => {
-    const res = await api.get(
-      "/patient/visit/appointments/history"
-    );
+  /* ================= HISTORY ================= */
+  getHistory: async (cursor = null) => {
 
-    const list = res.data.appointments || []; // 👈 backend-safe
-    return list.map(mapFromApi);
+    const params = {};
+
+    if (cursor && typeof cursor === "string") {
+      params.cursor = cursor;
+    }
+
+    const res = await api.get("/patient/visit/appointments/history", { params });
+
+    const appointments = res.data?.data || [];
+
+    return {
+      data: appointments.map((item) => ({
+        id: item.id,
+        doctorName: item.doctorName,
+        specialization: item.specialization,
+        date: item.appointment_date,
+        shift: item.appointment_slot,
+        token: item.token_number,
+        status: item.status,
+        doctorId: item.doctorId,
+        profile_image: item.profile_image,
+         patientName: item.patientName,
+         isFamily: item.isFamily,
+      })),
+      nextCursor: res.data?.nextCursor || null,
+    };
   },
 
-  /* 🔹 CANCEL APPOINTMENT */
+  /* ================= CANCEL ================= */
   cancel: async (id) => {
-    const res = await api.put(
-      `/patient/visit/appointments/${id}/cancel`
-    );
+    const res = await api.put(`/patient/visit/appointments/${id}/cancel`);
     return res.data;
   },
 
-  /* 🔹 RATE DOCTOR (backend aligned) */
-  rateDoctor: async (doctorId, rating) => {
+  /* ================= RATE DOCTOR ================= */
+  rateDoctor: async ({ appointmentId, rating, comment = "" }) => {
     const res = await api.post("/patient/doctor-feedback", {
-      doctorId,
+      appointmentId,
       rating,
+      comment,
     });
+
     return res.data;
   },
 };

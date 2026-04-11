@@ -1,203 +1,198 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { validateLoginForm } from "../../controllers/FormValidation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { toast } from "react-toastify";
 import { patientLoginApi } from "../../services/patient/PatientLoginApi";
 import { jwtDecode } from "jwt-decode";
-import { FaGoogle } from "react-icons/fa";
+import { notify } from "../../utils/notify";
 
 const ClientLoginPage = () => {
-  // ✅ identifier = phone OR email
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
 
-  const handleForgotPassword = () => {
-    toast.info("Forgot Password (frontend only)");
-  };
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const redirect = params.get("redirect");
 
-  const handleGoogleLogin = () => {
-    toast.info("Google Login (frontend only)");
-  };
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    const raw =
+      localStorage.getItem("loggedInUser") ||
+      sessionStorage.getItem("loggedInUser");
+    if (token && raw) {
+      try {
+        const user = JSON.parse(raw);
+        if (redirect) {
+          navigate(redirect);
+        } else {
+          if (role === "ADMIN") navigate("/admin/dashboard");
+          else if (role === "PATIENT") navigate("/client/dashboard");
+          else notify.error("Unauthorized role");
+        }
+      } catch {}
+    }
+    setChecking(false);
+  }, []);
 
-  // 🔹 Identifier change (phone/email)
+  if (checking) return null;
+
   const handleIdentifierChange = (e) => {
     const value = e.target.value;
     setIdentifier(value);
     setErrors(validateLoginForm({ identifier: value, password }));
   };
 
-  // 🔹 Password change
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     setPassword(value);
     setErrors(validateLoginForm({ identifier, password: value }));
   };
 
-  // 🔹 LOGIN
-
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
       const res = await patientLoginApi({ identifier, password });
-
-      const token = res.data.token;
-      localStorage.setItem("token", token);
-
-      // ✅ TOKEN SE ROLE NIKAALO
+      const token = res.data.data.token;
       const decoded = jwtDecode(token);
       const role = decoded.role?.toUpperCase();
-
-      const loggedInUser = {
-        role,
-        identifier,
-      };
-
-      localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
-
-      toast.success("Login successful");
-
-      // ✅ ROLE BASED REDIRECT
-      if (role === "ADMIN") {
-        navigate("/admin/dashboard");
-      } else if (role === "PATIENT") {
-        navigate("/client/dashboard");
+      const loggedInUser = { role, identifier };
+      if (rememberMe) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
       } else {
-        toast.error("Unauthorized role");
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
       }
+      notify.success("Login successful");
+      if (role === "ADMIN") navigate("/admin/dashboard");
+      else if (role === "PATIENT") navigate("/client/dashboard");
+      else notify.error("Unauthorized role");
     } catch (err) {
-      toast.error("Invalid credentials");
+      notify.error(err.response?.data?.message || "Login failed");
     }
   };
 
+  const inputCls = (field) =>
+    `w-full px-4 py-2.5 rounded-lg text-sm text-gray-800 outline-none border transition-colors duration-150 ${
+      errors[field]
+        ? "border-red-400 bg-red-50"
+        : "border-gray-200 bg-white focus:border-[#0086C3] focus:ring-1 focus:ring-[#0086C3]/20"
+    }`;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-white to-blue-50 px-4 py-12">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 md:p-12">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+        <div className="text-center mb-4 mt-4">
+          <h1 className=" font-[family-name:var(--font-playfair)] text-2xl font-bold text-gray-800 leading-tight">
             Login to{" "}
             <img
-              src="/images/yo.png"
+              src="/images/logo.webp"
               alt="YoDoctor"
-              className="h-10 inline align-middle"
+              className="h-7 inline align-middle ml-1"
             />
           </h1>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5 sm:space-y-6">
-          {/* Phone / Email */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+        <hr />
+
+        <form onSubmit={handleLogin} className="px-8 py-6 flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
               Phone Number / Email
             </label>
-
             <input
               type="text"
               value={identifier}
-              placeholder="Enter phone number or email"
+              placeholder="Enter phone or email"
               onChange={handleIdentifierChange}
-              className={`w-full pl-4 pr-4 py-2 border rounded-lg outline-none focus:border-[#2277f7] focus:border-2 ${
-                errors.identifier ? "border-red-500" : "border-gray-300"
-              }`}
+              className={inputCls("identifier")}
             />
-
             {errors.identifier && (
-              <p className="text-red-500 text-xs mt-1">{errors.identifier}</p>
+              <p className="text-red-400 text-xs mt-1">{errors.identifier}</p>
             )}
           </div>
 
-          {/* Password */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
               Password
             </label>
-
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              placeholder="Password"
-              onChange={handlePasswordChange}
-              className={`w-full pl-4 pr-4 py-2 border rounded-lg outline-none focus:border-[#2277f7] focus:border-2 ${
-                errors.password ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-9.5 cursor-pointer text-gray-500"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
-
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                placeholder="Enter password"
+                onChange={handlePasswordChange}
+                className={inputCls("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0086C3] transition-colors duration-150"
+              >
+                {showPassword ? <FaEyeSlash size={15} /> : <FaEye size={15} />}
+              </button>
+            </div>
             {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              <p className="text-red-400 text-xs mt-1">{errors.password}</p>
             )}
           </div>
 
-          {/* Remember + Forgot */}
-          <div className="flex justify-between text-sm">
-            <label className="flex items-center gap-2">
+          <div className="flex justify-between items-center">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-[#0086C3] cursor-pointer"
               />
-              Remember me
+              <span className="text-sm text-gray-500">Remember me</span>
             </label>
-
             <button
               type="button"
-              onClick={handleForgotPassword}
-              className="text-red-500 hover:underline"
+              onClick={() => {
+                notify.info("Redirecting to password reset...");
+                navigate("/forgot-password");
+              }}
+              className="text-sm text-red-400 hover:underline font-medium cursor-pointer"
             >
               Forgot password?
             </button>
           </div>
 
-          {/* Login button */}
           <button
             type="submit"
-            className="w-full bg-linear-to-br from-[#2277f7] to-[#52abd4] text-white py-2 rounded-md cursor-pointer"
+            className="w-full bg-[#0086C3] hover:bg-[#006fa3] text-white cursor-pointer font-semibold text-sm py-2.5 rounded-lg transition-colors duration-150 mt-1"
           >
-            Login
+            Login →
           </button>
 
-          {/* Google login */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-100" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+
           <button
             type="button"
-            onClick={handleGoogleLogin}
-            className="
-    w-full
-    flex items-center justify-center gap-3
-    border-2 border-gray-400
-    rounded-full
-    py-2
-    bg-white
-    hover:bg-gray-50
-    transition
-  "
+            onClick={() => notify.info("Google login is not available yet.")}
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 cursor-pointer rounded-lg border border-gray-200 hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors duration-150"
           >
-            {/* Google Icon */}
-            <img src="/images/google.png" alt="Google" className="h-6 w-6" />
-
-            {/* Text */}
-            <span className="text-gray-800 font-medium text-lg">
-              Sign in with Google
-            </span>
+            <img src="/images/google.webp" alt="Google" className="h-4 w-4" />
+            Sign in with Google
           </button>
 
-          {/* Register */}
           <p className="text-center text-sm text-gray-500">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <button
               type="button"
               onClick={() => navigate("/clientregisterpage")}
-              className="text-blue-500 hover:underline"
+              className="text-[#0086C3] font-semibold hover:underline cursor-pointer"
             >
               Register here
             </button>

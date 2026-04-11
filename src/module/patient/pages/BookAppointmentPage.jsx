@@ -1,119 +1,94 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaUsers } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import api from "../../../services/api";
-import { bookVisitAppointment } from "../../../services/patientService";
+import { notify } from "../../../utils/notify";
+import { useSearchParams } from "react-router-dom";
+import {
+  bookVisitAppointment,
+  getDoctorById,
+  getFamilyMembers,
+  qrBookVisit,
+} from "../../../services/patientService";
 
-/* ✅ LOCAL DATE HELPER (IST SAFE) */
 const getLocalDate = (offsetDays = 0) => {
   const date = new Date();
   date.setDate(date.getDate() + offsetDays);
   date.setHours(0, 0, 0, 0);
-
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
-
   return `${yyyy}-${mm}-${dd}`;
 };
 
 const BookAppointmentPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { doctorId } = useParams();
 
-  /* ================= STATE ================= */
   const [doctor, setDoctor] = useState(null);
-
+  const [loading, setLoading] = useState(true);
   const [patientType, setPatientType] = useState("SELF");
   const [familyMembers, setFamilyMembers] = useState([]);
   const [selectedFamilyId, setSelectedFamilyId] = useState("");
-
   const [selectedDateType, setSelectedDateType] = useState("today");
   const [customDate, setCustomDate] = useState("");
   const [selectedSession, setSelectedSession] = useState("");
+  const [booking, setBooking] = useState(false);
 
-  /* ================= FAMILY MEMBERS SYNC ================= */
-  const loadFamilyMembers = () => {
-    const stored = JSON.parse(localStorage.getItem("familyMembers")) || [];
-    setFamilyMembers(stored);
-
-    // ❌ agar selected member delete ho gaya ho
-    if (
-      selectedFamilyId &&
-      !stored.some((m) => String(m.id) === String(selectedFamilyId))
-    ) {
-      setSelectedFamilyId("");
-      setPatientType("SELF");
-    }
-  };
+  const [searchParams] = useSearchParams();
+  const isQR = searchParams.get("fromQR") === "true";
 
   useEffect(() => {
-    // initial load
-    loadFamilyMembers();
-
-    // 🔁 different tab / window
-    const handleStorageChange = (e) => {
-      if (e.key === "familyMembers") {
-        loadFamilyMembers();
+    const loadFamilyMembers = async () => {
+      try {
+        const res = await getFamilyMembers();
+        const members = (res.data?.members || []).map((m) => ({
+          id: m.id,
+          name: m.full_name,
+          relation: m.relation,
+        }));
+        setFamilyMembers(members);
+      } catch (err) {
+        console.error("Family members fetch failed:", err);
       }
     };
+    loadFamilyMembers();
+  }, []);
 
-    // 🔁 same tab (Add/Delete page se wapas aane par)
-    const handleFocus = () => {
-      loadFamilyMembers();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [selectedFamilyId]);
-
-  /* ================= FETCH DOCTOR ================= */
   useEffect(() => {
     const fetchDoctor = async () => {
+      setLoading(true);
       try {
-        const res = await api.get("/patient/visit/doctors");
-
-        const foundDoctor = res.data.doctors?.find(
-          (doc) => String(doc.doctorId) === String(id),
-        );
-
-        if (!foundDoctor) {
-          toast.error("Doctor not found");
+        const res = await getDoctorById(doctorId);
+        const doctorData = res.data.doctor || res.data;
+        if (!doctorData) {
+          notify.error("Doctor not found");
           navigate(-1);
           return;
         }
-
-        setDoctor(foundDoctor);
-      } catch {
-        toast.error("Failed to load doctor");
+        setDoctor(doctorData);
+      } catch (err) {
+        notify.error("Doctor fetch failed");
+        navigate(-1);
+      } finally {
+        setLoading(false);
       }
     };
+    if (doctorId) fetchDoctor();
+  }, [doctorId, navigate]);
 
-    if (id) fetchDoctor();
-  }, [id, navigate]);
-
-  /* ================= RESET SESSION ================= */
   useEffect(() => {
     setSelectedSession("");
   }, [selectedDateType]);
 
-  /* ================= CONFIRM APPOINTMENT ================= */
   const handleConfirm = async () => {
+    if (booking) return;
     if (!doctor) return;
-
     if (patientType === "OTHER" && !selectedFamilyId) {
-      toast.error("Please select a family member");
+      notify.error("Please select a family member");
       return;
     }
-
-    if (selectedDateType !== "today" && !selectedSession) {
-      toast.error("Please select Morning or Evening");
+    if (!isQR && !selectedSession) {
+      notify.error("Please select Morning or Evening");
       return;
     }
 
@@ -124,31 +99,42 @@ const BookAppointmentPage = () => {
           ? getLocalDate(1)
           : customDate;
 
+    if (!isQR && !appointmentDate) {
+      notify.error("Please select a date");
+      return;
+    }
+
     const payload = {
-      doctorId: doctor.doctorId,
-      appointmentType: doctor.placeType, // CLINIC | HOSPITAL
-      bookingFor: patientType, // ✅ SELF | OTHER
-
-      // ✅ ONLY send when OTHER
-      ...(patientType === "OTHER" && {
-        familyMemberId: selectedFamilyId,
-      }),
-
+      doctorId: Number(doctorId),
+      appointmentType: "CLINIC", // 🔥 FIX
+      bookingFor: patientType, // ✅ rehne do (frontend ke liye useful)
       appointmentDate,
-      slot: selectedDateType === "today" ? "MORNING" : selectedSession,
+      slot: selectedSession,
+      familyMemberIds:
+        patientType === "OTHER" ? [Number(selectedFamilyId)] : [], // 🔥 FIX
     };
 
+    setBooking(true);
     try {
-      const res = await bookVisitAppointment(payload);
+      let res;
 
-      toast.success("Appointment booked successfully");
-
+      if (isQR) {
+        res = await qrBookVisit({
+          doctorId: Number(doctorId),
+          familyMemberIds:
+            patientType === "OTHER" ? [Number(selectedFamilyId)] : [],
+        });
+      } else {
+        res = await bookVisitAppointment(payload);
+      }
+      const { appointmentId, token, slot } = res.data.data;
+      notify.success(`Token #${token} booked successfully`);
       navigate("/client/patientqueuepage", {
         state: {
-          appointmentId: res.data.appointmentId, // ✅ REQUIRED
-          token: res.data.token,
-          slot: res.data.slot,
-          bookingFor: patientType, // SELF | OTHER
+          appointmentId,
+          token,
+          slot,
+          bookingFor: patientType,
           patientName:
             patientType === "SELF"
               ? "You"
@@ -158,129 +144,346 @@ const BookAppointmentPage = () => {
         },
       });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to book appointment");
+      notify.error(err.response?.data?.message || "Failed to book appointment");
+    } finally {
+      setBooking(false);
     }
   };
 
-  /* ================= LOADING ================= */
-  if (!doctor) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600 text-lg">Loading doctor details...</p>
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{ background: "#f0f4f8" }}
+      >
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-[#0086C3] border-t-transparent rounded-full animate-spin" />
+          <p className="font-[family-name:var(--font-dm)] text-sm text-gray-400">
+            Loading doctor details...
+          </p>
+        </div>
       </div>
     );
   }
 
-  /* ================= UI ================= */
+  if (!doctor) {
+    return (
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{ background: "#f0f4f8" }}
+      >
+        <p className="font-[family-name:var(--font-dm)] text-gray-500">
+          Doctor not found
+        </p>
+      </div>
+    );
+  }
+
+  const btnBase =
+    "font-[family-name:var(--font-dm)] font-semibold text-[13px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 border";
+  const btnActive = "text-white border-transparent";
+  const btnInactive = "text-[#4b5e7a] bg-white hover:bg-[#f8fafc]";
+
+  const now = new Date();
+  const currentHour = now.getHours();
+
+  const isTodaySelected = selectedDateType === "today";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-3 sm:px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-4 sm:p-8">
-        <h3 className="text-2xl font-semibold text-center mb-6">
-          Book Appointment for {doctor.doctorName}
-        </h3>
-
-        {/* 🧍 Patient Type */}
-        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 mb-6">
-          <button
-            onClick={() => {
-              setPatientType("SELF");
-              setSelectedFamilyId("");
-            }}
-            className={`w-full sm:w-auto flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer ${
-              patientType === "SELF"
-                ? "bg-linear-to-br from-[#2277f7] to-[#52abd4] text-white"
-                : "border border-gray-300"
-            }`}
-          >
-            <FaUser /> Self
-          </button>
-
-          <select
-            disabled={familyMembers.length === 0}
-            value={patientType === "OTHER" ? selectedFamilyId : ""}
-            onChange={(e) => {
-              setPatientType("OTHER");
-              setSelectedFamilyId(e.target.value);
-            }}
-            className="w-full sm:w-44 px-4 py-3 rounded-lg border cursor-pointer"
-          >
-            <option value="">Select Family</option>
-
-            {familyMembers.map((m) => (
-              <option key={m.id} value={String(m.id)}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={() => navigate("/client/addfamilypage")}
-            className="w-full sm:w-auto  flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer hover:bg-gray-100"
-          >
-            <FaUsers /> Add Family
-          </button>
-        </div>
-
-        {/* 📅 Date */}
-        <div className="flex flex-wrap justify-center gap-3 mb-6">
-          {["today", "tomorrow"].map((d) => (
-            <button
-              key={d}
-              onClick={() => setSelectedDateType(d)}
-              className={`px-4 py-2 rounded-lg border ${
-                selectedDateType === d
-                  ? "bg-linear-to-br from-[#2277f7] to-[#52abd4] text-white cursor-pointer"
-                  : "border-gray-300 cursor-pointer"
-              }`}
-            >
-              {d.charAt(0).toUpperCase() + d.slice(1)}
-            </button>
-          ))}
-
-          <input
-            type="date"
-            min={getLocalDate(0)}
-            value={customDate}
-            onChange={(e) => {
-              setSelectedDateType("custom");
-              setCustomDate(e.target.value);
-            }}
-            className="w-full sm:w-auto px-4 py-2 rounded-lg border"
-          />
-        </div>
-
-        {/* 🌅 Session */}
-        {selectedDateType !== "today" && (
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 mb-6">
-            {["MORNING", "EVENING"].map((slot) => (
-              <button
-                key={slot}
-                onClick={() => setSelectedSession(slot)}
-                className={`w-full sm:w-auto px-6 py-3 rounded-xl border font-semibold ${
-                  selectedSession === slot
-                    ? "bg-linear-to-br from-[#2277f7] to-[#52abd4] text-white cursor-pointer"
-                    : "border-gray-300 cursor-pointer"
-                }`}
-              >
-                {slot}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <button
-          onClick={handleConfirm}
-          className="w-full py-3 rounded-xl bg-linear-to-br from-[#2277f7] to-[#52abd4] text-white font-bold text-lg cursor-pointer hover:opacity-90"
+    <div
+      className="min-h-screen px-4 py-10 flex items-center justify-center"
+      style={{ background: "#f0f4f8" }}
+    >
+      <div
+        className="w-full max-w-2xl bg-white rounded-2xl overflow-hidden animate-[fadeUp_0.5s_cubic-bezier(0.22,1,0.36,1)_both]"
+        style={{
+          boxShadow: "0 4px 32px rgba(12,30,58,0.1)",
+          border: "1px solid rgba(12,30,58,0.06)",
+        }}
+      >
+        <div
+          className="px-7 py-5 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg,#0086C3,#00b4d8,#2ecc71)",
+          }}
         >
-          Confirm Appointment
-        </button>
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage:
+                "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }}
+          />
+          <button
+            onClick={() => navigate(-1)}
+            className="font-[family-name:var(--font-dm)] text-[12px] font-semibold text-white/70 hover:text-white flex items-center gap-1 mb-3 cursor-pointer transition-all hover:-translate-x-1"
+            style={{ background: "none", border: "none" }}
+          >
+            ← Back
+          </button>
+          <h1 className="font-[family-name:var(--font-playfair)] text-[20px] font-extrabold text-white leading-tight">
+            Book Appointment
+          </h1>
+          <p className="font-[family-name:var(--font-dm)] text-[13px] text-white/70 mt-0.5">
+            with{" "}
+            <span
+              className="text-white font-semibold cursor-pointer hover:underline"
+              onClick={() =>
+                navigate(
+                  `/client/doctor-profile/${doctor.doctorId}${
+                    isQR ? "?fromQR=true" : ""
+                  }`,
+                )
+              }
+            >
+              {doctor.doctorName}
+            </span>
+            {doctor.specialization && ` • ${doctor.specialization}`}
+          </p>
+        </div>
+
+        <div className="px-7 py-6 flex flex-col gap-6">
+          <div>
+            <p
+              className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
+              style={{ color: "#94a3b8" }}
+            >
+              Step 1 — Who is this for?
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setPatientType("SELF");
+                  setSelectedFamilyId("");
+                }}
+                className={`${btnBase} flex items-center gap-2 ${patientType === "SELF" ? btnActive : btnInactive}`}
+                style={
+                  patientType === "SELF"
+                    ? {
+                        background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+                        borderColor: "transparent",
+                        boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                      }
+                    : { borderColor: "rgba(12,30,58,0.12)" }
+                }
+              >
+                <FaUser size={12} /> Self
+              </button>
+
+              {/* Family select */}
+              <div className="relative">
+                <select
+                  disabled={familyMembers.length === 0}
+                  value={patientType === "OTHER" ? selectedFamilyId : ""}
+                  onChange={(e) => {
+                    setPatientType("OTHER");
+                    setSelectedFamilyId(e.target.value);
+                  }}
+                  className={`${btnBase} pr-8 appearance-none ${patientType === "OTHER" && selectedFamilyId ? btnActive : btnInactive}`}
+                  style={
+                    patientType === "OTHER" && selectedFamilyId
+                      ? {
+                          background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+                          borderColor: "transparent",
+                          color: "#fff",
+                          boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                        }
+                      : { borderColor: "rgba(12,30,58,0.12)" }
+                  }
+                >
+                  <option value="">
+                    {familyMembers.length === 0
+                      ? "No family members"
+                      : "Select Family"}
+                  </option>
+                  {familyMembers.map((m) => (
+                    <option key={m.id} value={String(m.id)}>
+                      {m.name} ({m.relation})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={() => navigate("/client/addfamilypage")}
+                className={`${btnBase} flex items-center gap-2 ${btnInactive}`}
+                style={{ borderColor: "rgba(12,30,58,0.12)" }}
+              >
+                <FaUsers size={12} /> Add Family
+              </button>
+            </div>
+          </div>
+
+          <div className="h-px" style={{ background: "rgba(12,30,58,0.07)" }} />
+          {!isQR && (
+            <>
+              <div>
+                <p
+                  className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
+                  style={{ color: "#94a3b8" }}
+                >
+                  Step 2 — Select Date
+                </p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {["today", "tomorrow"].map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setSelectedDateType(d)}
+                      className={`${btnBase} ${selectedDateType === d ? btnActive : btnInactive}`}
+                      style={
+                        selectedDateType === d
+                          ? {
+                              background:
+                                "linear-gradient(135deg,#0086C3,#00b4d8)",
+                              borderColor: "transparent",
+                              boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                            }
+                          : { borderColor: "rgba(12,30,58,0.12)" }
+                      }
+                    >
+                      {d.charAt(0).toUpperCase() + d.slice(1)}
+                    </button>
+                  ))}
+
+                  <input
+                    type="date"
+                    min={getLocalDate(0)}
+                    max={getLocalDate(7)}
+                    value={customDate}
+                    onChange={(e) => {
+                      setSelectedDateType("custom");
+                      setCustomDate(e.target.value);
+                    }}
+                    className={`${btnBase} ${selectedDateType === "custom" ? btnActive : btnInactive}`}
+                    style={
+                      selectedDateType === "custom"
+                        ? {
+                            background:
+                              "linear-gradient(135deg,#0086C3,#00b4d8)",
+                            borderColor: "transparent",
+                            color: "#fff",
+                            boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                          }
+                        : { borderColor: "rgba(12,30,58,0.12)" }
+                    }
+                  />
+                </div>
+              </div>
+
+              <div
+                className="h-px"
+                style={{ background: "rgba(12,30,58,0.07)" }}
+              />
+
+              <div>
+                <p
+                  className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
+                  style={{ color: "#94a3b8" }}
+                >
+                  Step 3 — Select Session
+                </p>
+                <div className="flex gap-3">
+                  {[
+                    { key: "MORNING", label: "🌅 Morning", sub: "Before noon" },
+                    { key: "EVENING", label: "🌆 Evening", sub: "After noon" },
+                  ].map((s) => {
+                    const isDisabled =
+                      isTodaySelected &&
+                      currentHour >= 12 &&
+                      s.key === "MORNING";
+
+                    return (
+                      <button
+                        key={s.key}
+                        disabled={isDisabled}
+                        onClick={() => setSelectedSession(s.key)}
+                        className="flex-1 py-3.5 rounded-xl cursor-pointer transition-all duration-200 flex flex-col items-center gap-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={
+                          selectedSession === s.key
+                            ? {
+                                background:
+                                  "linear-gradient(135deg,#0086C3,#00b4d8)",
+                                border: "1.5px solid transparent",
+                                boxShadow: "0 4px 16px rgba(0,134,195,0.35)",
+                              }
+                            : {
+                                background: "#f8fafc",
+                                border: "1.5px solid rgba(12,30,58,0.1)",
+                              }
+                        }
+                      >
+                        <span
+                          className="font-[family-name:var(--font-dm)] text-[14px] font-bold"
+                          style={{
+                            color:
+                              selectedSession === s.key ? "#fff" : "#0c1e3a",
+                          }}
+                        >
+                          {s.label}
+                        </span>
+                        <span
+                          className="font-[family-name:var(--font-dm)] text-[11px]"
+                          style={{
+                            color:
+                              selectedSession === s.key
+                                ? "rgba(255,255,255,0.7)"
+                                : "#94a3b8",
+                          }}
+                        >
+                          {s.sub}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+          <button
+            onClick={handleConfirm}
+            disabled={booking || (!isQR && !selectedSession)}
+            className="w-full py-3.5 rounded-xl font-[family-name:var(--font-dm)] font-bold text-[15px] text-white cursor-pointer transition-all duration-250 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+              boxShadow: "0 4px 18px rgba(0,134,195,0.4)",
+            }}
+            onMouseEnter={(e) =>
+              !booking &&
+              (e.currentTarget.style.boxShadow =
+                "0 6px 24px rgba(0,134,195,0.55)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.boxShadow =
+                "0 4px 18px rgba(0,134,195,0.4)")
+            }
+          >
+            {booking ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Booking...
+              </span>
+            ) : (
+              "Confirm Appointment →"
+            )}
+          </button>
+
+          {doctor.consultationFee && (
+            <p
+              className="font-[family-name:var(--font-dm)] text-[12px] text-center -mt-3"
+              style={{ color: "#94a3b8" }}
+            >
+              Consultation fee:{" "}
+              <strong className="text-[#0086C3]">
+                ₹{doctor.consultationFee}
+              </strong>{" "}
+              payable at clinic
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default BookAppointmentPage;
-
-
-
-

@@ -8,13 +8,3 @@ export const canBookAppointment = (patientId) => {
 
   return noShows.length < 3;
 };
-
-
-
-// USE KAISE KARNA
-// import { canBookAppointment } from "../utils/bookingRules";
-
-// if (!canBookAppointment(patientId)) {
-//   alert("Booking blocked due to repeated no-shows");
-//   return;
-// }

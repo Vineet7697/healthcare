@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { getMyQR } from "../../../services/doctorService";
+import { notify } from "../../../utils/notify"; // ✅ Fix #1
 
 const DoctorQRCodePage = () => {
   const [qrValue, setQrValue] = useState("");
@@ -14,7 +15,8 @@ const DoctorQRCodePage = () => {
         setQrValue(res.data.qrUrl);
         setDoctorId(res.data.doctorId);
       } catch {
-        alert("Doctor not approved or unauthorized");
+        // ✅ Fix #1 — alert ki jagah notify
+        notify.error("Doctor not approved or unauthorized");
       } finally {
         setLoading(false);
       }
@@ -41,7 +43,10 @@ const DoctorQRCodePage = () => {
         </h2>
 
         {loading ? (
-          <p>Loading QR...</p>
+          <div className="flex flex-col items-center justify-center py-10 gap-3">
+            <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-gray-400 text-sm">Loading QR...</p>
+          </div>
         ) : qrValue ? (
           <div className="flex justify-center mb-4">
             <QRCodeCanvas
@@ -53,7 +58,7 @@ const DoctorQRCodePage = () => {
             />
           </div>
         ) : (
-          <p className="text-red-500">QR not available</p>
+          <p className="text-red-500 py-6">QR not available</p>
         )}
 
         <p className="text-sm text-gray-600 mb-4">
@@ -62,8 +67,8 @@ const DoctorQRCodePage = () => {
 
         <button
           onClick={downloadQR}
-          disabled={!qrValue}
-          className="bg-teal-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          disabled={!qrValue || loading}
+          className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           Download QR
         </button>

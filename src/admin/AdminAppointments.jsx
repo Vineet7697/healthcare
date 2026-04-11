@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
-import { toast } from "react-toastify";
-
+import { notify } from "../utils/notify";
 /* ================= CONSTANTS ================= */
 const PAGE_SIZE = 50;
 const TABS = ["TODAY", "UPCOMING", "COMPLETED", "CANCELLED"];
@@ -20,7 +19,7 @@ const AdminAppointments = () => {
       const res = await api.get("/admin/appointments");
       setAppointments(res.data.appointments || []);
     } catch {
-      toast.error("Failed to load appointments");
+      notify.error("Failed to load appointments");
     } finally {
       setLoading(false);
     }
@@ -80,10 +79,10 @@ const AdminAppointments = () => {
     if (!window.confirm("Cancel this appointment?")) return;
     try {
       await api.put(`/admin/appointments/${id}/cancel`);
-      toast.success("Appointment cancelled");
+      notify.success("Appointment cancelled");
       loadAppointments();
     } catch {
-      toast.error("Cancel failed");
+      notify.error("Cancel failed");
     }
   };
 

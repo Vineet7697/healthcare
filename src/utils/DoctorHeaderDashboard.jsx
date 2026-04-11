@@ -2,8 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "./LogoutModal";
+import { useImage } from "../context/ImageContext";
+import {
+  getDoctorNotifications,
+  getDoctorUnreadCount,
+  markDoctorNotificationRead,
+} from "../services/notificationService";
+import api from "../services/api";
 
-/* ================= SAFE STORAGE ================= */
 const getStoredUser = () => {
   const raw = localStorage.getItem("loggedInUser");
   if (!raw || raw === "undefined") return null;
@@ -16,64 +22,32 @@ const getStoredUser = () => {
 
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-
 const DOCTOR_IMAGE_KEY = "doctorProfileImage";
 
 const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
 
-  /* ================= STATE ================= */
   const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
-
-  // 🔥 IMAGE STATE (ONLY FROM localStorage)
-  const [profileImage, setProfileImage] = useState(
-    localStorage.getItem(DOCTOR_IMAGE_KEY) || DEFAULT_AVATAR,
-  );
-  // const profileImage =
-  // localStorage.getItem("profileImage") || DEFAULT_AVATAR;
-
+  const { image, setImage } = useImage();
+  const profileImage = image || DEFAULT_AVATAR;
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
-  /* ================= NOTIFICATIONS (dummy) ================= */
-  const notifications = [
-    { id: 1, text: "New appointment booked", time: "2 mins ago" },
-    { id: 2, text: "Profile updated successfully", time: "1 hour ago" },
-  ];
-
-  /* ================= USER SYNC (LOGIN / LOGOUT ONLY) ================= */
   useEffect(() => {
-    const syncUser = () => {
-      setLoggedInUser(getStoredUser());
-    };
-
+    const syncUser = () => setLoggedInUser(getStoredUser());
     window.addEventListener("storage", syncUser);
     window.addEventListener("userLogin", syncUser);
     window.addEventListener("userLogout", syncUser);
-
     return () => {
       window.removeEventListener("storage", syncUser);
       window.removeEventListener("userLogin", syncUser);
       window.removeEventListener("userLogout", syncUser);
     };
-  }, []);
-
-  /* ================= PROFILE IMAGE SYNC ================= */
-  useEffect(() => {
-    const syncImage = () => {
-      const img = localStorage.getItem(DOCTOR_IMAGE_KEY);
-      if (img) setProfileImage(img);
-      else setProfileImage(DEFAULT_AVATAR);
-    };
-
-    window.addEventListener("doctorProfileImageUpdated", syncImage);
-
-    return () =>
-      window.removeEventListener("doctorProfileImageUpdated", syncImage);
   }, []);
 
   /* ================= OUTSIDE CLICK ================= */
@@ -84,27 +58,62 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
         notificationRef.current?.contains(e.target)
       )
         return;
-
       setProfileOpen(false);
       setNotificationOpen(false);
     };
-
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  /* ================= HANDLERS ================= */
+  const fetchNotifications = async () => {
+    try {
+      const res = await getDoctorNotifications();
+      setNotifications(res.data.notifications || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchUnread = async () => {
+    try {
+      const res = await getDoctorUnreadCount();
+      setUnreadCount(res.data.unreadCount || 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchUnread();
+    const interval = setInterval(() => {
+      if (!notificationOpen) {
+        fetchNotifications();
+        fetchUnread();
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [notificationOpen]);
+
+  const handleNotificationClick = async (id) => {
+    try {
+      await markDoctorNotificationRead(id);
+      fetchNotifications();
+      fetchUnread();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("token");
     localStorage.removeItem(DOCTOR_IMAGE_KEY);
-
     setLoggedInUser(null);
-    setProfileImage(DEFAULT_AVATAR);
+    setImage(null);
     setProfileOpen(false);
     setNotificationOpen(false);
     setIsLogoutModalOpen(false);
-
     window.dispatchEvent(new Event("userLogout"));
     navigate("/");
   };
@@ -115,32 +124,26 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     navigate(path);
   };
 
-  /* ================= GUARD ================= */
   if (!loggedInUser) return null;
 
   return (
     <nav
       className={`fixed top-0 z-50 h-20 bg-white border-b border-gray-200
       transition-all duration-300
-      ${
-        isSidebarOpen
-          ? "md:left-64 md:w-[calc(100%-16rem)]"
-          : "md:left-20 md:w-[calc(100%-5rem)]"
-      }
+      ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-20 md:w-[calc(100%-5rem)]"}
       left-0 w-full`}
     >
-      <div className="h-full px-4 flex items-center justify-between w-full">
-        {/* ⬅️ LEFT */}
+      <div className="h-full px-4 flex items-center w-full">
         <button
           onClick={toggleSidebar}
-          className="text-xl text-gray-700 hover:text-blue-600"
+          className="md:hidden text-xl text-gray-700 mr-4"
         >
           <FaBars />
         </button>
 
-        {/* ➡️ RIGHT */}
+        <div className="flex-1" />
+
         <div className="flex items-center gap-3 relative">
-          {/* 🔔 Notifications */}
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {
@@ -150,35 +153,68 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
               className="relative text-xl text-gray-700 hover:text-blue-600"
             >
               <FaBell />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
             </button>
 
             {notificationOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-lg border z-20">
-                <div className="p-3 font-semibold border-b">Notifications</div>
-                <ul className="max-h-64 overflow-y-auto">
-                  {notifications.map((note) => (
-                    <li
-                      key={note.id}
-                      className="px-4 py-2 text-sm border-b hover:bg-gray-50"
-                    >
-                      <p>{note.text}</p>
-                      <p className="text-xs text-gray-400">{note.time}</p>
+              <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                <div className="flex justify-between items-center px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                  <h3 className="font-semibold text-sm">Notifications</h3>
+                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                    {notifications.length}
+                  </span>
+                </div>
+                <ul className="max-h-72 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <li className="px-4 py-6 text-center text-gray-500 text-sm">
+                      🔔 No notifications
                     </li>
-                  ))}
+                  ) : (
+                    notifications.map((note) => (
+                      <li
+                        key={note.id}
+                        onClick={() => handleNotificationClick(note.id)}
+                        className={`flex gap-3 px-4 py-3 border-b hover:bg-cyan-50 cursor-pointer transition ${
+                          !note.is_read
+                            ? "bg-cyan-50 border-l-4 border-cyan-500"
+                            : ""
+                        }`}
+                      >
+                        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-cyan-100 text-cyan-600 text-lg">
+                          🔔
+                        </div>
+                        <div className="flex-1">
+                          <p
+                            className={`text-sm ${!note.is_read ? "font-semibold" : ""}`}
+                          >
+                            {note.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {note.message}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(note.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </li>
+                    ))
+                  )}
                 </ul>
               </div>
             )}
           </div>
 
-          {/* 👤 Profile */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => {
                 setProfileOpen((p) => !p);
                 setNotificationOpen(false);
               }}
-              className="p-1 rounded-full hover:bg-gray-100"
+              className="p-1 rounded-full hover:bg-gray-100 transition"
             >
               <img
                 src={profileImage}
@@ -212,10 +248,9 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
                   </li>
                   <li
                     onClick={() => setIsLogoutModalOpen(true)}
-                    className=" flex items-center gap-3 w-full text-sm px-5 py-2  text-red-600 hover:bg-gray-100 cursor-pointer border-t"
+                    className="flex items-center gap-3 w-full text-sm px-5 py-2 text-red-600 hover:bg-gray-100 cursor-pointer border-t"
                   >
-                   
-                      <FaSignOutAlt /> Logout
+                    <FaSignOutAlt /> Logout
                   </li>
                 </ul>
               </div>

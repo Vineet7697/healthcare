@@ -1,13 +1,10 @@
 import { FaTimes } from "react-icons/fa";
 
 const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
-  if (!isOpen) return null; // Render nothing if modal is closed
-
+  if (!isOpen) return null; 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      {/* Modal Container */}
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 relative animate-fadeIn">
-        {/* Close Icon */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
@@ -16,13 +13,11 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
           <FaTimes className="text-xl" />
         </button>
 
-        {/* Content */}
         <div className="text-center mt-4">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Are you sure you want to logout?
           </h2>
 
-          {/* Buttons */}
           <div className="flex items-center justify-center space-x-6 mt-6">
            
             <button
@@ -42,7 +37,6 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
         </div>
       </div>
 
-      {/* Optional animation */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: scale(0.95); }

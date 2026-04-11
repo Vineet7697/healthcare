@@ -14,11 +14,15 @@ export const getCities = () =>
 export const getDiseases = () =>
   api.get("/patient/diseases");
 
+export const getDoctorNames = () =>
+  api.get("/patient/doctorname");
+
+export const getDoctorById = (doctorId) =>
+  api.get(`/patient/visit/doctors/${doctorId}`);
+
 /* ================= APPOINTMENTS ================= */
 export const bookVisitAppointment = (data) =>
   api.post("/patient/visit/appointments", data);
-
-
 
 export const getUpcomingAppointments = (filter = "") =>
   api.get("/patient/appointments/upcoming", {
@@ -27,6 +31,12 @@ export const getUpcomingAppointments = (filter = "") =>
 
 export const cancelAppointment = (id) =>
   api.put(`/patient/visit/appointments/${id}/cancel`);
+
+export const getAppointmentHistory = (cursor = null) => {
+  const params = {};
+  if (cursor && typeof cursor === "string") params.cursor = cursor;
+  return api.get("/patient/visit/appointments/history", { params });
+};
 
 /* ================= FAMILY ================= */
 export const getFamilyMembers = () =>
@@ -48,14 +58,17 @@ export const getNotifications = () =>
 export const markNotificationRead = (id) =>
   api.put(`/patient/notifications/${id}/read`);
 
-export const getDoctorById = (doctorId) => {
-  if (!doctorId) {
-    console.warn("getDoctorById called without doctorId");
-    return Promise.reject("Doctor ID missing");
-  }
-  return api.get(`/getDoctorById/${doctorId}`);
-};
+export const getUnreadNotificationCount = () =>
+  api.get("/patient/notifications/unread-count");
 
 /* ================= TOKEN STATUS ================= */
 export const getTokenStatus = (appointmentId) =>
   api.get(`/patient/visit/token-status/${appointmentId}`);
+
+
+export const submitDoctorReview = (data) =>
+  api.post("/patient/doctor-feedback", data);
+
+
+export const qrBookVisit = (data) =>
+ api.post("/patient/visit/qr-book", data);

@@ -1,206 +1,637 @@
 import { useLanguage } from "../context/LanguageContext";
+import { useState } from "react";
 
+import onlinebookingImg from "../assets/images/online_appointment_booking.webp";
+import VideoconsultationImg from "../assets/images/video_consultation_telemedicine.webp";
+import inclinicConsultationImg from "../assets/images/in_clinic_consultation.webp";
+import doctorprofilesImg from "../assets/images/doctor_profiles.webp";
+import specialitiesdepartmentsImg from "../assets/images/specialities_departments.webp";
+import treatmentofferedImg from "../assets/images/treatment_offered.webp";
+import viewlabreportImg from "../assets/images/view_lab_report.webp";
+import prescriptionmanagementImg from "../assets/images/prescription_management.webp";
+import healthpackageImg from "../assets/images/health_package.webp";
+import homecareserviceImg from "../assets/images/home_care_service.webp";
+
+import SEO from "../components/SEO";
+
+const Icon = ({ d, size = 18, color = "#0072BC" }) => (
+  <svg
+    width={size}
+    height={size}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke={color}
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d={d} />
+  </svg>
+);
+
+const ICONS = {
+  calendar:
+    "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+  video:
+    "M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z",
+  clinic:
+    "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+  doctor:
+    "M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+  heart:
+    "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+  shield:
+    "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+  lab: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z",
+  doc: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  check:
+    "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+  home: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+
+  search: "M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z",
+  appt: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  consult:
+    "M8 10h.01M12 10h.01M16 10h.01M21 16c0 1.1-.9 2-2 2H7l-4 4V6a2 2 0 012-2h14a2 2 0 012 2v10z",
+  care: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+  verified:
+    "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z",
+  clock: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  privacy:
+    "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
+  support:
+    "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z",
+  price:
+    "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  rating:
+    "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
+};
+
+const ServiceCard = ({ img, title, desc, iconKey }) => {
+  const [hovered, setHovered] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div
+      className="flex flex-col bg-white rounded-2xl overflow-hidden"
+      style={{
+        boxShadow: hovered
+          ? "0 20px 48px rgba(0,114,188,0.16)"
+          : "0 2px 16px rgba(0,0,0,0.07)",
+        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        transition: "box-shadow 0.3s, transform 0.3s",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="relative overflow-hidden" style={{ height: 195 }}>
+        <img
+          src={img}
+          alt={title}
+          loading="lazy"
+          className="w-full h-full object-cover"
+          style={{
+            transform: hovered ? "scale(1.08)" : "scale(1)",
+            transition: "transform 0.5s",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(5,15,36,0.5) 0%, transparent 55%)",
+            opacity: hovered ? 1 : 0,
+            transition: "opacity 0.3s",
+          }}
+        />
+        <div
+          className="absolute top-3 left-3 flex items-center justify-center rounded-xl bg-white"
+          style={{
+            width: 38,
+            height: 38,
+            boxShadow: "0 2px 10px rgba(0,0,0,0.13)",
+          }}
+        >
+          <Icon d={ICONS[iconKey]} />
+        </div>
+      </div>
+      <div className="flex flex-col flex-1 p-5 gap-2">
+        <h3
+          className="font-bold text-sm leading-snug"
+          style={{
+            color: hovered ? "#0072BC" : "#1a2e44",
+            transition: "color 0.2s",
+          }}
+        >
+          {title}
+        </h3>
+        <div
+          style={{
+            width: hovered ? 36 : 20,
+            height: 2,
+            background: "#0072BC",
+            borderRadius: 2,
+            transition: "width 0.3s",
+          }}
+        />
+        <p className="text-gray-400 text-xs leading-relaxed flex-1">
+          {expanded ? desc : desc.slice(0, 60) + "..."}
+        </p>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-1 text-xs font-bold mt-1 w-fit"
+          style={{ color: "#0072BC" }}
+        >
+        {expanded ? "Show Less" : "Read More"}
+          <svg
+            width="13"
+            height="13"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="#0072BC"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{
+              transform: hovered ? "translateX(4px)" : "translateX(0)",
+              transition: "transform 0.2s",
+            }}
+          >
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const processSteps = [
+  {
+    num: "01",
+    iconKey: "search",
+    title: "Find a Doctor",
+    desc: "Browse verified doctor profiles by speciality, location, or availability. Read reviews and choose the right doctor for your needs.",
+    dark: false,
+  },
+  {
+    num: "02",
+    iconKey: "appt",
+    title: "Book Appointment",
+    desc: "Schedule an in-clinic visit or video consultation instantly. Pick a time slot that suits you — no waiting in queues.",
+    dark: false,
+  },
+  {
+    num: "03",
+    iconKey: "consult",
+    title: "Consult & Diagnose",
+    desc: "Get professional medical advice, diagnosis, and prescriptions from certified doctors — from the comfort of your home or clinic.",
+    dark: false,
+  },
+  {
+    num: "04",
+    iconKey: "care",
+    title: "Prescribe",
+    desc: "Access your lab reports, prescriptions, and health packages anytime. Avail home care services and stay on track with your health.",
+    dark: false,
+  },
+];
+
+const whyChoose = [
+  {
+    iconKey: "verified",
+    title: "Verified Doctors",
+    desc: "All doctors on Yo Doctor are thoroughly verified with valid credentials and years of experience.",
+  },
+  {
+    iconKey: "clock",
+    title: "24/7 Availability",
+    desc: "Book appointments anytime — our platform is available round the clock for your convenience.",
+  },
+  {
+    iconKey: "privacy",
+    title: "Data Privacy",
+    desc: "Your health records and personal data are encrypted and kept completely confidential.",
+  },
+  {
+    iconKey: "support",
+    title: "Dedicated Support",
+    desc: "Our support team is always ready to assist you with bookings, reports, or any query you have.",
+  },
+  {
+    iconKey: "price",
+    title: "Transparent Pricing",
+    desc: "No hidden charges. See consultation fees upfront and choose plans that fit your budget.",
+  },
+  {
+    iconKey: "rating",
+    title: "Trusted by Patients",
+    desc: "Thousands of patients trust Yo Doctor for reliable, high-quality healthcare services every day.",
+  },
+];
+
+/* ═══════════════════════════════════════════════ */
 const Service = () => {
   const { language, lang } = useLanguage();
   const t = lang[language];
+
+  const services = [
+    {
+      img: onlinebookingImg,
+      title: t.online_booking_title,
+      desc: t.online_booking_desc,
+      iconKey: "calendar",
+    },
+    {
+      img: VideoconsultationImg,
+      title: t.video_consult_title,
+      desc: t.video_consult_desc,
+      iconKey: "video",
+    },
+    {
+      img: inclinicConsultationImg,
+      title: t.clinic_consult_title,
+      desc: t.clinic_consult_desc,
+      iconKey: "clinic",
+    },
+    {
+      img: doctorprofilesImg,
+      title: t.doctor_profile_title,
+      desc: t.doctor_profile_desc,
+      iconKey: "doctor",
+    },
+    {
+      img: specialitiesdepartmentsImg,
+      title: t.specialties_title,
+      desc: t.specialties_desc,
+      iconKey: "heart",
+    },
+    {
+      img: treatmentofferedImg,
+      title: t.treatment_title,
+      desc: t.treatment_desc,
+      iconKey: "shield",
+    },
+    {
+      img: viewlabreportImg,
+      title: t.lab_report_title,
+      desc: t.lab_report_desc,
+      iconKey: "lab",
+    },
+    {
+      img: prescriptionmanagementImg,
+      title: t.prescription_title,
+      desc: t.prescription_desc,
+      iconKey: "doc",
+    },
+    {
+      img: healthpackageImg,
+      title: t.health_package_title,
+      desc: t.health_package_desc,
+      iconKey: "check",
+    },
+    {
+      img: homecareserviceImg,
+      title: t.home_care_title,
+      desc: t.home_care_desc,
+      iconKey: "home",
+    },
+  ];
+
   return (
     <>
-      <section className="py-20 px-6 md:px-16 bg-blue-50 text-gray-800">
-        <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 text-center">
-            {t.services_title_main}{" "}
-            <span className="text-[#0072BC]">
-              {" "}
-              {t.services_title_highlight}{" "}
+      <SEO
+        title="Healthcare Services | Yo Doctor"
+        description="Explore healthcare services like online doctor appointment booking, video consultation, in-clinic consultation, lab reports, prescriptions, and home care services."
+        keywords="online doctor booking, video consultation, clinic consultation, health packages, home care services"
+        url="https://www.yodoctor.in/services"
+      />
+
+      <div
+        className="relative w-full overflow-hidden"
+        style={{ minHeight: 240, background: "#050f24" }}
+      >
+        {/* Dot-grid */}
+        <svg
+          className="absolute inset-0 w-full h-full"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ opacity: 0.07 }}
+        >
+          <defs>
+            <pattern
+              id="dots"
+              width="32"
+              height="32"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="1.5" cy="1.5" r="1.5" fill="white" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dots)" />
+        </svg>
+        {/* Glow orb */}
+        <div
+          className="absolute"
+          style={{
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(0,114,188,0.25) 0%, transparent 70%)",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            pointerEvents: "none",
+          }}
+        />
+        {/* Center content */}
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 px-4 text-center mt-10">
+          <div>
+            <span className=" font-extrabold uppercase tracking-widest mb-3 inline-block text-[#0072BC] text-lg">
+              Yo
             </span>{" "}
-            {t.services_title_end}
-          </h2>
+            <span className="text-lg font-extrabold uppercase tracking-widest mb-3 inline-block text-[#16a34a]">
+              {" "}
+              Doctor
+            </span>
+          </div>
+          <h1
+            className="font-black uppercase text-white"
+            style={{
+              fontSize: "clamp(2.2rem, 6vw, 4rem)",
+              letterSpacing: "0.18em",
+              lineHeight: 1.1,
+            }}
+          >
+            Our <span style={{ color: "#0072BC" }}>Services</span>
+          </h1>
+          <div className="flex items-center gap-3 mt-4">
+            <div
+              style={{
+                width: 56,
+                height: 2,
+                background: "#0072BC",
+                borderRadius: 2,
+              }}
+            />
+            <div
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "#0072BC",
+              }}
+            />
+            <div
+              style={{
+                width: 56,
+                height: 2,
+                background: "#0072BC",
+                borderRadius: 2,
+              }}
+            />
+          </div>
+          <p
+            className="mt-5 text-sm max-w-sm"
+            style={{ color: "rgba(180,210,255,0.75)", lineHeight: 1.7 }}
+          >
+            Comprehensive healthcare solutions designed for your convenience and
+            well-being
+          </p>
+        </div>
+      </div>
 
-          {/* Services Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {/* ✅ Core Services */}
-            <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
-              <h3 className="text-2xl font-semibold text-[#0072BC]">
-                {t.core_services}
-              </h3>
-              <ul className="space-y-4 text-gray-700">
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/online_appointment_booking.png"
-                    alt="Online Appointment Booking"
-                    className="w-8 h-8 mt-1 rounded"
-                  />
-                  <p>
-                    <strong>{t.online_booking_title}:</strong>{" "}
-                    {t.online_booking_desc}
-                  </p>
-                </li>
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/video_consultation_telemedicine.png"
-                    alt="Video Consultation"
-                    className="w-8 h-8 mt-1 rounded"
-                  />
-                  <p>
-                    <strong>{t.video_consult_title}:</strong>{" "}
-                    {t.video_consult_desc}
-                  </p>
-                </li>
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/in_clinic_consultation.png"
-                    alt="In-Clinic Consultation"
-                    className="w-8 h-8 mt-1 rounded"
-                  />
-                  <p>
-                    <strong>{t.clinic_consult_title}:</strong>{" "}
-                    {t.clinic_consult_desc}
-                  </p>
-                </li>
-              </ul>
+      <section
+        id="services"
+        style={{ background: "#eef3fb", padding: "64px 0 88px" }}
+      >
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <div className="flex items-stretch gap-4 mb-10">
+            <div style={{ width: 4, background: "#0072BC", borderRadius: 4 }} />
+            <div>
+              <p
+                className="text-xs font-extrabold uppercase tracking-widest mb-0.5"
+                style={{ color: "#0072BC" }}
+              >
+                What We Offer
+              </p>
+              <h2 className="text-2xl font-extrabold text-gray-900 leading-tight">
+                Explore Our Healthcare Services
+              </h2>
             </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4  gap-6">
+            {services.map((s, i) => (
+              <ServiceCard key={i} {...s} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* ✅ Informational Services (fixed layout) */}
-            <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
-              <h3 className="text-2xl font-semibold text-[#0072BC]">
-                {t.info_services}
-              </h3>
-              <ul className="space-y-4 text-gray-700">
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/doctor_profiles.png"
-                    alt="Doctor Profiles"
-                    className="w-8 h-8 mt-1 rounded"
-                  />
-                  <p>
-                    <strong>{t.doctor_profile_title}:</strong>{" "}
-                    {t.doctor_profile_desc}
-                  </p>
-                </li>
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/specialities_departments.png"
-                    alt="Specialties and Departments"
-                    className="w-8 h-8 mt-1 rounded"
-                  />
-                  <p>
-                    <strong>{t.specialties_title}:</strong> {t.specialties_desc}
-                  </p>
-                </li>
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/treatment_offered.png"
-                    alt="Treatments Offered"
-                    className="w-8 h-8 mt-1 rounded"
-                  />
-                  <p>
-                    <strong>{t.treatment_title}:</strong> {t.treatment_desc}
-                  </p>
-                </li>
-              </ul>
-            </div>
+      <section style={{ background: "#f8faff", padding: "72px 0 80px" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          <div className="text-center mb-14">
+            <p
+              className="text-xs font-extrabold uppercase tracking-widest mb-2"
+              style={{ color: "#0072BC" }}
+            >
+              How It Works
+            </p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+              Our Simple{" "}
+              <span style={{ color: "#0072BC" }}>Healthcare Process</span>
+            </h2>
+            <p className="mt-3 text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
+              Getting quality healthcare has never been easier. Follow these
+              four steps to connect with the right doctor.
+            </p>
+          </div>
 
-            {/* Patient Conveniences */}
-            <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
-              <h3 className="text-2xl font-semibold text-[#0072BC]">
-                {t.patient_convenience}
-                
-              </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            <div
+              className="hidden lg:block absolute top-10 left-0 right-0 h-px"
+              style={{
+                background:
+                  "linear-gradient(to right, transparent, #0072BC44, #0072BC44, transparent)",
+                margin: "0 10%",
+              }}
+            />
 
-              <ul className="space-y-4 text-gray-700">
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/view_lab_report.png"
-                    alt="View Lab Reports"
-                    className="w-8 h-8 rounded"
+            {processSteps.map((step, i) => (
+              <div
+                key={i}
+                className="relative flex flex-col rounded-2xl p-6 transition-all duration-300"
+                style={{
+                  background: step.dark ? "#0a1a3c" : "#ffffff",
+                  color: step.dark ? "#fff" : "#1a2e44",
+                  boxShadow: step.dark
+                    ? "0 12px 40px rgba(0,114,188,0.25)"
+                    : "0 4px 20px rgba(0,0,0,0.07)",
+                }}
+              >
+                <span
+                  className="font-black mb-4 leading-none select-none"
+                  style={{
+                    fontSize: "2.2rem",
+                    color: step.dark
+                      ? "rgba(255,255,255,0.15)"
+                      : "rgba(0,114,188,0.12)",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {step.num}
+                </span>
+                <div
+                  className="flex items-center justify-center rounded-xl mb-4"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    background: step.dark
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,114,188,0.08)",
+                  }}
+                >
+                  <Icon
+                    d={ICONS[step.iconKey]}
+                    size={22}
+                    color={step.dark ? "#7ec8f8" : "#0072BC"}
                   />
-                  <p>
-                    <strong>{t.lab_report_title}: </strong>{t.lab_report_desc}
-                  
-                  </p>
-                </li>
+                </div>
+                <h3
+                  className="font-bold text-base mb-2"
+                  style={{ color: step.dark ? "#fff" : "#1a2e44" }}
+                >
+                  {step.title}
+                </h3>
+                <div
+                  style={{
+                    width: 28,
+                    height: 2,
+                    background: step.dark ? "#f5c518" : "#0072BC",
+                    borderRadius: 2,
+                    marginBottom: 12,
+                  }}
+                />
+                <p
+                  className="text-xs leading-relaxed"
+                  style={{
+                    color: step.dark ? "rgba(200,220,255,0.7)" : "#9ca3af",
+                  }}
+                >
+                  {step.desc}
+                </p>
 
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/prescription_management.png"
-                    alt="Prescription Management"
-                    className="w-8 h-8 rounded"
-                  />
-                  <p>
-                    <strong>{t.prescription_title}:</strong> {t.prescription_desc}
-                    
-                  </p>
-                </li>
+                <div
+                  className="hidden lg:flex absolute -right-3 top-10 w-6 h-6 rounded-full items-center justify-center z-10"
+                  style={{
+                    background: step.dark ? "#f5c518" : "#0072BC",
+                    display: i < processSteps.length - 1 ? undefined : "none",
+                  }}
+                >
+                  <svg
+                    width="10"
+                    height="10"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="#fff"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/health_package.png"
-                    alt="Health Packages"
-                    className="w-8 h-8 rounded"
-                  />
-                  <p>
-                    <strong>{t.health_package_title}:</strong> {t.health_package_desc}
-                  </p>
-                </li>
+      <section style={{ background: "#ffffff", padding: "72px 0 88px" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-12">
+          {/* Heading */}
+          <div className="text-center mb-14">
+            <p
+              className="text-xs font-extrabold uppercase tracking-widest mb-2"
+              style={{ color: "#0072BC" }}
+            >
+              Our Strengths
+            </p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+              Why Choose <span style={{ color: "#0072BC" }}>Yo Doctor?</span>
+            </h2>
+            <p className="mt-3 text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
+              We combine technology and compassion to deliver healthcare that
+              puts patients first.
+            </p>
+          </div>
 
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/home_care_service.png"
-                    alt="Home Care Services"
-                    className="w-8 h-8 rounded"
-                  />
-                  <p>
-                    <strong>{t.home_care_title}:</strong> {t.home_care_desc}
-                  </p>
-                </li>
-              </ul>
-            </div>
-
-            {/* Additional Services */}
-            {/* <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
-              <h3 className="text-2xl font-semibold text-[#0072BC]">
-                {t.additional_services}
-              </h3>
-
-              <ul className="space-y-4 text-gray-700">
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/emergency_service.png"
-                    alt="Emergency Services"
-                    className="w-8 h-8 rounded"
-                  />
-                  <p>
-                    <strong>{t.emergency_title}: </strong> {t.emergency_desc}
-                  </p>
-                </li>
-
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/health_blog_articles.png"
-                    alt="Health Blog"
-                    className="w-8 h-8 rounded"
-                  />
-                  <p>
-                    <strong>{t.blog_title}: </strong> {t.blog_desc}
-                  </p>
-                </li>
-
-                <li className="flex items-start gap-3">
-                  <img
-                    src="/images/book_ambulance.png"
-                    alt="Book Ambulance"
-                    className="w-8 h-8 rounded"
-                  />
-                  <p>
-                    <strong>{t.ambulance_title}: </strong> {t.ambulance_desc}
-                  </p>
-                </li>
-              </ul>
-            </div> */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {whyChoose.map((item, i) => (
+              <WhyCard key={i} {...item} />
+            ))}
           </div>
         </div>
       </section>
     </>
+  );
+};
+
+const WhyCard = ({ iconKey, title, desc }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="flex flex-col gap-3 p-6 rounded-2xl transition-all duration-300"
+      style={{
+        background: hovered ? "#0072BC" : "#f4f7fb",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        boxShadow: hovered ? "0 16px 40px rgba(0,114,188,0.2)" : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        style={{
+          width: "100%",
+          height: 3,
+          borderRadius: 2,
+          background: hovered ? "rgba(255,255,255,0.3)" : "#0072BC",
+          marginBottom: 4,
+        }}
+      />
+      {/* Icon */}
+      <div
+        className="flex items-center justify-center rounded-xl"
+        style={{
+          width: 48,
+          height: 48,
+          background: hovered
+            ? "rgba(255,255,255,0.15)"
+            : "rgba(0,114,188,0.1)",
+        }}
+      >
+        <Icon
+          d={ICONS[iconKey]}
+          size={22}
+          color={hovered ? "#fff" : "#0072BC"}
+        />
+      </div>
+      <h3
+        className="font-bold text-base"
+        style={{
+          color: hovered ? "#ffffff" : "#1a2e44",
+          transition: "color 0.2s",
+        }}
+      >
+        {title}
+      </h3>
+      <p
+        className="text-xs leading-relaxed"
+        style={{
+          color: hovered ? "rgba(220,235,255,0.85)" : "#9ca3af",
+          transition: "color 0.2s",
+        }}
+      >
+        {desc}
+      </p>
+    </div>
   );
 };
 

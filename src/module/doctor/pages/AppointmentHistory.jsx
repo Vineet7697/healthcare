@@ -1,264 +1,7 @@
-// import React, { useEffect, useMemo, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import api from "../../../services/api";
-
-// /* ================= STATUS MAP ================= */
-// const mapStatus = (status) => {
-//   switch (status) {
-//     case "COMPLETED":
-//       return "Completed";
-//     case "REJECTED":
-//     case "CANCELLED":
-//       return "Cancelled";
-//     case "ACCEPTED":
-//       return "In Queue";
-//     default:
-//       return status;
-//   }
-// };
-
-// const AppointmentHistory = () => {
-//   const navigate = useNavigate();
-
-//   const [appointments, setAppointments] = useState([]);
-//   const [filter, setFilter] = useState("TODAY");
-//   const [loading, setLoading] = useState(false);
-
-//   /* ================= LOAD HISTORY ================= */
-//   useEffect(() => {
-//     loadHistory();
-//   }, []);
-
-//   const loadHistory = async () => {
-//     try {
-//       setLoading(true);
-
-//       const res = await api.get("/doctor/appointments/history");
-
-//       const normalized = (res.data.appointments || []).map((a) => ({
-//         id: a.id,
-//         aptId: `APT-${a.id}`,
-//         patientName:
-//           a.familyMemberName || a.patientEmail || "Walk-in Patient",
-//         token: a.token_number,
-//         slot: a.appointment_slot,
-//         time: a.time || "--",
-//         date: a.appointment_date,
-//         status: mapStatus(a.status),
-//         rawStatus: a.status,
-//       }));
-
-//       setAppointments(normalized);
-//     } catch (err) {
-//       console.error("Failed to load appointment history", err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   /* ================= DATE FILTER ================= */
-//   const isToday = (date) => {
-//     const d = new Date(date);
-//     const t = new Date();
-//     return (
-//       d.getDate() === t.getDate() &&
-//       d.getMonth() === t.getMonth() &&
-//       d.getFullYear() === t.getFullYear()
-//     );
-//   };
-
-//   const isLast7Days = (date) => {
-//     const d = new Date(date);
-//     const now = new Date();
-//     const diff = (now - d) / (1000 * 60 * 60 * 24);
-//     return diff <= 7;
-//   };
-
-//   const filteredAppointments = useMemo(() => {
-//     return appointments
-//       .filter((a) => {
-//         if (filter === "TODAY") return isToday(a.date);
-//         if (filter === "7DAYS") return isLast7Days(a.date);
-//         return true;
-//       })
-//       .sort((a, b) => new Date(b.date) - new Date(a.date));
-//   }, [appointments, filter]);
-
-//   /* ================= STATUS STYLE ================= */
-//   const statusStyle = (status) => {
-//     switch (status) {
-//       case "Completed":
-//         return "bg-green-100 text-green-600";
-//       case "Cancelled":
-//         return "bg-red-100 text-red-500";
-//       case "In Queue":
-//         return "bg-blue-100 text-sky-600";
-//       default:
-//         return "bg-gray-100 text-gray-600";
-//     }
-//   };
-
-//   return (
-//     <div className="bg-sky-50 font-sans min-h-screen">
-//       <main className="max-w-7xl mx-auto p-6">
-
-//         {/* Page Title */}
-//         <div className="flex justify-between items-center mb-6">
-//           <div>
-//             <h2 className="text-3xl font-bold text-gray-700">
-//               Appointment History
-//             </h2>
-//             <p className="text-gray-500">
-//               Track all completed, cancelled and queued appointments
-//             </p>
-//           </div>
-//         </div>
-
-//         {/* Filter Tabs */}
-//         <div className="flex gap-3 mb-6">
-//           <button
-//             onClick={() => setFilter("TODAY")}
-//             className={`px-5 py-2 rounded-lg ${
-//               filter === "TODAY"
-//                 ? "bg-sky-500 text-white"
-//                 : "bg-white border hover:bg-sky-50"
-//             }`}
-//           >
-//             Today
-//           </button>
-
-//           <button
-//             onClick={() => setFilter("7DAYS")}
-//             className={`px-5 py-2 rounded-lg ${
-//               filter === "7DAYS"
-//                 ? "bg-sky-500 text-white"
-//                 : "bg-white border hover:bg-sky-50"
-//             }`}
-//           >
-//             Last 7 Days
-//           </button>
-
-//           <button
-//             onClick={() => setFilter("ALL")}
-//             className={`px-5 py-2 rounded-lg ${
-//               filter === "ALL"
-//                 ? "bg-sky-500 text-white"
-//                 : "bg-white border hover:bg-sky-50"
-//             }`}
-//           >
-//             All Time
-//           </button>
-//         </div>
-
-//         {/* History Cards */}
-//         <div className="space-y-6">
-
-//           {loading ? (
-//             <p className="text-gray-500">Loading history...</p>
-//           ) : filteredAppointments.length === 0 ? (
-//             <p className="text-gray-400">
-//               No appointment history found
-//             </p>
-//           ) : (
-//             filteredAppointments.map((a) => (
-//               <div
-//                 key={a.id}
-//                 className={`bg-white p-6 rounded-xl shadow-sm border ${
-//                   a.status === "Cancelled" ? "opacity-70" : ""
-//                 }`}
-//               >
-//                 <div className="flex justify-between items-center mb-4">
-//                   <div>
-//                     <p className="text-sm text-gray-400">
-//                       {a.aptId}
-//                     </p>
-//                     <h3
-//                       className={`text-xl font-semibold ${
-//                         a.status === "Cancelled"
-//                           ? "text-gray-500"
-//                           : "text-gray-700"
-//                       }`}
-//                     >
-//                       {a.patientName}
-//                     </h3>
-//                   </div>
-
-//                   <span
-//                     className={`px-4 py-1 rounded-full text-sm ${statusStyle(
-//                       a.status
-//                     )}`}
-//                   >
-//                     {a.status}
-//                   </span>
-//                 </div>
-
-//                 <div className="grid grid-cols-4 gap-6 text-gray-600">
-//                   <div>
-//                     <p className="text-sm">Shift</p>
-//                     <p className="font-medium text-gray-800">
-//                       {a.slot}
-//                     </p>
-//                   </div>
-
-//                   <div>
-//                     <p className="text-sm">Time</p>
-//                     <p className="font-medium text-gray-800">
-//                       {new Date(a.date).toLocaleTimeString([], {
-//                         hour: "2-digit",
-//                         minute: "2-digit",
-//                       })}
-//                     </p>
-//                   </div>
-
-//                   <div>
-//                     <p className="text-sm">Token</p>
-//                     <p className="font-medium text-sky-600">
-//                       #{a.token}
-//                     </p>
-//                   </div>
-
-//                   <div className="flex items-end justify-end">
-//                     {a.rawStatus === "COMPLETED" && (
-//                       <button
-//                         onClick={() =>
-//                           navigate(
-//                             `/doctordashboard/visit-summary/${a.id}`
-//                           )
-//                         }
-//                         className="text-sky-600 font-medium hover:underline"
-//                       >
-//                         View Details →
-//                       </button>
-//                     )}
-
-//                     {a.rawStatus === "ACCEPTED" && (
-//                       <button
-//                         onClick={() =>
-//                           navigate("/doctordashboard/livequeue")
-//                         }
-//                         className="text-sky-600 font-medium hover:underline"
-//                       >
-//                         Start Session →
-//                       </button>
-//                     )}
-//                   </div>
-//                 </div>
-//               </div>
-//             ))
-//           )}
-//         </div>
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default AppointmentHistory;
-
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 
-/* ================= STATUS MAP ================= */
 const mapStatus = (status) => {
   switch (status) {
     case "COMPLETED":
@@ -274,64 +17,73 @@ const mapStatus = (status) => {
   }
 };
 
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = import.meta.env.VITE_API_URL || "";
 
-/* ================= IMAGE BUILDER ================= */
 const buildImageUrl = (path) => {
-  if (!path) return "/images/default-avatar.png";
+  if (!path) return null;
   if (path.startsWith("http")) return path;
-  return `${BASE_URL}${path}`;
+  return `${BASE_URL}/${path}`.replace(/([^:])\/\//g, "$1/");
 };
 
 const getInitials = (name) => {
   if (!name) return "U";
-
   const words = name.trim().split(" ");
   if (words.length === 1) return words[0][0].toUpperCase();
-
   return words[0][0].toUpperCase() + words[1][0].toUpperCase();
 };
 
+const STATUS_STYLE = {
+  Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  Cancelled: "bg-red-50 text-red-500 border-red-200",
+  Rejected: "bg-red-50 text-red-500 border-red-200",
+  "In Queue": "bg-amber-50 text-amber-600 border-amber-200",
+};
+
+const FILTERS = [
+  { key: "TODAY", label: "Today" },
+  { key: "7DAYS", label: "Last 7 Days" },
+  { key: "ALL", label: "All" },
+];
+
 const AppointmentHistory = () => {
   const navigate = useNavigate();
-
   const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
 
-  /* ================= BACKEND FILTER MAPPING ================= */
   const getBackendFilter = () => {
     if (filter === "TODAY") return "today";
     if (filter === "7DAYS") return "last7";
     return "all";
   };
 
-  /* ================= LOAD HISTORY ================= */
   const loadHistory = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-
       const res = await api.get(
         `/doctor/appointments/history?filter=${getBackendFilter()}`,
       );
+      setAppointments(
+        (res.data.appointments || []).map((a) => ({
+          id: a.id,
+          token: a.token_number,
+          patientName: a.familyMemberName || a.patientName || "Walk-in Patient",
+          image: a.patientImage
+            ? a.patientImage.startsWith("http")
+              ? a.patientImage
+              : `${BASE_URL}/${a.patientImage}`
+            : null,
+          type: a.appointment_type || "Consultation",
+          date: a.appointment_date,
+          slot: a.appointment_slot,
+          status: mapStatus(a.status),
 
-      const normalized = (res.data.appointments || []).map((a) => ({
-        id: a.id,
-        token: a.token_number,
-        patientName: a.familyMemberName || a.patientName || "Walk-in Patient",
-
-        image: a.patientImage || null,
-
-        type: a.appointment_type || "Consultation",
-        date: a.appointment_date,
-        slot: a.appointment_slot,
-        rawStatus: a.status,
-        status: mapStatus(a.status),
-      }));
-
-      setAppointments(normalized);
+          // ✅ ADD THIS LINE
+          hasPrescription: a.hasPrescription || false,
+        })),
+      );
     } catch (err) {
-      console.error("Failed to load appointment history", err);
+      console.error("Failed to load history", err);
     } finally {
       setLoading(false);
     }
@@ -341,164 +93,232 @@ const AppointmentHistory = () => {
     loadHistory();
   }, [filter]);
 
-  /* ================= SORTED LIST ================= */
-  const filteredAppointments = useMemo(() => {
-    return [...appointments].sort(
-      (a, b) => new Date(b.date) - new Date(a.date),
-    );
-  }, [appointments]);
+  const sorted = useMemo(
+    () => [...appointments].sort((a, b) => new Date(b.date) - new Date(a.date)),
+    [appointments],
+  );
 
-  /* ================= STATUS STYLE ================= */
-  const statusStyle = (status) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-100 text-green-600";
-      case "Cancelled":
-        return "bg-red-100 text-red-600";
-      case "In Queue":
-        return "bg-orange-100 text-orange-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
+  const PatientAvatar = ({ image, name }) => {
+    const url = buildImageUrl(image);
+    return url ? (
+      <img
+        src={url}
+        alt={name}
+        className="w-10 h-10 rounded-full object-cover border border-black/[0.07] flex-shrink-0"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.style.display = "none";
+        }}
+      />
+    ) : (
+      <div className="w-10 h-10 rounded-full bg-[#0e7490] text-white flex items-center justify-center font-playfair font-bold text-[14px] flex-shrink-0">
+        {getInitials(name)}
+      </div>
+    );
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-sans">
-      <main className="flex-1 p-8">
-        {/* ================= HEADER ================= */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Appointment History</h1>
-            <p className="text-gray-500 mt-1">
-              View and manage records of past patient consultations.
-            </p>
-          </div>
+    <div
+      className="font-dm min-h-screen bg-[#f5f3ef] px-4 sm:px-6 py-10"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 10% 5%, rgba(14,116,144,0.05) 0%, transparent 50%)",
+      }}
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* HEADER */}
+        <div className="animate-fade-up mb-4">
+          <h1 className="font-playfair text-[clamp(24px,3.5vw,36px)] font-bold text-[#1c2b33] leading-tight">
+            Appointment History
+          </h1>
         </div>
 
-        {/* ================= FILTER TABS ================= */}
-        <div className="flex gap-6  mb-6">
-          {["TODAY", "7DAYS", "ALL"].map((tab) => (
+        {/* FILTER TABS */}
+        <div className="animate-fade-up [animation-delay:0.07s] flex gap-2 mb-4  border-black/[0.07] pb-0">
+          {FILTERS.map((f) => (
             <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`pb-3 ${
-                filter === tab
-                  ? "border-b-2 border-teal-500 text-teal-600 font-medium"
-                  : "text-gray-500 hover:text-black"
-              }`}
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`font-dm pb-3 px-1 text-[14px] font-semibold whitespace-nowrap border-none bg-transparent cursor-pointer transition border-b-2 -mb-px
+                ${
+                  filter === f.key
+                    ? "border-[#0e7490] text-[#0e7490]"
+                    : "border-transparent text-[#6b7f8a] hover:text-[#1c2b33]"
+                }`}
             >
-              {tab === "TODAY"
-                ? "Today"
-                : tab === "7DAYS"
-                  ? "Last 7 Days"
-                  : "All Appointments"}
+              {f.label}
             </button>
           ))}
         </div>
 
-        {/* ================= TABLE ================= */}
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50 text-gray-500 text-sm uppercase">
-              <tr>
-                <th className="p-4">Patient Name</th>
-                <th className="p-4">Type</th>
-                <th className="p-4">Token</th>
-                <th className="p-4">Date & Time</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
+        {/* LOADING */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="w-9 h-9 border-4 border-[rgba(14,116,144,0.2)] border-t-[#0e7490] rounded-full animate-spin" />
+            <p className="font-dm text-[13px] text-[#6b7f8a]">
+              Loading history…
+            </p>
+          </div>
+        )}
 
-            <tbody className="divide-y">
-              {loading ? (
-                <tr>
-                  <td colSpan="6" className="p-6 text-center text-gray-400">
-                    Loading...
-                  </td>
-                </tr>
-              ) : filteredAppointments.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="p-6 text-center text-gray-400">
-                    No appointment history found
-                  </td>
-                </tr>
-              ) : (
-                filteredAppointments.map((a) => (
-                  <tr key={a.id}>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        {a.image ? (
-                          <img
-                            src={buildImageUrl(a.image)}
-                            alt={a.patientName}
-                            className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                            onError={(e) => {
-                              e.target.src = "/images/default-avatar.png";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-semibold">
-                            {getInitials(a.patientName)}
+        {/* EMPTY */}
+        {!loading && sorted.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <span className="text-4xl opacity-30">📋</span>
+            <p className="font-dm text-[14px] text-[#6b7f8a]">
+              No appointments found
+            </p>
+            <p className="font-dm text-[12px] text-[#9fb0b8]">
+              Try changing the filter above
+            </p>
+          </div>
+        )}
+
+        {/* TABLE — desktop */}
+        {!loading && sorted.length > 0 && (
+          <>
+            <div
+              className="animate-fade-up [animation-delay:0.13s] hidden md:block bg-white border border-black/[0.07] rounded-[18px] overflow-hidden"
+              style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
+            >
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-black/[0.06]">
+                    {[
+                      "Patient",
+                      "Type",
+                      "Token",
+                      "Date & Time",
+                      "Status",
+                      "Action",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="font-dm text-[10px] font-semibold tracking-widest uppercase text-[#6b7f8a] px-5 py-4"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/[0.04]">
+                  {sorted.map((a) => (
+                    <tr key={a.id} className="hover:bg-[#fafaf8] transition">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <PatientAvatar image={a.image} name={a.patientName} />
+                          <div>
+                            <p className="font-dm font-semibold text-[14px] text-[#1c2b33]">
+                              {a.patientName}
+                            </p>
+                            <p className="font-dm text-[11px] text-[#6b7f8a]">
+                              {a.slot}
+                            </p>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-medium">{a.patientName}</p>
-                          <p className="text-sm text-gray-400">{a.slot}</p>
                         </div>
-                      </div>
-                    </td>
+                      </td>
+                      <td className="px-5 py-4 font-dm text-[13px] text-[#6b7f8a]">
+                        {a.type}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="font-dm text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#ecfeff] text-[#0e7490] border border-[rgba(14,116,144,0.15)]">
+                          #{a.token}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 font-dm text-[13px] text-[#6b7f8a]">
+                        {new Date(a.date).toLocaleString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`font-dm text-[11px] font-semibold tracking-wide px-3 py-1 rounded-full border ${STATUS_STYLE[a.status] || "bg-slate-50 text-slate-500 border-slate-200"}`}
+                        >
+                          {a.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {a.status === "Completed" && (
+                          <button
+                            onClick={() =>
+                              navigate(`/doctordashboard/prescription/${a.id}`)
+                            }
+                            className="font-dm text-[11px] font-semibold text-white bg-[#0e7490] hover:bg-[#0c5f75] px-3 py-1.5 rounded-full border-none cursor-pointer transition"
+                            style={{
+                              boxShadow: "0 2px 8px rgba(14,116,144,0.2)",
+                            }}
+                          >
+                            {a.hasPrescription ? "Update Rx" : "+ Prescription"}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                    <td className="p-4">{a.type}</td>
-
-                    <td className="p-4 text-gray-500">#{a.token}</td>
-
-                    <td className="p-4">
-                      {new Date(a.date).toLocaleString([], {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-
-                    <td className="p-4">
+            {/* CARDS — mobile */}
+            <div className="md:hidden space-y-3 animate-fade-up [animation-delay:0.13s]">
+              {sorted.map((a) => (
+                <div
+                  key={a.id}
+                  className="bg-white border border-black/[0.07] rounded-[16px] p-5"
+                  style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <PatientAvatar image={a.image} name={a.patientName} />
+                    <div>
+                      <p className="font-dm font-semibold text-[14px] text-[#1c2b33]">
+                        {a.patientName}
+                      </p>
+                      <p className="font-dm text-[11px] text-[#6b7f8a]">
+                        {a.slot}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-[12px]">
+                    <div>
+                      <p className="font-dm text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-0.5">
+                        Type
+                      </p>
+                      <p className="font-dm text-[#1c2b33]">{a.type}</p>
+                    </div>
+                    <div>
+                      <p className="font-dm text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-0.5">
+                        Token
+                      </p>
+                      <p className="font-dm text-[#1c2b33]">#{a.token}</p>
+                    </div>
+                    <div>
+                      <p className="font-dm text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-0.5">
+                        Date
+                      </p>
+                      <p className="font-dm text-[#1c2b33]">
+                        {new Date(a.date).toLocaleDateString("en-IN")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-dm text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-0.5">
+                        Status
+                      </p>
                       <span
-                        className={`px-3 py-1 text-sm rounded-full ${statusStyle(
-                          a.status,
-                        )}`}
+                        className={`font-dm text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${STATUS_STYLE[a.status] || "bg-slate-50 text-slate-500 border-slate-200"}`}
                       >
                         {a.status}
                       </span>
-                    </td>
-
-                    <td className="p-4 text-right">
-                      {a.rawStatus === "COMPLETED" && (
-                        <button
-                          onClick={() =>
-                            navigate(`/doctordashboard/visit-summary/${a.id}`)
-                          }
-                          className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition shadow-sm"
-                        >
-                          Prescribe
-                        </button>
-                      )}
-
-                      {a.rawStatus === "ACCEPTED" && (
-                        <span
-                          onClick={() => navigate("/doctordashboard/livequeue")}
-                        >
-                          Start Session
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </main>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

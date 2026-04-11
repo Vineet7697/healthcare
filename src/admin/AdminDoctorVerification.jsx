@@ -1,168 +1,312 @@
-import React, { useState } from "react";
-import { FiMail, FiEye, FiCheck, FiX } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../services/api";
+import { notify } from "../utils/notify";
 
-const AdminDoctorVerification = () => {
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [note, setNote] = useState("");
-  const [actionConfirm, setActionConfirm] = useState(null); 
-  // { id, status } ya null
+const BASE_URL = import.meta.env.VITE_API_URL || "";
 
-  const [docs, setDocs] = useState([
-    {
-      id: 1,
-      title: "Medical License",
-      date: "Oct 12, 2023",
-      status: "VERIFIED",
-      icon: "license",
-      fileUrl:
-        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-      id: 2,
-      title: "Identity Proof",
-      date: "Oct 14, 2023",
-      status: "PENDING",
-      icon: "fingerprint",
-      fileUrl:
-        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-      id: 3,
-      title: "Degree Certificate",
-      date: "Oct 14, 2023",
-      status: "PENDING",
-      icon: "degree",
-      fileUrl:
-        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-  ]);
+const getFileUrl = (filePath) => {
+  if (!filePath) return "";
+  const clean = filePath.replace(/\\/g, "/");
+  if (clean.startsWith("http")) return clean;
+  return `${BASE_URL}/${clean}`.replace(/([^:])\/\//g, "$1/");
+};
 
-  const navigate = useNavigate();
+const Icon = ({ d, size = 16, color = "currentColor", sw = 1.8 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <path d={d} />
+  </svg>
+);
 
-  const updateStatus = (id, status) => {
-    setDocs((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status } : d))
-    );
-  };
+const ICONS = {
+  back:   "M19 12H5M12 19l-7-7 7-7",
+  eye:    "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 100 6 3 3 0 000-6z",
+  check:  "M5 13l4 4L19 7",
+  x:      "M6 18L18 6M6 6l12 12",
+  shield: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+  file:   "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  id:     "M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0",
+  degree: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
+  user:   "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
+};
 
-  const handleSubmitAll = () => {
-    console.log("Final statuses:", docs);
-    console.log("Admin note:", note);
+const DOC_ICON = {
+  certificate: ICONS.degree,
+  idProof:     ICONS.id,
+  profile:     ICONS.user,
+};
 
-    setConfirmOpen(false);
-    navigate("/admin/doctors");
-  };
+const STATUS_CFG = {
+  VERIFIED: { label: "Verified",       cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  REJECTED: { label: "Rejected",       cls: "bg-red-50    text-red-600    border-red-200"       },
+  PENDING:  { label: "Pending Review", cls: "bg-amber-50  text-amber-600  border-amber-200"     },
+};
 
-  const handleConfirmAction = () => {
-    if (!actionConfirm) return;
-    updateStatus(actionConfirm.id, actionConfirm.status);
-    setActionConfirm(null);
-  };
+/* ── Doc Card ── */
+const DocCard = ({ title, date, status, icon, fileUrl, onApprove, onReject }) => {
+  const cfg       = STATUS_CFG[status] || STATUS_CFG.PENDING;
+  const isPending = status === "PENDING";
+  const iconPath  = DOC_ICON[icon] || ICONS.file;
 
   return (
-    <div className="min-h-screen bg-[#faf7f5] p-6">
-      {/* Doctor Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <img
-              src="https://i.pravatar.cc/100?img=12"
-              alt="doctor"
-              className="h-16 w-16 rounded-full object-cover"
-            />
-            <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 ring-2 ring-white" />
-          </div>
-
-          <div>
-            <h2 className="text-xl font-bold">Dr. Julian Thorne</h2>
-            <div className="flex gap-3 text-sm text-gray-500 mt-1">
-              <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
-                Cardiologist
-              </span>
-              <span>ID: #VET-9920</span>
-            </div>
-          </div>
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <Icon d={iconPath} size={20} color="#3b82f6" sw={1.8} />
         </div>
-
-        <button className="flex items-center gap-2 border rounded-lg px-4 py-2 text-sm hover:bg-gray-50">
-          <FiMail />
-          Contact Doctor
-        </button>
+        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border font-[family-name:var(--font-dm)] ${cfg.cls}`}>
+          {cfg.label}
+        </span>
       </div>
 
-      {/* Required Documents */}
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="font-semibold text-lg">Required Documents</h3>
-        <span className="text-sm text-gray-500">{docs.length} Total Files</span>
+      <div>
+        <p className="text-sm font-bold text-slate-800 font-[family-name:var(--font-dm)]">{title}</p>
+        <p className="text-xs text-slate-400 mt-0.5 font-[family-name:var(--font-dm)]">Uploaded: {date}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        {docs.map((doc) => (
-          <DocCard
-            key={doc.id}
-            {...doc}
-            onApprove={() => setActionConfirm({ id: doc.id, status: "VERIFIED" })}
-            onReject={() => setActionConfirm({ id: doc.id, status: "REJECTED" })}
-          />
-        ))}
-      </div>
+      <button
+        onClick={() => window.open(fileUrl, "_blank")}
+        className="flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-700 transition font-[family-name:var(--font-dm)] w-fit"
+      >
+        <Icon d={ICONS.eye} size={14} color="#3b82f6" sw={2} />
+        View Document
+      </button>
 
-      {/* Notes */}
-      <div className="mb-6">
-        <h4 className="font-semibold mb-2">📝 Notes for Doctor</h4>
-        <textarea
-          rows={4}
-          maxLength={500}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Provide details if any document is rejected..."
-          className="w-full rounded-xl border p-4 focus:ring-2 focus:ring-blue-400 outline-none"
-        />
-        <p className="text-xs text-gray-400 text-right mt-1">
-          {note.length}/500 characters
-        </p>
-      </div>
-
-      {/* Footer Actions */}
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => navigate("/admin/doctors")}
-          className="px-5 py-2 rounded-lg border hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => setConfirmOpen(true)}
-          className="px-6 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600"
-        >
-          Submit All Verifications →
-        </button>
-      </div>
-
-      {confirmOpen && (
-        <ConfirmModal
-          title="Submit Verification?"
-          description="Are you sure you want to submit all document verifications? This action cannot be undone."
-          onCancel={() => setConfirmOpen(false)}
-          onConfirm={handleSubmitAll}
-        />
+      {isPending && (
+        <div className="flex gap-2 mt-auto">
+          <button onClick={onApprove}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition font-[family-name:var(--font-dm)]">
+            <Icon d={ICONS.check} size={13} color="white" sw={2.5} />
+            Approve
+          </button>
+          <button onClick={onReject}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 transition font-[family-name:var(--font-dm)]">
+            <Icon d={ICONS.x} size={13} color="#dc2626" sw={2.5} />
+            Reject
+          </button>
+        </div>
       )}
 
-      {actionConfirm && (
+      {!isPending && (
+        <div className={`flex items-center gap-2 rounded-xl px-3 py-2.5 ${status === "VERIFIED" ? "bg-emerald-50" : "bg-red-50"}`}>
+          <Icon
+            d={status === "VERIFIED" ? ICONS.check : ICONS.x}
+            size={14}
+            color={status === "VERIFIED" ? "#16a34a" : "#dc2626"}
+            sw={2.5}
+          />
+          <span className={`text-xs font-semibold font-[family-name:var(--font-dm)] ${status === "VERIFIED" ? "text-emerald-700" : "text-red-600"}`}>
+            {status === "VERIFIED" ? "Document verified" : "Document rejected"}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── Confirm Modal ── */
+const ConfirmModal = ({ type, doc, rejectReason, setRejectReason, rejectError, onCancel, onConfirm }) => {
+  const isApprove = type === "approve";
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-2xl border border-slate-200 p-7 w-full max-w-sm shadow-2xl">
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 ${isApprove ? "bg-emerald-50" : "bg-red-50"}`}>
+          <Icon d={isApprove ? ICONS.check : ICONS.x} size={22}
+            color={isApprove ? "#16a34a" : "#dc2626"} sw={2.5} />
+        </div>
+        <h3 className="text-base font-bold text-slate-800 text-center font-[family-name:var(--font-dm)] mb-1">
+          {isApprove ? "Approve Document?" : "Reject Document?"}
+        </h3>
+        <p className="text-sm text-slate-400 text-center font-[family-name:var(--font-dm)] mb-5">
+          Are you sure you want to {isApprove ? "approve" : "reject"}{" "}
+          <span className="font-semibold text-slate-600">{doc?.title}</span>?
+        </p>
+
+        {/* ✅ Reject reason — required */}
+        {!isApprove && (
+          <div className="mb-4">
+            <textarea
+              placeholder="Rejection reason (required)..."
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              rows={3}
+              className={`w-full rounded-xl border px-4 py-3 text-sm outline-none resize-none font-[family-name:var(--font-dm)] placeholder:text-slate-300 transition
+                ${rejectError
+                  ? "border-red-400 bg-red-50 focus:ring-2 focus:ring-red-100"
+                  : "border-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                }`}
+            />
+            {rejectError && (
+              <p className="text-xs text-red-500 mt-1.5 font-[family-name:var(--font-dm)]">
+                ⚠ Rejection reason is required
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button onClick={onCancel}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition font-[family-name:var(--font-dm)]">
+            Cancel
+          </button>
+          <button onClick={onConfirm}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition font-[family-name:var(--font-dm)]
+              ${isApprove ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-500 hover:bg-red-600"}`}>
+            {isApprove ? "Yes, Approve" : "Yes, Reject"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/* ══════════════════════════════════════════ */
+const AdminDoctorVerification = () => {
+  const { id }   = useParams();
+  const navigate = useNavigate();
+
+  const [loading, setLoading]             = useState(true);
+  const [docs, setDocs]                   = useState([]);
+  const [confirmOpen, setConfirmOpen]     = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [rejectReason, setRejectReason]   = useState("");
+  const [rejectError, setRejectError]     = useState(false);
+  const [doctorStatus, setDoctorStatus]   = useState(null);
+
+  const fetchDocuments = async () => {
+    setLoading(true);
+    try {
+      const [docsRes, doctorRes] = await Promise.all([
+        api.get(`/admin/doctors/${id}/documents`),
+        api.get(`/admin/doctors/${id}`),
+      ]);
+
+      setDocs(docsRes.data.documents.map(doc => ({
+        id:      doc.id,
+        title:   doc.doc_type === "certificate" ? "Degree Certificate"
+                 : doc.doc_type === "idProof"   ? "Identity Proof"
+                 : "Profile Photo",
+        date:    new Date(doc.uploaded_at).toDateString(),
+        // ✅ 0 = PENDING, 1 = VERIFIED, 2 = REJECTED
+        status:  doc.verified === 1 ? "VERIFIED" : doc.verified === 2 ? "REJECTED" : "PENDING",
+        icon:    doc.doc_type,
+        fileUrl: getFileUrl(doc.file_path),
+        docType: doc.doc_type,
+      })));
+
+      const status =
+        doctorRes.data?.doctor?.status ||
+        doctorRes.data?.status         ||
+        null;
+      setDoctorStatus(status);
+
+    } catch { notify.error("Failed to load documents"); }
+    finally  { setLoading(false); }
+  };
+
+  useEffect(() => { fetchDocuments(); }, [id]);
+
+  const approveDocument = async (doc) => {
+    try {
+      api.put(`/admin/doctors/${id}/documents/verify`, { docType: doc.docType, verified: true });
+      setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, status: "VERIFIED" } : d));
+      notify.success("Document approved");
+    } catch { notify.error("Approval failed"); }
+  };
+
+  const rejectDocument = async (doc, reason) => {
+    try {
+      await api.put(`/admin/doctors/${id}/verify-document`, {
+  docType: doc.docType,
+  verified: false,
+  reason
+});
+      setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, status: "REJECTED" } : d));
+      notify.success("Document rejected");
+    } catch { notify.error("Reject failed"); }
+  };
+
+  const handleSubmitAll = async () => {
+    try {
+      await api.put(`/admin/doctors/${id}/verify`);
+      
+      notify.success("Doctor verified successfully");
+      setConfirmOpen(false);
+      navigate("/admin/doctors");
+    } catch (err) { notify.error(err.response?.data?.message || "Verification failed"); }
+  };
+
+  const allDocsVerified = docs.length > 0 && docs.every(d => d.status !== "PENDING")
+  const isDoctorApproved = doctorStatus === "APPROVED";
+  const canSubmit        = allDocsVerified && !isDoctorApproved;
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400 text-sm font-[family-name:var(--font-dm)]">Loading documents...</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-50 px-4 sm:px-6 lg:px-10 py-8">
+      <div className="max-w-5xl mx-auto">
+
+        <button onClick={() => navigate(-1)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition font-[family-name:var(--font-dm)] mb-7 shadow-sm">
+          <Icon d={ICONS.back} size={15} sw={2.5} />
+          Back
+        </button>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-7">
+          {docs.map(doc => (
+            <DocCard
+              key={doc.id}
+              {...doc}
+           
+              onApprove={() => {
+                setRejectReason("");
+                setRejectError(false);
+                setConfirmAction({ type: "approve", doc });
+              }}
+              onReject={() => {
+                setRejectReason("");
+                setRejectError(false);
+                setConfirmAction({ type: "reject", doc });
+              }}
+            />
+          ))}
+        </div>
+
+      </div>
+      {confirmAction && (
         <ConfirmModal
-          title={
-            actionConfirm.status === "VERIFIED"
-              ? "Approve Document?"
-              : "Reject Document?"
-          }
-          description={
-            actionConfirm.status === "VERIFIED"
-              ? "Are you sure you want to approve this document?"
-              : "Are you sure you want to reject this document?"
-          }
-          onCancel={() => setActionConfirm(null)}
-          onConfirm={handleConfirmAction}
+          type={confirmAction.type}
+          doc={confirmAction.doc}
+          rejectReason={rejectReason}
+          setRejectReason={(val) => {
+            setRejectReason(val);
+            if (val.trim()) setRejectError(false);
+          }}
+          rejectError={rejectError}
+          onCancel={() => {
+            setConfirmAction(null);
+            setRejectError(false);
+          }}
+          
+          onConfirm={async () => {
+            if (confirmAction.type === "reject" && !rejectReason.trim()) {
+              setRejectError(true);
+              return;
+            }
+            if (confirmAction.type === "approve") await approveDocument(confirmAction.doc);
+            else await rejectDocument(confirmAction.doc, rejectReason);
+            setConfirmAction(null);
+            setRejectError(false);
+          }}
         />
       )}
     </div>
@@ -170,105 +314,3 @@ const AdminDoctorVerification = () => {
 };
 
 export default AdminDoctorVerification;
-
-/* ================= DOCUMENT CARD ================= */
-
-const DocCard = ({ title, date, status, icon, fileUrl, onApprove, onReject }) => {
-  const isVerified = status === "VERIFIED";
-  const isRejected = status === "REJECTED";
-
-  const handleViewFile = () => {
-    if (!fileUrl) return alert("File not available");
-    window.open(fileUrl, "_blank", "noopener,noreferrer");
-  };
-
-  return (
-    <div className="rounded-2xl p-5 border shadow-sm bg-white">
-      <div className="flex justify-between items-center mb-3">
-        <Icon icon={icon} />
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            isVerified
-              ? "bg-green-100 text-green-700"
-              : isRejected
-              ? "bg-red-100 text-red-700"
-              : "bg-orange-100 text-orange-700"
-          }`}
-        >
-          {isVerified ? "VERIFIED" : isRejected ? "REJECTED" : "PENDING REVIEW"}
-        </span>
-      </div>
-
-      <h4 className="font-semibold">{title}</h4>
-      <p className="text-sm text-gray-500 mb-6">Uploaded: {date}</p>
-
-      <button
-        onClick={handleViewFile}
-        className="flex items-center gap-2 text-sm text-blue-600 mb-3 hover:underline"
-      >
-        <FiEye /> View File
-      </button>
-
-      {status === "PENDING" && (
-        <div className="flex gap-3">
-          <button
-            onClick={onApprove}
-            className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white py-2 text-sm hover:bg-green-700"
-          >
-            <FiCheck /> Approve
-          </button>
-          <button
-            onClick={onReject}
-            className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-red-500 text-red-600 py-2 text-sm hover:bg-red-50"
-          >
-            <FiX /> Reject
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* ================= ICON ================= */
-
-const Icon = ({ icon }) => {
-  const map = {
-    license: "📄",
-    fingerprint: "🆔",
-    degree: "🎓",
-  };
-
-  return (
-    <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl">
-      {map[icon] || "📁"}
-    </div>
-  );
-};
-
-/* ================= CONFIRM MODAL (Reusable) ================= */
-
-const ConfirmModal = ({ title, description, onCancel, onConfirm }) => {
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-        <h3 className="text-lg font-bold mb-2">{title}</h3>
-        <p className="text-gray-600 mb-6">{description}</p>
-
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-          >
-            No, Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
-          >
-            Yes, Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};

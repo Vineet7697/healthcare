@@ -1,16 +1,23 @@
-
-
-
-// Sidebar.jsx
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import LogoutModal from "../utils/LogoutModal";
+import {
+  FaBars,
+  FaHome,
+  FaCalendarAlt,
+  FaEdit,
+  FaUsers,
+  FaCalendarCheck,
+  FaChartBar,
+  FaUserMd,
+  FaFileMedical,
 
-const Sidebar = ({ isOpen, setIsOpen, activeNav, setActiveNav }) => {
+} from "react-icons/fa";
+
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const location = useLocation();
+  const [tooltip, setTooltip] = useState(null);
 
-  /* ================= SAFE USER ================= */
   let loggedInUser = null;
   try {
     loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -18,141 +25,122 @@ const Sidebar = ({ isOpen, setIsOpen, activeNav, setActiveNav }) => {
     loggedInUser = null;
   }
 
-  const role = loggedInUser?.role; // DOCTOR | PATIENT | ADMIN
+  const role = loggedInUser?.role;
 
-  /* ================= NAV CONFIG ================= */
   const doctorNav = [
-    { key: "dashboard", label: "Dashboard", icon: "🏠" },
-    { key: "appointment", label: "Appointments", icon: "📅" },
-    { key: "manualbooking", label: "Manual Booking", icon: "✍️" },
-    { key: "doctornotes", label: "Doctor Notes", icon: "📝" },
+    { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
+    { key: "appointment", label: "Appointments", icon: <FaCalendarAlt /> },
+    { key: "manualbooking", label: "Manual Booking", icon: <FaEdit /> },
   ];
 
   const patientNav = [
-    { key: "dashboard", label: "Dashboard", icon: "🏠" },
-    { key: "family", label: "Family Members", icon: "👨‍👩‍👧" },
-    { key: "myappointment", label: "My Appointments", icon: "📅" },
-
+    { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
+    { key: "family", label: "Family Members", icon: <FaUsers /> },
+    { key: "myappointment", label: "My Appointments", icon: <FaCalendarCheck /> },
+    { key: "mycertificate", label: "My Certificates", icon: <FaFileMedical /> },
   ];
 
   const adminNav = [
-    { key: "dashboard", label: "Admin Dashboard", icon: "📊" },
-    { key: "doctors", label: "Doctors", icon: "📅" },
+    { key: "dashboard", label: "Admin Dashboard", icon: <FaChartBar /> },
+    { key: "doctors", label: "Doctors", icon: <FaUserMd /> },
+    { key: "contact-requests", label: "Enquiries", icon: <FaEdit /> },
   ];
 
-  /* ================= ROLE BASED NAV ================= */
   const navItems =
-    role === "DOCTOR"
-      ? doctorNav
-      : role === "ADMIN"
-      ? adminNav
-      : patientNav;
+    role === "DOCTOR" ? doctorNav : role === "ADMIN" ? adminNav : patientNav;
 
-  /* ================= HANDLERS ================= */
-  const handleNavClick = (item) => {
-    setActiveNav?.(item.key);
-
-    // mobile me sidebar close
-    if (window.innerWidth < 768) {
-      setIsOpen(false);
-    }
-
+  const getRoute = (key) => {
     if (role === "DOCTOR") {
-      navigate(`/doctordashboard/${item.key}`);
-    } else if (role === "ADMIN") {
-      navigate(`/admin/${item.key}`);
-    } else {
-      navigate(`/client/${item.key}`);
+      if (key === "dashboard") return "/doctordashboard";
+      return `/doctordashboard/${key}`;
     }
+    if (role === "ADMIN") {
+      if (key === "dashboard") return "/admin";
+      return `/admin/${key}`;
+    }
+    if (key === "dashboard") return "/client/dashboard";
+    return `/client/${key}`;
   };
 
-  const handleLogoutConfirm = () => {
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("token");
-    navigate("/");
+  const handleNavClick = (item) => {
+    navigate(getRoute(item.key));
+    if (window.innerWidth < 768) setIsOpen(false);
   };
 
-  /* ================= UI ================= */
+ 
   return (
     <>
       <aside
         className={`
-          fixed top-0 left-0 h-screen
-          bg-[#0072BC] p-4 overflow-y-auto
-          transition-all duration-300
+          fixed top-0 left-0 h-screen flex flex-col
+          overflow-y-auto overflow-x-hidden
+          transition-all duration-300 ease-in-out
           z-50 md:z-40
           ${isOpen ? "w-64" : "w-20"}
         `}
+        style={{ backgroundColor: "#0072BC" }}
       >
-        {/* ===== LOGO ===== */}
-        <div className="mb-6 text-xl font-bold text-[#22C55E] text-center">
-          {isOpen ? (
-            <span>
-            
-                <img
-                src={
-                  role === "DOCTOR"
-                    ? "/images/yo.png"
-                    : role === "ADMIN"
-                    ? "/images/yo_admin.png"
-                    : "/images/yoclient_patient.png"
-                }
-                alt="logo"
-                className="h-12 mx-auto"
-              />
-            </span>
-
-            
-          ) : (
-            <span className="flex justify-center">
-              <img
-                src={
-                  role === "DOCTOR"
-                    ? "/images/yo_doctor.png"
-                    : role === "ADMIN"
-                    ? "/images/yo_admin.png"
-                    : "/images/yo_client.png"
-                }
-                alt="logo"
-                className="h-8"
-              />
-            </span>
-          )}
-        </div>
-
-        {/* ===== NAV ===== */}
-        <nav className="space-y-2 px-2">
-          {navItems.map((item) => (
-            <div
-              key={item.key}
-              onClick={() => handleNavClick(item)}
-              className={`
-                flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer
-                ${
-                  activeNav === item.key
-                    ? "bg-blue-500 text-white"
-                    : "text-white hover:bg-blue-500"
-                }
-                ${!isOpen && "justify-center"}
-              `}
-            >
-              <div className="text-lg">{item.icon}</div>
-              {isOpen && (
-                <div className="font-medium whitespace-nowrap">
-                  {item.label}
-                </div>
-              )}
+        <div className={`flex items-center p-5 mb-2  ${isOpen ? "justify-between bg-white" : "justify-center" } border-r-2 border-gray-300`}>
+          {isOpen && (
+            <div className="flex items-center gap-2 select-none ">
+              <img src="/images/logo.webp" alt="Yo Doctor" className="h-10" />
+              
             </div>
-          ))}
+          )}
+          <button
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="  text-xl flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 hover:bg-white/20 flex-shrink-0"
+            title={isOpen ? "Collapse sidebar " : "Expand sidebar "}
+          >
+            {isOpen ? <FaBars className=" text-black" /> : <FaBars className=" text-white" />}
+          </button>
+        </div>
+        
+        <nav className="flex-1 space-y-1 px-3">
+          {navItems.map((item) => {
+            const isActive = location.pathname === getRoute(item.key);
+            return (
+              <div
+                key={item.key}
+                onClick={() => handleNavClick(item)}
+                onMouseEnter={() => !isOpen && setTooltip(item.key)}
+                onMouseLeave={() => setTooltip(null)}
+                className={`
+                  relative flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer
+                  transition-all duration-200
+                  ${isActive ? "text-white" : "text-blue-100 hover:text-white"}
+                  ${!isOpen && "justify-center"}
+                `}
+                style={{ backgroundColor: isActive ? "rgba(255,255,255,0.25)" : undefined }}
+                onMouseOver={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"; }}
+                onMouseOut={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = ""; }}
+              >
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-white" />
+                )}
+
+                <div className="text-lg flex-shrink-0">{item.icon}</div>
+
+                {isOpen && (
+                  <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>
+                )}
+
+                {!isOpen && tooltip === item.key && (
+                  <div
+                    className="absolute left-16 z-50 px-3 py-1.5 rounded-lg text-sm font-medium text-white whitespace-nowrap shadow-lg pointer-events-none"
+                    style={{ backgroundColor: "#005a96" }}
+                  >
+                    {item.label}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
+
       </aside>
 
-      {/* ===== LOGOUT MODAL ===== */}
-      <LogoutModal
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogoutConfirm}
-      />
+      
     </>
   );
 };

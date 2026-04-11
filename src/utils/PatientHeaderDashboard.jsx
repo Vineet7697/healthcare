@@ -1,71 +1,44 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaBars, FaBell,FaSignOutAlt  } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
+import { useImage } from "../context/ImageContext";
+import {
+  getPatientNotifications,
+  getPatientUnreadCount,
+  markPatientNotificationRead,
+} from "../services/notificationService";
+import { getProfileImageApi } from "../services/PatientProfileImageApi"; 
 
-/* ================= SAFE STORAGE ================= */
 const getStoredUser = () => {
   const raw = localStorage.getItem("loggedInUser");
   if (!raw || raw === "undefined") return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(raw); } catch { return null; }
 };
 
-const DEFAULT_AVATAR =
-  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
 const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  /* 🔴 ALL HOOKS MUST BE HERE (TOP LEVEL) */
   const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
-  const [profileImage, setProfileImage] = useState(
-    localStorage.getItem("profileImage") || DEFAULT_AVATAR
-  );
+ const { image, setImage } = useImage();
 
+const profileImage = image || DEFAULT_AVATAR;
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const notifications = [
-    { id: 1, text: "New appointment booked", time: "2 mins ago" },
-    { id: 2, text: "Profile updated successfully", time: "1 hour ago" },
-  ];
-
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
-  console.log("HEADER mounted, user 👉", loggedInUser);
-
-  /* ================= SYNC PROFILE IMAGE ================= */
-const handleNavigate = (path) => {
-  setProfileOpen(false);
-  setNotificationOpen(false);
-  navigate(path);
-};
-
-
-  useEffect(() => {
-    const syncImage = () => {
-      const img = localStorage.getItem("profileImage");
-      if (img) setProfileImage(img);
-    };
-
-    window.addEventListener("profileImageUpdated", syncImage);
-    return () =>
-      window.removeEventListener("profileImageUpdated", syncImage);
-  }, []);
-
-  /* ================= USER SYNC ================= */
   useEffect(() => {
     const syncUser = () => setLoggedInUser(getStoredUser());
-
     window.addEventListener("storage", syncUser);
     window.addEventListener("userLogin", syncUser);
     window.addEventListener("userLogout", syncUser);
-
     return () => {
       window.removeEventListener("storage", syncUser);
       window.removeEventListener("userLogin", syncUser);
@@ -73,142 +46,157 @@ const handleNavigate = (path) => {
     };
   }, []);
 
-  /* ================= OUTSIDE CLICK ================= */
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (
         dropdownRef.current?.contains(e.target) ||
         notificationRef.current?.contains(e.target)
-      )
-        return;
-
+      ) return;
       setProfileOpen(false);
       setNotificationOpen(false);
     };
-
     document.addEventListener("mousedown", handleOutsideClick);
-    return () =>
-      document.removeEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  /* ================= HANDLERS ================= */
+  const fetchNotifications = async () => {
+    try {
+      const res = await getPatientNotifications();
+      setNotifications(res.data.notifications || []);
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchUnread = async () => {
+    try {
+      const res = await getPatientUnreadCount();
+      setUnreadCount(res.data.unreadCount || 0);
+    } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchUnread();
+    const interval = setInterval(() => {
+      if (!notificationOpen) { fetchNotifications(); fetchUnread(); }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [notificationOpen]);
+
+  const handleNotificationClick = async (id) => {
+    try {
+      await markPatientNotificationRead(id);
+      fetchNotifications();
+      fetchUnread();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleNavigate = (path) => {
+    setProfileOpen(false);
+    setNotificationOpen(false);
+    navigate(path);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("profileImage");
-
+    localStorage.removeItem("token");
     setLoggedInUser(null);
-    setProfileImage(DEFAULT_AVATAR);
-
+    setImage(null);
+    setIsLogoutModalOpen(false);
     window.dispatchEvent(new Event("userLogout"));
     navigate("/");
   };
 
+  if (!loggedInUser) return null;
+
   return (
-    <nav
-      className={`fixed top-0 z-50 h-20 bg-white border-b border-gray-200
-      transition-all duration-300
-      ${
-        isSidebarOpen
-          ? "md:left-64 md:w-[calc(100%-16rem)]"
-          : "md:left-20 md:w-[calc(100%-5rem)]"
-      }
+    <nav className={`fixed top-0 z-50 h-20 bg-white border-b border-gray-200 transition-all duration-300
+      ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-20 md:w-[calc(100%-5rem)]"}
       left-0 w-full`}
     >
       <div className="h-full px-4 flex items-center">
-        {/* ⬅️ Sidebar Toggle */}
-        <div className="flex items-center">
-          <button
-            onClick={toggleSidebar}
-            className="text-xl text-gray-700 hover:text-blue-600 transition"
-          >
-            <FaBars />
-          </button>
-        </div>
+        <button onClick={toggleSidebar} className="md:hidden text-xl text-gray-700 mr-4">
+          <FaBars />
+        </button>
 
-        {/* 🎯 Center */}
+        {/* Center */}
         <div className="flex-1 flex justify-center gap-4">
-          <button
-            onClick={() => navigate("/client/book-appointment")}
-            className="hidden md:flex px-6 py-2 rounded-full
-            bg-linear-to-br from-[#2277f7] to-[#52abd4]
-            text-white text-sm font-medium"
-          >
-            Book Appointment
-          </button>
+          {location.pathname === "/client/dashboard" && (
+            <button
+              onClick={() => handleNavigate("/client/book-appointment")}
+              className="hidden md:flex px-6 py-2 rounded-full bg-gradient-to-br from-[#2277f7] to-[#52abd4] text-white text-sm font-medium"
+            >
+              Book Appointment
+            </button>
+          )}
         </div>
 
-        {/* ➡️ Right */}
         <div className="flex items-center gap-3 relative">
-          {/* 🔔 Notifications */}
+
           <div className="relative" ref={notificationRef}>
             <button
-              onClick={() => {
-                setNotificationOpen((p) => !p);
-                setProfileOpen(false);
-              }}
+              onClick={() => { setNotificationOpen((p) => !p); setProfileOpen(false); }}
               className="relative text-xl text-gray-700 hover:text-blue-600"
             >
               <FaBell />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
             </button>
 
             {notificationOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-lg border z-20">
-                <div className="p-3 font-semibold border-b">Notifications</div>
-                <ul className="max-h-64 overflow-y-auto">
-                  {notifications.map((note) => (
-                    <li
-                      key={note.id}
-                      className="px-4 py-2 text-sm border-b hover:bg-gray-50"
-                    >
-                      <p>{note.text}</p>
-                      <p className="text-xs text-gray-400">{note.time}</p>
-                    </li>
-                  ))}
+              <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                <div className="flex justify-between items-center px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                  <h3 className="font-semibold text-sm">Notifications</h3>
+                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">{notifications.length}</span>
+                </div>
+                <ul className="max-h-72 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <li className="px-4 py-6 text-center text-gray-500 text-sm">🔔 No notifications</li>
+                  ) : (
+                    notifications.map((note) => (
+                      <li
+                        key={note.id}
+                        onClick={() => handleNotificationClick(note.id)}
+                        className={`flex gap-3 px-4 py-3 border-b hover:bg-cyan-50 cursor-pointer transition ${
+                          !note.is_read ? "bg-cyan-50 border-l-4 border-cyan-500" : ""
+                        }`}
+                      >
+                        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-cyan-100 text-cyan-600 text-lg">🔔</div>
+                        <div className="flex-1">
+                          <p className={`text-sm ${!note.is_read ? "font-semibold" : ""}`}>{note.title}</p>
+                          <p className="text-xs text-gray-500">{note.message}</p>
+                          <p className="text-xs text-gray-400 mt-1">{new Date(note.created_at).toLocaleString()}</p>
+                        </div>
+                      </li>
+                    ))
+                  )}
                 </ul>
               </div>
             )}
           </div>
 
-          {/* 👤 Profile */}
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => {
-                setProfileOpen((p) => !p);
-                setNotificationOpen(false);
-              }}
+              onClick={() => { setProfileOpen((p) => !p); setNotificationOpen(false); }}
               className="p-1 rounded-full hover:bg-gray-100 transition"
             >
               <img
                 src={profileImage}
                 alt="avatar"
                 className="w-8 h-8 rounded-full border object-cover"
-                onError={(e) => {
-                  e.target.src =
-                    "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                }}
+                onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_AVATAR; }}
               />
             </button>
 
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-20">
                 <ul className="py-2 text-sm">
-                  <li
-                    onClick={() => handleNavigate("/client/profile")}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    👤 My Profile
-                  </li>
-                  <li
-                    onClick={() => handleNavigate("/client/changepassword")}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    🔒 Change Password
-                  </li>
-                  <li
-                    onClick={() => setIsLogoutModalOpen(true)}
-                    className="flex items-center gap-3 w-full text-sm px-5 py-2  text-red-600 hover:bg-gray-100 cursor-pointer border-t"
-                  >
+                  <li onClick={() => handleNavigate("/client/profile")} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">👤 My Profile</li>
+                  <li onClick={() => handleNavigate("/client/changepassword")} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">🔒 Change Password</li>
+                  <li onClick={() => setIsLogoutModalOpen(true)} className="flex items-center gap-3 w-full text-sm px-5 py-2 text-red-600 hover:bg-gray-100 cursor-pointer border-t">
                     <FaSignOutAlt /> Logout
                   </li>
                 </ul>

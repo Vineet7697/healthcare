@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { FaClock } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { notify } from "../../../utils/notify";
 import api from "../../../services/api";
 
 const PatientQueuePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔑 Appointment ID from booking page
   const {
     appointmentId,
     token: initialToken,
@@ -29,26 +28,33 @@ const PatientQueuePage = () => {
       return;
     }
 
-    const fetchQueueStatus = async () => {
-      try {
-        setLoading(true);
+  const fetchQueueStatus = async () => {
+  try {
+    setLoading(true);
 
-        const res = await api.get(`/patient/token-status/${appointmentId}`);
+    const res = await api.get(`/patient/visit/token-status/${appointmentId}`);
 
-        setToken(res.data.yourToken);
-        setNowServing(res.data.nowServing);
-        setEstimatedWaitTime(`${res.data.estimatedWaitMinutes} mins`);
-      } catch (err) {
-        toast.error("Failed to load queue status");
-        setError("Queue information not available");
-      } finally {
-        setLoading(false);
-      }
-    };
+    setToken(res.data.yourToken);
+    setNowServing(res.data.nowServing);
+    setEstimatedWaitTime(`${res.data.estimatedWaitMinutes} mins`);
+    setError("");
+  } catch (err) {
 
+    // 🔹 Agar appointment future ka hai
+    if (err.response?.status === 404) {
+      setError("Queue will be available on appointment day");
+      return;
+    }
+
+    notify.error("Failed to load queue status");
+    setError("Queue information not available");
+  } finally {
+    setLoading(false);
+  }
+};
     fetchQueueStatus();
 
-    // 🔄 Auto refresh every 30 sec (optional but recommended)
+    //  Auto refresh every 30 sec 
     const interval = setInterval(fetchQueueStatus, 30000);
     return () => clearInterval(interval);
   }, [appointmentId, navigate]);

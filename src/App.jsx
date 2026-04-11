@@ -1,14 +1,20 @@
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Router from "./routes/Router";
 import { LanguageProvider } from "./context/LanguageContext";
+import { HelmetProvider } from "react-helmet-async";
+import GlobalSnackbar from "./components/common/GlobalSnackbar";
+import { ImageProvider } from "./context/ImageContext";
 
 const App = () => {
   return (
-    <LanguageProvider>
-      <Router />
-      <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
-    </LanguageProvider>
+    <HelmetProvider>
+      <ImageProvider>   {/* ✅ YEH ADD KARNA HAI */}
+        <LanguageProvider>
+          <Router />
+        </LanguageProvider>
+      </ImageProvider>
+
+      <GlobalSnackbar position="top-right" autoClose={2000} hideProgressBar />
+    </HelmetProvider>
   );
 };
 

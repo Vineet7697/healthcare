@@ -1,629 +1,413 @@
-// import React, { useEffect, useState } from "react";
-// import { toast } from "react-toastify";
-// import { useNavigate } from "react-router-dom";
-// import {
-//   FaUser,
-//   FaEnvelope,
-//   FaPhone,
-//   FaCalendarAlt,
-//   FaEdit,
-//   FaTrash,
-// } from "react-icons/fa";
-// import { MdWc } from "react-icons/md";
-
-// import {
-//   uploadProfileImageApi,
-//   getProfileImageApi,
-//   updateProfileImageApi,
-//   deleteProfileImageApi,
-// } from "../../../services/PatientProfileImageApi";
-// import { PatientGetProfileApi } from "../../../services/patient/profile/PatientGetProfileApi";
-// import { PatientUpdateProfileApi } from "../../../services/patient/profile/PatientUpdateProfileApi";
-
-// /* ================= CONSTANTS ================= */
-// const DEFAULT_AVATAR = "/images/default-avatar.png";
-
-// /* ================= HELPERS ================= */
-// const buildImageUrl = (path) => {
-//   if (!path) return DEFAULT_AVATAR;
-//   if (path.startsWith("http")) return path;
-
-//   const base = import.meta.env.VITE_API_URL.replace(/\/$/, "");
-//   const cleanPath = path.replace(/^\//, "");
-
-//   return `${base}/${cleanPath}`;
-// };
-
-// /* ================= CONFIRM MODAL ================= */
-// const ConfirmModal = ({ text, onNo, onYes }) => (
-//   <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-//     <div className="bg-white rounded-xl shadow-lg p-6 w-80 text-center">
-//       <h3 className="text-lg font-semibold mb-4">{text}</h3>
-//       <div className="flex justify-center gap-4">
-//         <button onClick={onNo} className="bg-gray-300 px-4 py-2 rounded-lg">
-//           No
-//         </button>
-//         <button
-//           onClick={onYes}
-//           className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-//         >
-//           Yes
-//         </button>
-//       </div>
-//     </div>
-//   </div>
-// );
-
-// /* ================= INPUT ================= */
-// const Input = ({ icon, ...props }) => (
-//   <div className="relative">
-//     <span className="absolute left-3 top-3 text-gray-400">{icon}</span>
-//     <input
-//       {...props}
-//       className="w-full pl-10 border rounded-lg p-2 outline-none focus:ring focus:ring-blue-200"
-//     />
-//   </div>
-// );
-
-// /* ================= MAIN COMPONENT ================= */
-// const ProfileSection = () => {
-//   const navigate = useNavigate();
-
-//   const [profile, setProfile] = useState({
-//     id: "",
-//     name: "",
-//     email: "",
-//     phone: "",
-//     gender: "",
-//     dob: "",
-//   });
-
-//   const [profileImage, setProfileImage] = useState(
-//     localStorage.getItem("profileImage") || DEFAULT_AVATAR
-//   );
-
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const [showUpdateModal, setShowUpdateModal] = useState(false);
-
-//   /* ================= DATE FORMAT ================= */
-//   const formatDateForInput = (iso) =>
-//     iso ? new Date(iso).toISOString().split("T")[0] : "";
-
-//   /* ================= LOAD PROFILE + IMAGE ================= */
-//   useEffect(() => {
-//     const loadData = async () => {
-//       try {
-//         const data = await PatientGetProfileApi();
-
-//         setProfile({
-//           id: data.id,
-//           name: data.fullName || "",
-//           email: data.email || "",
-//           phone: data.phone || "",
-//           gender: data.gender || "",
-//           dob: formatDateForInput(data.dob),
-//         });
-
-//         const imgRes = await getProfileImageApi();
-//         const imageUrl = buildImageUrl(imgRes?.data?.imageUrl);
-
-//         setProfileImage(imageUrl);
-//         localStorage.setItem("profileImage", imageUrl);
-//       } catch (err) {
-//         console.error(err);
-//         setProfileImage(DEFAULT_AVATAR);
-//       }
-//     };
-
-//     loadData();
-//   }, []);
-
-//   /* ================= IMAGE UPLOAD ================= */
-//   const handleImageChange = async (e) => {
-//     const file = e.target.files[0];
-//     if (!file) return;
-
-//     try {
-//       const hasCustomImage = !profileImage.includes("default-avatar");
-
-//       const res = hasCustomImage
-//         ? await updateProfileImageApi(file)
-//         : await uploadProfileImageApi(file);
-
-//       const fullUrl = `${buildImageUrl(res.data.imageUrl)}?t=${Date.now()}`;
-
-//       setProfileImage(fullUrl);
-//       localStorage.setItem("profileImage", fullUrl);
-
-//       toast.success("Profile image updated");
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Image update failed");
-//     }
-//   };
-
-//   /* ================= IMAGE DELETE ================= */
-//   const handleRemoveImage = async () => {
-//     try {
-//       await deleteProfileImageApi();
-
-//       setProfileImage(DEFAULT_AVATAR);
-//       localStorage.removeItem("profileImage");
-
-//       setShowDeleteModal(false);
-//       toast.success("Profile image removed");
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Failed to delete image");
-//     }
-//   };
-
-//   /* ================= INPUT CHANGE ================= */
-//   const handleChange = (e) =>
-//     setProfile({ ...profile, [e.target.name]: e.target.value });
-
-//   /* ================= UPDATE PROFILE ================= */
-//   const confirmUpdateProfile = async () => {
-//     try {
-//       await PatientUpdateProfileApi({
-//         fullName: profile.name,
-//         phone: profile.phone,
-//         gender: profile.gender,
-//         dob: profile.dob,
-//       });
-
-//       toast.success("Profile updated");
-//       setShowUpdateModal(false);
-
-//       localStorage.setItem(
-//         "loggedInUser",
-//         JSON.stringify({
-//           role: "PATIENT",
-//           name: profile.name,
-//           phone: profile.phone,
-//         })
-//       );
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Profile update failed");
-//     }
-//   };
-
-//   /* ================= UI ================= */
-//   return (
-//     <div className="min-h-screen flex justify-center items-center bg-linear-to-b from-[#cfeeff] to-[#e9f8ff] py-10 px-4">
-//       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-4xl">
-//         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">
-//           My Profile
-//         </h2>
-
-//         <form onSubmit={(e) => e.preventDefault()}>
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-//             {/* Avatar */}
-//             <div className="flex flex-col items-center">
-//               <img
-//                 src={profileImage}
-//                 className="w-32 h-32 rounded-full object-cover border"
-//                 onError={(e) => {
-//                   e.target.onerror = null;
-//                   e.target.src = DEFAULT_AVATAR;
-//                 }}
-//               />
-
-//               <div className="flex gap-4 mt-3">
-//                 <label className="cursor-pointer text-blue-600">
-//                   <FaEdit />
-//                   <input
-//                     type="file"
-//                     accept="image/*"
-//                     hidden
-//                     onChange={handleImageChange}
-//                   />
-//                 </label>
-
-//                 <button
-//                   type="button"
-//                   onClick={() => setShowDeleteModal(true)}
-//                   className="text-red-500"
-//                 >
-//                   <FaTrash />
-//                 </button>
-//               </div>
-//             </div>
-
-//             {/* Details */}
-//             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-//               <Input
-//                 icon={<FaUser />}
-//                 name="name"
-//                 value={profile.name}
-//                 onChange={handleChange}
-//                 placeholder="Full Name"
-//               />
-//               <Input
-//                 icon={<FaEnvelope />}
-//                 name="email"
-//                 value={profile.email}
-//                 readOnly
-//               />
-
-//               <div className="relative">
-//                 <span className="absolute left-3 top-3 text-xl text-gray-400">
-//                   <MdWc />
-//                 </span>
-//                 <select
-//                   name="gender"
-//                   value={profile.gender}
-//                   onChange={handleChange}
-//                   className="w-full pl-10 border rounded-lg p-2"
-//                 >
-//                   <option value="Male">Male</option>
-//                   <option value="Female">Female</option>
-//                   <option value="Other">Other</option>
-//                 </select>
-//               </div>
-
-//               <Input
-//                 icon={<FaCalendarAlt />}
-//                 type="date"
-//                 name="dob"
-//                 value={profile.dob}
-//                 onChange={handleChange}
-//               />
-//               <Input
-//                 icon={<FaPhone />}
-//                 name="phone"
-//                 value={profile.phone}
-//                 readOnly
-//               />
-//             </div>
-//           </div>
-
-//           <div className="flex justify-end mt-6 gap-3">
-//             <button
-//               type="button"
-//               onClick={() => navigate(-1)}
-//               className="bg-red-600 text-white px-6 py-2 rounded-lg"
-//             >
-//               Cancel
-//             </button>
-//             <button
-//               type="button"
-//               onClick={() => setShowUpdateModal(true)}
-//               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
-//             >
-//               Update Profile
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-
-//       {showDeleteModal && (
-//         <ConfirmModal
-//           text="Delete profile image?"
-//           onNo={() => setShowDeleteModal(false)}
-//           onYes={handleRemoveImage}
-//         />
-//       )}
-
-//       {showUpdateModal && (
-//         <ConfirmModal
-//           text="Update profile details?"
-//           onNo={() => setShowUpdateModal(false)}
-//           onYes={confirmUpdateProfile}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ProfileSection;
-
-
-
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { notify } from "../../../utils/notify";
+import { useImage } from "../../../context/ImageContext";
 import {
   uploadProfileImageApi,
   getProfileImageApi,
-  updateProfileImageApi,
   deleteProfileImageApi,
 } from "../../../services/PatientProfileImageApi";
 import { PatientGetProfileApi } from "../../../services/patient/profile/PatientGetProfileApi";
 import { PatientUpdateProfileApi } from "../../../services/patient/profile/PatientUpdateProfileApi";
-import { FaEdit,FaTrash } from "react-icons/fa";
+import { FaCamera, FaTrash } from "react-icons/fa";
 
-const DEFAULT_AVATAR = "/images/default-avatar.png";
+const DEFAULT_AVATAR =
+  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
-const buildImageUrl = (path) => {
-  if (!path) return DEFAULT_AVATAR;
-  if (path.startsWith("http")) return path;
-  const base = import.meta.env.VITE_API_URL.replace(/\/$/, "");
-  const cleanPath = path.replace(/^\//, "");
-  return `${base}/${cleanPath}`;
-};
+const formatDateForInput = (iso) =>
+  iso ? new Date(iso).toISOString().split("T")[0] : "";
+
+
+function FloatingInput({ label, icon, readOnly, ...props }) {
+  return (
+    <div
+      className={`flex items-center gap-3.5 bg-[#fafafa] border border-black/[0.07] rounded-[10px] px-[18px] py-3.5 transition-all duration-200
+      ${!readOnly ? "focus-within:border-[#3d6b8e] focus-within:ring-2 focus-within:ring-[rgba(61,107,142,0.12)] focus-within:bg-white" : ""}`}
+    >
+      <div
+        className={`w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0
+        ${readOnly ? "bg-[#f0f0f0] text-[#8a8680]" : "bg-[#e8f0f6] text-[#3d6b8e]"}`}
+      >
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <label className="block text-[10.5px] font-medium tracking-[0.07em] uppercase text-[#8a8680] mb-[3px]">
+          {label}
+        </label>
+        <input
+          {...props}
+          readOnly={readOnly}
+          className={`font-dm block w-full bg-transparent border-none outline-none text-[14.5px] font-normal leading-[1.4] placeholder-[#c5c1bc] p-0
+            ${readOnly ? "text-[#8a8680] cursor-default" : "text-[#1a1814]"}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FloatingSelect({ label, icon, ...props }) {
+  return (
+    <div className="flex items-center gap-3.5 bg-[#fafafa] border border-black/[0.07] rounded-[10px] px-[18px] py-3.5 transition-all duration-200 focus-within:border-[#3d6b8e] focus-within:ring-2 focus-within:ring-[rgba(61,107,142,0.12)] focus-within:bg-white">
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 bg-[#e8f0f6] text-[#3d6b8e]">
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <label className="block text-[10.5px] font-medium tracking-[0.07em] uppercase text-[#8a8680] mb-[3px]">
+          {label}
+        </label>
+        <select
+          {...props}
+          className="font-dm block w-full bg-transparent border-none outline-none text-[14.5px] text-[#1a1814] p-0 cursor-pointer appearance-none"
+        >
+          <option value="">Select</option>
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmModal({ text, subtitle, onNo, onYes, danger }) {
+  return (
+    <div className="animate-fade-in fixed inset-0 bg-[rgba(10,8,6,0.45)] backdrop-blur-[6px] flex items-center justify-center z-[100]">
+      <div
+        className="animate-scale-in bg-white rounded-[20px] px-9 py-10 w-[340px] text-center"
+        style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }}
+      >
+        <div
+          className={`w-14 h-14 rounded-full flex items-center justify-center text-[22px] mx-auto mb-5
+          ${danger ? "bg-[#fdf0ef]" : "bg-[#e8f0f6]"}`}
+        >
+          {danger ? "⚠️" : "✦"}
+        </div>
+        <h3 className="font-playfair text-[22px] font-semibold text-[#1a1814] m-0 mb-2">
+          {text}
+        </h3>
+        {subtitle && (
+          <p className="font-dm text-[13px] text-[#8a8680] m-0 mb-7">
+            {subtitle}
+          </p>
+        )}
+        <div className="flex gap-2.5 justify-center">
+          <button
+            onClick={onNo}
+            className="font-dm px-7 py-2.5 rounded-full text-[14px] font-medium text-[#8a8680] bg-[#f0eeec] border-none cursor-pointer transition hover:bg-[#e8e5e2] hover:text-[#1a1814]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onYes}
+            className={`font-dm px-7 py-2.5 rounded-full text-[14px] font-medium text-white border-none cursor-pointer transition
+              ${danger ? "bg-[#c0392b] hover:bg-[#a93226]" : "bg-[#3d6b8e] hover:bg-[#2d5a7a]"}`}
+            style={{
+              boxShadow: danger ? "none" : "0 4px 12px rgba(61,107,142,0.12)",
+            }}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProfileSection() {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const emptyProfile = {
     id: "",
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     gender: "",
     dob: "",
-  });
-
+  };
+const { setImage } = useImage();
+  const [profile, setProfile] = useState(emptyProfile);
   const [profileImage, setProfileImage] = useState(DEFAULT_AVATAR);
+  const [originalProfile, setOriginalProfile] = useState(emptyProfile);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
-  const formatDateForInput = (iso) =>
-    iso ? new Date(iso).toISOString().split("T")[0] : "";
-
-  /* ================= LOAD DATA ================= */
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await PatientGetProfileApi();
-
-        setFormData({
-          id: data.id,
-          fullName: data.fullName || "",
+        const res = await PatientGetProfileApi();
+        const data = res?.data?.data || res?.data;
+        if (!data) return;
+        const loaded = {
+          id: data.id || "",
+          name: data.fullName || "",
           email: data.email || "",
-          phone: data.phone || "",
+          phone: data.phone || data.mobile || "",
           gender: data.gender || "",
           dob: formatDateForInput(data.dob),
-        });
-
+        };
+        setProfile(loaded);
+        setOriginalProfile(loaded);
         const imgRes = await getProfileImageApi();
-        setProfileImage(buildImageUrl(imgRes?.data?.imageUrl));
+        const rawUrl = imgRes?.data?.imageUrl;
+
+        const imageUrl = rawUrl ? `${rawUrl}?t=${Date.now()}` : DEFAULT_AVATAR;
+
+        setProfileImage(imageUrl);
+
+      if (rawUrl) {
+  setImage(rawUrl); // ✅ global update
+}
       } catch (err) {
-        console.error(err);
+        console.error("Profile load error:", err);
         setProfileImage(DEFAULT_AVATAR);
       }
     };
     loadData();
   }, []);
 
-  /* ================= IMAGE HANDLERS ================= */
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+const handleImageChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    try {
-      const hasCustomImage = !profileImage.includes("default-avatar");
+  if (!file.type.startsWith("image/")) {
+    notify.error("Only image files allowed");
+    return;
+  }
 
-      const res = hasCustomImage
-        ? await updateProfileImageApi(file)
-        : await uploadProfileImageApi(file);
+  try {
+    const res = await uploadProfileImageApi(file);
 
-      const fullUrl = `${buildImageUrl(res.data.imageUrl)}?t=${Date.now()}`;
-      setProfileImage(fullUrl);
-      localStorage.setItem("profileImage", fullUrl);
+    const rawUrl = res.data.imageUrl;
 
-      toast.success("Profile image updated");
-    } catch {
-      toast.error("Image update failed");
-    }
-  };
+    // ✅ UI ke liye cache-bust
+    const fullUrl = `${rawUrl}?t=${Date.now()}`;
 
+    setProfileImage(fullUrl);
+setImage(rawUrl);
+    // ✅ clean URL store
+
+    notify.success("Profile image updated");
+  } catch {
+    notify.error("Image update failed");
+  }
+};
   const handleRemoveImage = async () => {
     try {
       await deleteProfileImageApi();
       setProfileImage(DEFAULT_AVATAR);
-      localStorage.removeItem("profileImage");
+      setImage(null); 
       setShowDeleteModal(false);
-      toast.success("Profile image removed");
+      notify.success("Profile image removed");
     } catch {
-      toast.error("Delete failed");
+      notify.error("Delete failed");
     }
   };
 
-  /* ================= FORM HANDLERS ================= */
   const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setProfile({ ...profile, [e.target.name]: e.target.value });
+  const handleCancel = () => setProfile(originalProfile);
 
   const confirmUpdateProfile = async () => {
     try {
       await PatientUpdateProfileApi({
-        fullName: formData.fullName,
-        phone: formData.phone,
-        gender: formData.gender,
-        dob: formData.dob,
+        fullName: profile.name,
+        phone: profile.phone,
+        gender: profile.gender,
+        dob: profile.dob,
       });
-
-      toast.success("Profile updated");
+      notify.success("Profile updated successfully");
       setShowUpdateModal(false);
+      setOriginalProfile(profile);
+      localStorage.setItem(
+        "loggedInUser",
+        JSON.stringify({
+          role: "PATIENT",
+          name: profile.name,
+          phone: profile.phone,
+        }),
+      );
     } catch {
-      toast.error("Update failed");
+      notify.error("Update failed");
     }
   };
 
- return (
-  <div className="min-h-screen bg-gray-100 font-sans flex justify-center items-center px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-    <div className="bg-white w-full max-w-4xl rounded-2xl shadow-sm p-5 sm:p-8">
-
-      {/* ================= Header ================= */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
-
-        <div className="relative">
-          <img
-            src={profileImage}
-            onError={(e) => (e.target.src = DEFAULT_AVATAR)}
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-gray-200 object-cover mx-auto sm:mx-0"
-            alt=""
+  return (
+    <div
+      className="font-dm min-h-screen bg-[#faf8f5] flex items-start justify-center px-4 py-12"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 20% 10%, rgba(61,107,142,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 90%, rgba(61,107,142,0.04) 0%, transparent 50%)",
+      }}
+    >
+      <div className="animate-fade-up w-full max-w-[860px]">
+        <div
+          className="bg-white rounded-[24px] px-10 py-10 mb-5 relative overflow-hidden"
+          style={{
+            boxShadow:
+              "0 12px 48px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          <div
+            className="absolute top-0 left-0 right-0 h-[3px]"
+            style={{
+              background: "linear-gradient(90deg, #3d6b8e, #6fa3c4, #3d6b8e)",
+            }}
           />
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            id="uploadImage"
-            onChange={handleImageChange}
-          />
+
+          <div className="flex items-center gap-9 flex-col sm:flex-row">
+            <div className="relative flex-shrink-0">
+              <div
+                className="w-[110px] h-[110px] rounded-full p-[3px] bg-gradient-to-br from-[#3d6b8e] to-[#a8c8de]"
+                style={{ boxShadow: "0 8px 24px rgba(61,107,142,0.12)" }}
+              >
+                <img
+                  src={profileImage}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = DEFAULT_AVATAR;
+                  }}
+                  className="w-full h-full rounded-full object-cover border-[3px] border-white block"
+                  alt="Profile"
+                />
+              </div>
+              <label
+                htmlFor="uploadImage"
+                className="absolute bottom-0.5 right-0.5 w-8 h-8 bg-[#3d6b8e] hover:bg-[#2d5a7a] border-[2.5px] border-white rounded-full flex items-center justify-center cursor-pointer text-white transition-transform hover:scale-110"
+              >
+                <FaCamera size={12} />
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                id="uploadImage"
+                onChange={handleImageChange}
+              />
+            </div>
+
+            {/* Hero Text */}
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <div className="inline-flex items-center gap-1.5 bg-[#e8f0f6] text-[#3d6b8e] text-[11px] font-medium tracking-[0.08em] uppercase px-3 py-1 rounded-full mb-2.5">
+                <span className="animate-pulse-dot w-1.5 h-1.5 bg-[#3d6b8e] rounded-full inline-block" />
+                Active Patient
+              </div>
+              <h1 className="font-playfair text-[32px] font-semibold text-[#1a1814] leading-[1.1] m-0 mb-1.5 truncate">
+                {profile.name || "Your Name"}
+              </h1>
+              <p className="font-dm text-[13px] font-light text-[#8a8680] m-0 mb-5">
+                Patient ID ·{" "}
+                <span className="font-medium text-[#1a1814]">
+                  #{profile.id || "—"}
+                </span>
+              </p>
+              <div className="flex gap-2.5 flex-wrap justify-center sm:justify-start">
+                <label
+                  htmlFor="uploadImage"
+                  className="inline-flex items-center gap-1.5 px-[18px] py-2 bg-[#e8f0f6] text-[#3d6b8e] rounded-full text-[13px] font-medium cursor-pointer border-none transition hover:bg-[#d0e4f0] hover:-translate-y-px"
+                >
+                  <FaCamera size={11} /> Change Photo
+                </label>
+                {profileImage !== DEFAULT_AVATAR && (
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="inline-flex items-center gap-1.5 px-[18px] py-2 bg-[#fdf0ef] text-[#c0392b] rounded-full text-[13px] font-medium cursor-pointer border-none transition hover:bg-[#f9dede] hover:-translate-y-px"
+                  >
+                    <FaTrash size={11} /> Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
-            {formData.fullName}
+        <div
+          className="bg-white rounded-[24px] px-10 py-10"
+          style={{
+            boxShadow:
+              "0 12px 48px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          <h2 className="font-playfair text-[22px] font-semibold text-[#1a1814] m-0 mb-7 flex items-center gap-3">
+            Personal Information
+            <span className="flex-1 h-px bg-black/[0.07]" />
           </h2>
-          <p className="text-gray-500">
-            Patient ID: #{formData.id}
-          </p>
 
-          <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
-            <label
-              htmlFor="uploadImage"
-              className="px-4 py-2 bg-blue-100 text-blue-600 rounded-xl font-medium hover:bg-blue-200 cursor-pointer text-sm"
-            >
-              <FaEdit className="inline mr-2" />
-              Edit Photo
-            </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FloatingInput
+              label="Full Name"
+              icon="👤"
+              name="name"
+              value={profile.name}
+              onChange={handleChange}
+              placeholder="Enter your name"
+            />
+            <FloatingInput
+              label="Email Address"
+              icon="✉️"
+              name="email"
+              value={profile.email}
+              readOnly
+              placeholder="—"
+            />
+            <FloatingInput
+              label="Mobile Number"
+              icon="📱"
+              name="phone"
+              value={profile.phone}
+              onChange={handleChange}
+              placeholder="Enter mobile number"
+            />
+            <FloatingInput
+              label="Date of Birth"
+              icon="🗓"
+              type="date"
+              name="dob"
+              value={profile.dob}
+              onChange={handleChange}
+            />
+            <FloatingSelect
+              label="Gender"
+              icon="⚧"
+              name="gender"
+              value={profile.gender}
+              onChange={handleChange}
+            />
+          </div>
 
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-black/[0.07] flex-col-reverse sm:flex-row">
             <button
-              onClick={() => setShowDeleteModal(true)}
-              className="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 text-sm"
+              onClick={() => navigate(-1)}
+              className="font-dm px-7 py-3 rounded-full bg-white border border-black/[0.07] text-[#8a8680] text-[14px] font-medium cursor-pointer transition hover:border-[#ccc] hover:text-[#1a1814] hover:bg-[#f5f5f5]"
             >
-              <FaTrash className="inline mr-2" />
-              Remove
+              Discard Changes
+            </button>
+            <button
+              onClick={() => setShowUpdateModal(true)}
+              className="font-dm px-9 py-3 rounded-full bg-[#3d6b8e] text-white text-[14px] font-medium tracking-[0.02em] cursor-pointer border-none transition hover:bg-[#2d5a7a] hover:-translate-y-px active:translate-y-0"
+              style={{ boxShadow: "0 4px 12px rgba(61,107,142,0.12)" }}
+            >
+              Update Profile
             </button>
           </div>
         </div>
       </div>
 
-      {/* ================= Form ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-
-        <Input
-          label="Full Name"
-          name="fullName"
-          value={formData.fullName}
-          onChange={handleChange}
+      {showDeleteModal && (
+        <ConfirmModal
+          danger
+          text="Remove profile photo?"
+          subtitle="Your default avatar will be restored."
+          onNo={() => setShowDeleteModal(false)}
+          onYes={handleRemoveImage}
         />
-
-        <Input
-          label="Email Address"
-          name="email"
-          value={formData.email}
-          readOnly
+      )}
+      {showUpdateModal && (
+        <ConfirmModal
+          text="Update these changes?"
+          subtitle="Your profile information will be updated."
+          onNo={() => setShowUpdateModal(false)}
+          onYes={confirmUpdateProfile}
         />
-
-        <Input
-          label="Mobile Number"
-          name="phone"
-          value={formData.phone}
-          readOnly
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Select
-            label="Gender"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-          />
-
-          <Input
-            label="Date of Birth"
-            type="date"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-          />
-        </div>
-
-      </div>
-
-      {/* ================= Buttons ================= */}
-      <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8 items-center">
-        <button
-          onClick={() => window.location.reload()}
-          className="text-gray-600 hover:text-gray-800 text-sm"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={() => setShowUpdateModal(true)}
-          className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 text-sm"
-        >
-          Update Profile
-        </button>
-      </div>
-
-    </div>
-
-    {/* ================= Modals ================= */}
-    {showDeleteModal && (
-      <ConfirmModal
-        text="Delete profile image?"
-        onNo={() => setShowDeleteModal(false)}
-        onYes={handleRemoveImage}
-      />
-    )}
-
-    {showUpdateModal && (
-      <ConfirmModal
-        text="Update profile details?"
-        onNo={() => setShowUpdateModal(false)}
-        onYes={confirmUpdateProfile}
-      />
-    )}
-  </div>
-);
-}
-
-/* ================= Reusable Components ================= */
-
-function Input({ label, ...props }) {
-  return (
-    <div>
-      <label className="block text-sm text-gray-600 mb-2">
-        {label}
-      </label>
-      <input
-        {...props}
-        className="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-    </div>
-  );
-}
-
-function Select({ label, ...props }) {
-  return (
-    <div>
-      <label className="block text-sm text-gray-600 mb-2">
-        {label}
-      </label>
-      <select
-        {...props}
-        className="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">Select</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-  );
-}
-
-function ConfirmModal({ text, onNo, onYes }) {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-white rounded-xl shadow-lg p-6 w-80 text-center">
-        <h3 className="text-lg font-semibold mb-4">{text}</h3>
-        <div className="flex justify-center gap-4">
-          <button onClick={onNo} className="bg-gray-300 px-4 py-2 rounded-lg">
-            No
-          </button>
-          <button
-            onClick={onYes}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-          >
-            Yes
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

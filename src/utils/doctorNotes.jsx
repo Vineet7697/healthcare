@@ -7,18 +7,3 @@ export const saveNotes = (data) => {
 };
 
 
-
-// 📁 Doctor Notes Page me use 
-
-// src/pages/DoctorNotesPage.jsx
-
-// Notes ka DATA STRUCTURE
-// {
-//   appointmentId,
-//   patientId,
-//   doctorId,
-//   notes,
-//   diagnosis,
-//   medicines,
-//   createdAt: new Date().toISOString()
-// }

@@ -9,7 +9,6 @@ import {
 const BOX_WIDTH = 360;
 const BOX_HEIGHT = 520;
 
-/* 🧠 HEALTHCARE FILTER */
 const isHealthcareQuestion = (text) => {
   const keywords = [
     "doctor",
@@ -31,12 +30,9 @@ const isHealthcareQuestion = (text) => {
     "health",
   ];
 
-  return keywords.some((word) =>
-    text.toLowerCase().includes(word)
-  );
+  return keywords.some((word) => text.toLowerCase().includes(word));
 };
 
-/* ⏰ TIME FORMAT */
 const formatTime = (time) =>
   new Date(time).toLocaleTimeString([], {
     hour: "2-digit",
@@ -50,13 +46,11 @@ const HealthcareChatbot = () => {
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
-  /* 👤 USER STORAGE */
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   const STORAGE_KEY = user?.id
     ? `chat_messages_${user.id}`
     : "chat_messages_guest";
 
-  /* 💬 CHAT */
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved
@@ -75,13 +69,11 @@ const HealthcareChatbot = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
-  /* 🔽 AUTO SCROLL */
   const messagesEndRef = useRef(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  /* 📍 INITIAL POSITION */
   useEffect(() => {
     setPosition({
       x: window.innerWidth - BOX_WIDTH - 56,
@@ -89,7 +81,6 @@ const HealthcareChatbot = () => {
     });
   }, []);
 
-  /* 🖱️ DRAG */
   const onMouseDown = (e) => {
     dragging.current = true;
     offset.current = {
@@ -103,11 +94,11 @@ const HealthcareChatbot = () => {
     setPosition({
       x: Math.max(
         0,
-        Math.min(e.clientX - offset.current.x, window.innerWidth - BOX_WIDTH)
+        Math.min(e.clientX - offset.current.x, window.innerWidth - BOX_WIDTH),
       ),
       y: Math.max(
         0,
-        Math.min(e.clientY - offset.current.y, window.innerHeight - BOX_HEIGHT)
+        Math.min(e.clientY - offset.current.y, window.innerHeight - BOX_HEIGHT),
       ),
     });
   };
@@ -123,7 +114,6 @@ const HealthcareChatbot = () => {
     };
   });
 
-  /* 🧹 CLEAR CHAT */
   const clearChat = () => {
     if (!window.confirm("Clear entire chat?")) return;
 
@@ -138,7 +128,6 @@ const HealthcareChatbot = () => {
     ]);
   };
 
-  /* 🔥 STREAMING BOT REPLY */
   const streamBotReply = (fullText) => {
     let index = 0;
     setIsTyping(true);
@@ -156,10 +145,8 @@ const HealthcareChatbot = () => {
       index++;
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === botMsg.id
-            ? { ...m, text: fullText.slice(0, index) }
-            : m
-        )
+          m.id === botMsg.id ? { ...m, text: fullText.slice(0, index) } : m,
+        ),
       );
 
       if (index >= fullText.length) {
@@ -169,7 +156,6 @@ const HealthcareChatbot = () => {
     }, 25);
   };
 
-  /* 💬 SEND MESSAGE (HEALTHCARE ONLY) */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -187,21 +173,18 @@ const HealthcareChatbot = () => {
 
     setInput("");
 
-    // ❌ Not healthcare
     if (!isHealthcareQuestion(question)) {
       streamBotReply(
-        "🙏 I can help only with healthcare-related questions like symptoms, medicines, doctors, or appointments."
+        "🙏 I can help only with healthcare-related questions like symptoms, medicines, doctors, or appointments.",
       );
       return;
     }
 
-    // ✅ Healthcare
     streamBotReply(
-      "🩺 I am fetching reliable medical information for you. Please wait a moment..."
+      "🩺 I am fetching reliable medical information for you. Please wait a moment...",
     );
   };
 
-  /* 🎤 VOICE INPUT */
   const startListening = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -225,7 +208,6 @@ const HealthcareChatbot = () => {
     recognition.onend = () => setIsListening(false);
   };
 
-  /* 💾 SAVE CHAT */
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages, STORAGE_KEY]);
@@ -246,7 +228,6 @@ const HealthcareChatbot = () => {
           style={{ left: position.x, top: position.y }}
           className="fixed w-[360px] h-[520px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col"
         >
-          {/* Header */}
           <div
             onMouseDown={onMouseDown}
             className="bg-emerald-500 text-white px-4 py-3 rounded-t-2xl flex justify-between items-center cursor-move"
@@ -263,8 +244,6 @@ const HealthcareChatbot = () => {
               <FaTimes onClick={() => setOpen(false)} />
             </div>
           </div>
-
-          {/* Messages */}
           <div className="flex-1 px-4 py-2 space-y-3 overflow-y-auto text-sm">
             {messages.map((msg) => (
               <div
@@ -275,9 +254,7 @@ const HealthcareChatbot = () => {
               >
                 <div
                   className={`px-3 py-2 rounded-lg inline-block max-w-[80%] whitespace-pre-wrap break-words ${
-                    msg.role === "user"
-                      ? "bg-emerald-100"
-                      : "bg-gray-100"
+                    msg.role === "user" ? "bg-emerald-100" : "bg-gray-100"
                   }`}
                 >
                   {msg.text}
@@ -297,7 +274,7 @@ const HealthcareChatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
+         
           <div className="border-t p-3 flex gap-2 items-center">
             <input
               value={input}
@@ -327,7 +304,8 @@ const HealthcareChatbot = () => {
         </div>
       )}
     </>
-  );o
+  );
+  o;
 };
 
 export default HealthcareChatbot;

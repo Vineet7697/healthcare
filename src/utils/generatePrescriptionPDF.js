@@ -9,17 +9,13 @@ export const generatePrescriptionPDF = (appointment) => {
   doc.setFontSize(12);
   doc.text(`Doctor: ${appointment.doctorName}`, 20, 35);
   doc.text(`Date: ${appointment.date}`, 20, 45);
-  doc.text(`Hospital: ${appointment.hospital}`, 20, 55);
+  doc.text(`Hospital: ${appointment.hospital || "N/A"}`, 20, 55);
 
   doc.text("Medicines:", 20, 70);
+  doc.text(appointment.medicines || "No medicines prescribed", 25, 80);
 
-  appointment.prescription?.medicines?.forEach((med, i) => {
-    doc.text(
-      `• ${med.name} - ${med.dosage} (${med.duration})`,
-      25,
-      80 + i * 10
-    );
-  });
+  doc.text("Instructions:", 20, 100);
+  doc.text(appointment.instructions || "No instructions", 25, 110);
 
   doc.save(`Prescription_${appointment.id}.pdf`);
 };

@@ -1,124 +1,134 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { validateDoctorLogin } from "../../controllers/FormValidation";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { notify } from "../../utils/notify";
 import { DoctorLoginApi } from "../../services/doctor/DoctorLoginApi";
+import loginimageImg from "../../assets/loginimage.webp";
 
 const DoctorLoginPage = () => {
   const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-
-  const [formValues, setFormValues] = useState({
-    identifier: "",
-    password: "",
-  });
-
+  const [formValues, setFormValues] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  /* ================= HANDLE CHANGE ================= */
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const raw = localStorage.getItem("loggedInUser");
+    if (token && raw) {
+      const user = JSON.parse(raw);
+      if (user.role === "DOCTOR") {
+        if (user.status === "APPROVED") navigate("/doctordashboard", { replace: true });
+        else if (user.status === "IN_PROGRESS") navigate("/doctorregistration", { replace: true });
+        else if (user.status === "PENDING") navigate("/approvalstatuspage", { replace: true });
+      }
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     const updated = { ...formValues, [name]: value };
     setFormValues(updated);
-
     const fieldErrors = validateDoctorLogin(updated);
     setErrors({ ...errors, [name]: fieldErrors[name] });
   };
 
-  /* ================= LOGIN ================= */
-const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleForgotPassword = () => {
+    notify.info("Redirecting to password reset...");
+    navigate("/forgot-password");
+  };
 
-  try {
-    const res = await DoctorLoginApi({
-      identifier: formValues.identifier,
-      password: formValues.password,
-    });
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await DoctorLoginApi({
+        identifier: formValues.identifier,
+        password: formValues.password,
+      });
+      const token = res.data.data.token;
+      const redirect = res.data.redirect;
+      const nextStep = res.data.nextStep;
+      const status = res.data.status;
+      const loggedInUser = { role: "DOCTOR", identifier: formValues.identifier, status };
+      window.dispatchEvent(new Event("userLogin"));
 
-    // 🔥 BACKEND RESPONSE KE HISAB SE
-    const { user, token } = res;
+      if (redirect === "dashboard") {
+        if (rememberMe) {
+          localStorage.setItem("token", token);
+          localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+        } else {
+          sessionStorage.setItem("token", token);
+          sessionStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+        }
+        notify.success("Doctor login successful");
+        navigate("/doctordashboard");
+        return;
+      }
+      if (redirect === "resume") {
+        notify.info("Resume your registration");
+        sessionStorage.setItem("tempToken", token);
+        navigate(`/doctorregistration?step=${nextStep}`);
+        return;
+      }
+      if (redirect === "waiting-approval") {
+        notify.info("Your profile is under verification");
+        sessionStorage.setItem("tempToken", token);
+        navigate("/approvalstatuspage");
+        return;
+      }
+    } catch (err) {
+      notify.error(err.response?.data?.message || "Invalid email/mobile or password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // 🔥 EXACT & SAFE STORAGE
-    localStorage.setItem(
-      "loggedInUser",
-      JSON.stringify({
-        id: user.id,          // ✅ 28
-        role: user.role,      // ✅ DOCTOR
-        name: user.email,     // ya doctorName agar future me aaye
-        phone: user.mobile,
-      })
-    );
+  const inputCls = (field) =>
+    `w-full px-4 py-2.5 rounded-lg text-sm text-gray-800 outline-none border transition-colors duration-150 ${
+      errors[field]
+        ? "border-red-400 bg-red-50"
+        : "border-gray-200 bg-white focus:border-[#0086C3] focus:ring-1 focus:ring-[#0086C3]/20"
+    }`;
 
-    localStorage.setItem("token", token);
-
-    window.dispatchEvent(new Event("userLogin"));
-
-    toast.success("Doctor login successful");
-    navigate("/doctordashboard");
-  } catch (err) {
-    toast.error(
-      err.response?.data?.message || "Invalid email/mobile or password"
-    );
-  }
-};
-
-
-  /* ================= UI ================= */
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-white to-blue-50">
-      <div className="bg-white shadow-2xl rounded-3xl overflow-hidden w-11/12 max-w-5xl md:flex">
-        {/* LEFT */}
-        <div className="w-full md:w-1/2 p-10 flex flex-col justify-center">
-       <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Login to{" "}
-            <img
-              src="/images/yo.png"
-              alt="YoDoctor"
-              className="h-10 inline align-middle"
-            />
-          </h1>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
+      <div className="w-full max-w-4xl rounded-2xl overflow-hidden md:flex shadow-md border border-gray-100">
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            {/* EMAIL / MOBILE */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="w-full md:w-1/2 bg-white px-8 py-10 flex flex-col justify-center">
+
+          <div className="text-center mb-8">
+            <h1 className=" font-[family-name:var(--font-playfair)] text-3xl font-bold text-gray-800 leading-tight">
+              Login to{" "}
+              <img src="/images/logo.webp" alt="YoDoctor" className="h-7 inline align-middle ml-1" />
+            </h1>
+          </div>
+
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
                 Email / Mobile Number
               </label>
-
-
               <input
                 type="text"
                 name="identifier"
                 value={formValues.identifier}
                 placeholder="Enter email or mobile number"
                 onChange={handleChange}
-                className={`w-full pl-4 pr-4 py-2 border rounded-lg outline-none focus:border-[#2277f7] focus:border-2 ${
-                  errors.identifier ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputCls("identifier")}
               />
-
               {errors.identifier && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.identifier}
-                </p>
+                <p className="text-red-400 text-xs mt-1">{errors.identifier}</p>
               )}
             </div>
 
-            {/* PASSWORD */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
                 Password
               </label>
-
-
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -126,74 +136,76 @@ const handleLogin = async (e) => {
                   value={formValues.password}
                   onChange={handleChange}
                   placeholder="Enter password"
-                  className={`w-full pl-4 pr-4 py-2 border rounded-lg outline-none focus:border-[#2277f7] focus:border-2 ${
-                    errors.password ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={inputCls("password")}
                 />
-
-                <span
+                <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0086C3] transition-colors duration-150"
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
+                  {showPassword ? <FaEyeSlash size={15} /> : <FaEye size={15} />}
+                </button>
               </div>
-
               {errors.password && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.password}
-                </p>
+                <p className="text-red-400 text-xs mt-1">{errors.password}</p>
               )}
             </div>
 
-            {/* REMEMBER / FORGOT */}
-            <div className="flex justify-between text-sm">
-              <label className="flex items-center gap-2">
+            <div className="flex justify-between items-center">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 accent-[#0086C3] cursor-pointer"
                 />
-                Remember me
+                <span className="text-sm text-gray-500">Remember me</span>
               </label>
-
               <button
                 type="button"
-                onClick={() => navigate("/forgotpassword")}
-                className="text-red-500 hover:underline"
+                onClick={handleForgotPassword}
+                className="text-sm text-red-400 font-medium hover:underline cursor-pointer"
               >
                 Forgot password?
               </button>
             </div>
 
-            {/* BUTTONS */}
-            <div className="flex gap-4">
+            <div className="h-px bg-gray-100" />
+
+            <div className="flex gap-3">
               <button
                 type="submit"
-                className="w-full bg-linear-to-br from-[#2277f7] to-[#52abd4] font-bold text-white py-2 rounded-full"
+                disabled={loading}
+                className="flex-1 bg-[#0086C3] hover:bg-[#006fa3] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm py-2.5 rounded-lg transition-colors duration-150"
               >
-                Login
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin " />
+                    Logging in...
+                  </span>
+                ) : "Login"}
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate("/doctorregistrationpage")}
-                className="w-full border border-[#2277f7] font-bold text-[#2277f7] py-2 rounded-full"
+                onClick={() => navigate("/doctorregistration")}
+                className="flex-1 text-[#0086C3] cursor-pointer border border-[#0086C3]/40 hover:bg-[#0086C3]/5 font-semibold text-sm py-2.5 rounded-lg transition-colors duration-150"
               >
                 Register
               </button>
             </div>
+
           </form>
         </div>
 
-        {/* RIGHT IMAGE */}
-        <div className="hidden md:flex w-1/2 bg-teal-100 items-center justify-center">
+        <div className="hidden md:flex w-1/2 relative items-end justify-center overflow-hidden bg-[#0086C3]">
           <img
-            src="/images/doctorclinic.jpg"
+            src={loginimageImg}
             alt="doctor"
             className="w-full h-full object-cover"
           />
         </div>
+
       </div>
     </div>
   );

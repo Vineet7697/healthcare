@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { CalendarDays, User, Mail, Lock, Phone } from "lucide-react";
-import { INPUT_BASE_CLASS } from "../../const/Signup_login";
-
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { validateRegisterForm } from "../../controllers/FormValidation";
-import { toast } from "react-toastify";
+import { notify } from "../../utils/notify";
 import { PatientSignupApi } from "../../services/patient/PatientSignupApi";
+import patientImg from "../../assets/patientRegistrationimage.webp";
 
 const ClientRegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -17,9 +16,7 @@ const ClientRegisterPage = () => {
     dob: "",
     password: "",
     confirmPassword: "",
-    // role: "PATIENT",
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -28,17 +25,14 @@ const ClientRegisterPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (errors[name]) setErrors({ ...errors, [name]: "" });
   };
-
-  // ✅ REGISTER → data.json (/users)
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
     const validationErrors = validateRegisterForm(formData);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length !== 0) return;
-
     try {
       const payload = {
         fullName: formData.fullName,
@@ -49,201 +43,274 @@ const ClientRegisterPage = () => {
         gender: formData.gender.toUpperCase(),
         dob: formData.dob,
       };
-
-      console.log("REGISTER PAYLOAD 👉", payload);
-
-      const res = await PatientSignupApi(payload);
-
-      console.log("REGISTER RESPONSE 👉", res.data);
-
-      toast.success("Registration successful!");
+      await PatientSignupApi(payload);
+      notify.success("Registration successful!");
       navigate("/clientloginpage");
     } catch (error) {
-      console.error("REGISTER ERROR 👉", error);
-      toast.error(error?.response?.data?.message || "Registration failed");
+      notify.error(error?.response?.data?.message || "Registration failed");
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 relative flex items-center justify-center overflow-hidden mt-16">
-      <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-b from-purple-500 to-indigo-500 rounded-tr-full rounded-br-full"></div>
+  const inputCls = (field) =>
+    `w-full pl-10 pr-4 py-2.5 rounded-xl font-[family-name:var(--font-dm)] text-[14px] text-[#0c1e3a] outline-none transition-all duration-200 ${
+      errors[field]
+        ? "border-2 border-red-400 bg-red-50"
+        : "border border-[rgba(12,30,58,0.15)] bg-white focus:border-2 focus:border-[#0086C3]"
+    }`;
 
-      <div className="relative z-10 bg-white shadow-2xl rounded-3xl md:flex max-w-5xl w-full mx-4 md:mx-0">
-        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-gray-800 ">
+  const iconCls =
+    "absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none";
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center px-4 pt-20 pb-10 relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg,#f0f4f8 0%,#e8f4fd 100%)" }}
+    >
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-full"
+        style={{ background: "linear-gradient(180deg,#0086C3,#2ecc71)" }}
+      />
+
+      <div
+        className="relative z-10 bg-white w-full max-w-5xl rounded-3xl overflow-hidden flex animate-[fadeUp_0.5s_cubic-bezier(0.22,1,0.36,1)_both]"
+        style={{
+          boxShadow: "0 8px 48px rgba(12,30,58,0.12)",
+          border: "1px solid rgba(12,30,58,0.06)",
+        }}
+      >
+        <div className="w-full md:w-1/2 px-8 md:px-12 py-10 flex flex-col justify-center">
+          <h2 className="font-[family-name:var(--font-playfair)] text-[26px] font-extrabold text-[#0c1e3a] mb-1">
             Create Patient Account
           </h2>
-          <p className="text-gray-500 mb-8">
+          <p
+            className="font-[family-name:var(--font-dm)] text-[14px] mb-7"
+            style={{ color: "#64748b" }}
+          >
             Join us to manage your health with ease.
           </p>
 
-          <form onSubmit={handleRegister} className="space-y-5">
-            {/* Full Name */}
-            <div className="relative">
-              <User className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Full Name"
-                className={`${INPUT_BASE_CLASS} ${
-                  errors.fullName ? "border-red-500" : "border-gray-300"
-                }`}
-              />
+          <form onSubmit={handleRegister} className="flex flex-col gap-4">
+            <div>
+              <div className="relative">
+                <User className={iconCls} size={16} color="#94a3b8" />
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  className={inputCls("fullName")}
+                />
+              </div>
               {errors.fullName && (
-                <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.fullName}
+                </p>
               )}
             </div>
 
-            {/* Email */}
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email Address"
-                className={`${INPUT_BASE_CLASS} ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
-              />
+            <div>
+              <div className="relative">
+                <Mail className={iconCls} size={16} color="#94a3b8" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Email Address"
+                  className={inputCls("email")}
+                />
+              </div>
               {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.email}
+                </p>
               )}
             </div>
 
-            {/* Phone */}
-            <div className="relative">
-              <Phone className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                maxLength={10}
-                placeholder="Enter mobile number"
-                className={`${INPUT_BASE_CLASS} ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
-                }`}
-              />
+            <div>
+              <div className="relative">
+                <Phone className={iconCls} size={16} color="#94a3b8" />
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  maxLength={10}
+                  placeholder="Mobile Number"
+                  className={inputCls("phone")}
+                />
+              </div>
               {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.phone}
+                </p>
               )}
             </div>
 
-            {/* Gender */}
-            <div className="relative">
+            <div>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className={`w-full border rounded-lg px-3 pr-10 py-2 text-md outline-none
-      focus:border-2 focus:border-[#2277f7]
-      ${errors.gender ? "border-red-500" : "border-gray-300"}
-    `}
+                className={`w-full px-4 py-2.5 rounded-xl font-[family-name:var(--font-dm)] text-[14px] outline-none transition-all duration-200 appearance-none ${
+                  errors.gender
+                    ? "border-2 border-red-400 bg-red-50 text-[#0c1e3a]"
+                    : "border border-[rgba(12,30,58,0.15)] bg-white text-[#0c1e3a] focus:border-2 focus:border-[#0086C3]"
+                }`}
               >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
               </select>
-
               {errors.gender && (
-                <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.gender}
+                </p>
               )}
             </div>
 
-            {/* DOB */}
-            <div className="relative">
-              <CalendarDays className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-              <input
-                type="date"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                className={`${INPUT_BASE_CLASS} ${
-                  errors.dob ? "border-red-500" : "border-gray-300"
-                }`}
-              />
+           
+            <div>
+              <div className="relative">
+                <CalendarDays className={iconCls} size={16} color="#94a3b8" />
+                <input
+                  type="date"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={handleChange}
+                  className={inputCls("dob")}
+                />
+              </div>
               {errors.dob && (
-                <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.dob}
+                </p>
               )}
             </div>
 
-            {/* Password */}
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                className={`${INPUT_BASE_CLASS} ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 cursor-pointer"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+            
+            <div>
+              <div className="relative">
+                <Lock className={iconCls} size={16} color="#94a3b8" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  className={`${inputCls("password")} pr-10`}
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? (
+                    <FaEyeSlash size={14} />
+                  ) : (
+                    <FaEye size={14} />
+                  )}
+                </span>
+              </div>
               {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.password}
+                </p>
               )}
             </div>
 
-            {/* Confirm Password */}
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm Password"
-                className={`${INPUT_BASE_CLASS} ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              <span
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-3 cursor-pointer"
-              >
-                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+         
+            <div>
+              <div className="relative">
+                <Lock className={iconCls} size={16} color="#94a3b8" />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
+                  className={`${inputCls("confirmPassword")} pr-10`}
+                />
+                <span
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? (
+                    <FaEyeSlash size={14} />
+                  ) : (
+                    <FaEye size={14} />
+                  )}
+                </span>
+              </div>
               {errors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
                   {errors.confirmPassword}
                 </p>
               )}
             </div>
 
+           
             <button
               type="submit"
-              className="w-full bg-gradient-to-br from-[#2277f7] to-[#52abd4] cursor-pointer text-white py-2 rounded-full font-semibold"
+              className="w-full font-[family-name:var(--font-dm)] font-bold text-[15px] text-white py-3 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 mt-1"
+              style={{
+                background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+              }}
             >
-              Register & Continue
+              Register & Continue →
             </button>
           </form>
 
-          <p className="mt-6 text-center text-gray-500 text-sm">
+          <p
+            className="mt-6 text-center font-[family-name:var(--font-dm)] text-[13px]"
+            style={{ color: "#64748b" }}
+          >
             Already have an account?{" "}
             <button
               onClick={() => navigate("/clientLoginpage")}
-              className="text-blue-500 font-medium hover:underline cursor-pointer"
+              className="font-semibold cursor-pointer hover:underline transition-all"
+              style={{ color: "#0086C3", background: "none", border: "none" }}
             >
               Login here
             </button>
           </p>
         </div>
 
-        {/* Illustration (unchanged) */}
-        <div className="hidden md:flex w-1/2 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-r-3xl">
-          <div className="w-72 h-72 bg-[url('https://cdn3d.iconscout.com/3d/premium/thumb/doctor-with-patient-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--consultation-medicine-illustrations-4323381.png')] bg-contain bg-no-repeat bg-center"></div>
+       
+        <div
+          className="hidden md:flex w-1/2 items-center justify-center rounded-r-3xl relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg,#e8f4fd,#d0eaff)" }}
+        >
+     
+          <div
+            className="absolute inset-0 pointer-events-none opacity-40"
+            style={{
+              backgroundImage:
+                "radial-gradient(rgba(0,134,195,0.2) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+        
+          <div
+            className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none opacity-20"
+            style={{
+              background: "radial-gradient(circle,#0086C3,transparent)",
+              filter: "blur(40px)",
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 w-40 h-40 rounded-full pointer-events-none opacity-15"
+            style={{
+              background: "radial-gradient(circle,#2ecc71,transparent)",
+              filter: "blur(32px)",
+            }}
+          />
+          <img
+            src={patientImg}
+            alt="Patient Registration"
+            className="relative z-10 w-3/4 drop-shadow-lg"
+          />
         </div>
       </div>
     </div>
