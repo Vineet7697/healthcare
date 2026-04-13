@@ -62,6 +62,8 @@ import AdminHeaderDashboard from "../utils/AdminHeaderDashboard";
 import QRRedirect from "../module/doctor/pages/QRRedirect";
 import ContactRequests from "../admin/ContactRequests";
 import Mycertificate from "../module/patient/pages/Mycertificate";
+import RequestCertificate from "../module/patient/pages/RequestCertificate";
+import Certificaterequest from "../module/doctor/pages/Certificaterequest";
 
 const Router = () => {
   return (
@@ -143,6 +145,7 @@ const Router = () => {
           <Route path="manualbooking" element={<ManualBookingPage />} />
           <Route path="appointment" element={<AppointmentHistory />} />
           <Route path="prescription/:id" element={<AddPrescription />} />
+          <Route path="certificaterequest" element={<Certificaterequest />} />
 
           <Route path="reviews" element={<DoctorReviews />} />
         </Route>
@@ -164,6 +167,7 @@ const Router = () => {
           <Route path="family" element={<FamilyMembers />} />
           <Route path="changepassword" element={<ChangePassword />} />
           <Route path="cards" element={<Cards />} />
+          <Route path="apply-certificate" element={<RequestCertificate />} />
 
           <Route path="book-appointment" element={<PatientbookAppointment />} />
           <Route

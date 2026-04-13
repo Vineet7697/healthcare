@@ -31,6 +31,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
     { key: "appointment", label: "Appointments", icon: <FaCalendarAlt /> },
     { key: "manualbooking", label: "Manual Booking", icon: <FaEdit /> },
+    { key: "Certificaterequest", label: "Certificate Requests", icon: <FaFileMedical /> }
   ];
 
   const patientNav = [
@@ -80,7 +81,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         `}
         style={{ backgroundColor: "#0072BC" }}
       >
-        <div className={`flex items-center p-5 mb-2  ${isOpen ? "justify-between bg-white" : "justify-center" } border-r-2 border-gray-300`}>
+        <div className={`flex items-center p-5 mb-2  ${isOpen ? "justify-between bg-white border-r-2 border-gray-300" : "justify-center "  }  `}>
           {isOpen && (
             <div className="flex items-center gap-2 select-none ">
               <img src="/images/logo.webp" alt="Yo Doctor" className="h-10" />

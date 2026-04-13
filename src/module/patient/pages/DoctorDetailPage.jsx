@@ -296,6 +296,24 @@ const formattedDays = doctor?.availableDays
               >
                 📅 Book Appointment
               </button>
+              <button
+                onClick={() => navigate(`/client/apply-certificate?doctorId=${doctor.doctorId}`, { state: { doctor } })}
+                className="w-full font-[family-name:var(--font-dm)] font-bold text-[14px] text-white py-3 rounded-xl cursor-pointer transition-all duration-250 hover:-translate-y-0.5 mb-2"
+                style={{
+                  background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+                  boxShadow: "0 4px 14px rgba(0,134,195,0.35)",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.boxShadow =
+                    "0 6px 20px rgba(0,134,195,0.5)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.boxShadow =
+                    "0 4px 14px rgba(0,134,195,0.35)")
+                }
+              >
+            Apply Certificate
+              </button>
 
               {doctor.description && (
                 <>

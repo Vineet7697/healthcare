@@ -342,7 +342,7 @@ const cleanImage = profileImage?.split("?")[0];
 
             <div className="flex-1">
               <div
-                className="bg-white border border-black/[0.08] rounded-[14px] p-1.5 flex flex-wrap gap-1 mb-4"
+                className="bg-white border border-black/[0.08] rounded-[14px] p-1.5 flex flex-wrap justify-between gap-1 mb-4"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
               >
                 {TABS.map((tab) => (

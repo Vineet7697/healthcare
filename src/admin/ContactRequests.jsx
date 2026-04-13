@@ -32,6 +32,23 @@ const ContactRequests = () => {
     }
   };
 
+  const deleteRequest = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this contact request?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/admin/contact-requests/${id}`);
+      notify.success("Contact request deleted successfully");
+      fetchContacts(); // Refresh data
+    } catch (err) {
+      console.error(err);
+      notify.error("Failed to delete contact request");
+    }
+  };
+
   return (
     <div className="p-5">
       <h2 className="text-xl font-medium mb-5">📩 Contact Requests</h2>
@@ -41,17 +58,28 @@ const ContactRequests = () => {
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="w-full border-collapse bg-white text-sm">
-
             {/* HEADER */}
             <thead className="bg-[#0072BC] text-white">
               <tr>
-                {["S.No", "Name", "Mobile", "Email", "Concern", "Sub Concern", "Message", "Status", "Date", "Action"].map(
-                  (col) => (
-                    <th key={col} className="px-4 py-3 text-left font-medium text-sm">
-                      {col}
-                    </th>
-                  )
-                )}
+                {[
+                  "S.No",
+                  "Name",
+                  "Mobile",
+                  "Email",
+                  "Concern",
+                  "Sub Concern",
+                  "Message",
+                  "Status",
+                  "Date",
+                  "Action",
+                ].map((col) => (
+                  <th
+                    key={col}
+                    className="px-4 py-3 text-left font-medium text-sm"
+                  >
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
 
@@ -72,11 +100,17 @@ const ContactRequests = () => {
                     }`}
                   >
                     <td className="px-4 py-3 text-gray-400">{item.id}</td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">
+                      {item.name}
+                    </td>
                     <td className="px-4 py-3 text-gray-700">{item.mobile}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.email || "-"}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {item.email || "-"}
+                    </td>
                     <td className="px-4 py-3 text-gray-700">{item.concern}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.sub_concern}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {item.sub_concern}
+                    </td>
 
                     {/* Message — truncated */}
                     <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate">
@@ -103,16 +137,27 @@ const ContactRequests = () => {
 
                     {/* Action */}
                     <td className="px-4 py-3">
-                      {item.status === "pending" ? (
+                      <div className="flex items-center gap-2">
+                        {item.status === "pending" ? (
+                          <button
+                            onClick={() => markResolved(item.id)}
+                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors cursor-pointer"
+                          >
+                            Resolve
+                          </button>
+                        ) : (
+                          <span className="text-green-600 font-medium text-sm">
+                            Done
+                          </span>
+                        )}
+
                         <button
-                          onClick={() => markResolved(item.id)}
-                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors cursor-pointer"
+                          onClick={() => deleteRequest(item.id)}
+                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors cursor-pointer"
                         >
-                          Resolve
+                          Delete
                         </button>
-                      ) : (
-                        <span className="text-green-600 font-medium text-sm">Done</span>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))
