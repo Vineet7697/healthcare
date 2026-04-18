@@ -574,3 +574,111 @@ export const validatePasswordFields = (fields) => {
 
   return errors;
 };
+
+export const validateStep = (
+  currentStep,
+  formData,
+  validateFile
+) => {
+  const newErrors = {};
+
+  const {
+    doctor,
+    purpose,
+    fullName,
+    dob,
+    gender,
+    height,
+    weight,
+    documents,
+  } = formData;
+
+  /* ================= STEP 1: CERTIFICATE DETAILS ================= */
+  if (currentStep === 0) {
+    if (!doctor) {
+      newErrors.doctor = "Please select an assigned doctor.";
+    }
+
+    if (!purpose || !purpose.trim()) {
+      newErrors.purpose =
+        "Please select the purpose of the certificate.";
+    }
+  }
+
+  /* ================= STEP 2: MEDICAL DETAILS ================= */
+  if (currentStep === 1) {
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (!fullName?.trim()) {
+      newErrors.fullName = "Full name is required.";
+    } else if (!nameRegex.test(fullName.trim())) {
+      newErrors.fullName =
+        "Only alphabets and spaces are allowed.";
+    } else if (fullName.trim().length < 3) {
+      newErrors.fullName =
+        "Full name must be at least 3 characters.";
+    }
+
+    if (!dob) {
+      newErrors.dob = "Date of birth is required.";
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const selectedDate = new Date(dob);
+
+      if (isNaN(selectedDate.getTime())) {
+        newErrors.dob = "Invalid date selected.";
+      } else if (selectedDate >= today) {
+        newErrors.dob =
+          "Date of birth must be in the past.";
+      }
+    }
+
+    if (!gender) {
+      newErrors.gender = "Please select gender.";
+    }
+
+    const heightValue = Number(height);
+    if (!height) {
+      newErrors.height = "Height is required.";
+    } else if (isNaN(heightValue)) {
+      newErrors.height = "Height must be a number.";
+    } else if (heightValue < 30 || heightValue > 300) {
+      newErrors.height =
+        "Height must be between 30 and 300 cm.";
+    }
+
+    const weightValue = Number(weight);
+    if (!weight) {
+      newErrors.weight = "Weight is required.";
+    } else if (isNaN(weightValue)) {
+      newErrors.weight = "Weight must be a number.";
+    } else if (weightValue < 1 || weightValue > 500) {
+      newErrors.weight =
+        "Weight must be between 1 and 500 kg.";
+    }
+  }
+
+  /* ================= STEP 3: DOCUMENT VALIDATION ================= */
+  if (currentStep === 2) {
+    if (!documents.idProof) {
+      newErrors.idProof = "ID Proof is required.";
+    } else {
+      const error = validateFile(documents.idProof);
+      if (error) newErrors.idProof = error;
+    }
+
+    if (documents.medicalReports) {
+      const error = validateFile(documents.medicalReports);
+      if (error) newErrors.medicalReports = error;
+    }
+
+    if (documents.prescription) {
+      const error = validateFile(documents.prescription);
+      if (error) newErrors.prescription = error;
+    }
+  }
+
+  return newErrors;
+};

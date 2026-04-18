@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 import { validateStep6Files, validateStep6Required } from "../../controllers/FormValidation";
 import { uploadDoctorDocuments } from "../../services/doctor/doctorRegisterServiceApi";
 import { notify } from "../../utils/notify";

@@ -312,7 +312,7 @@ const formattedDays = doctor?.availableDays
                     "0 4px 14px rgba(0,134,195,0.35)")
                 }
               >
-            Apply Certificate
+         ➕ Apply Certificate
               </button>
 
               {doctor.description && (

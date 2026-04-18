@@ -1,508 +1,518 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import CertificateModal from "../../../components/common/CertificateModal";
+import { notify } from "../../../utils/notify";
+import {
+  getDoctorRequests,
+  getRequestDetails,
+  getDocuments,
+  approveRequest,
+  rejectRequest,
+  getIssuedCertificates,
+} from "../../../services/certificateService";
 
-// ─── Static data ─────────────────────────────────────────────────────────────
-
-const requests = [
-  { id: "REQ-2025-0342", name: "Rahul Kumar",  initials: "RK", bg: "#E0F2FE", color: "#0369A1", type: "Second Opinion",        date: "Mar 17, 2025", status: "warning",  statusText: "Pending" },
-  { id: "REQ-2025-0341", name: "Priti Desai",  initials: "PD", bg: "#EDE9FE", color: "#7C3AED", type: "Medical Fitness",        date: "Mar 17, 2025", status: "pending",  statusText: "Pending"     },
-  { id: "REQ-2025-0339", name: "Sanjay Mehta", initials: "SM", bg: "#D1FAE5", color: "#059669", type: "Discharge Summary",      date: "Mar 16, 2025", status: "pending",  statusText: "Pending"     },
-  { id: "REQ-2025-0337", name: "Neha Gupta",   initials: "NG", bg: "#FEE2E2", color: "#DC2626", type: "Disability Certificate", date: "Mar 15, 2025", status: "approved", statusText: "Approved"    },
-  { id: "REQ-2025-0335", name: "Arjun Joshi",  initials: "AJ", bg: "#DBEAFE", color: "#2563EB", type: "Medical Fitness",        date: "Mar 14, 2025", status: "rejected", statusText: "Rejected"    },
-];
-
-const issuedCerts = [
-  { id: "MC-2025-10234", patient: "Rahul Kumar", type: "Medical Fitness",        issued: "Mar 10, 2025", expires: "Mar 10, 2026" },
-  { id: "MC-2025-10198", patient: "Neha Gupta",  type: "Disability Certificate", issued: "Mar 15, 2025", expires: "Mar 15, 2027" },
-];
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = ["All Status", "Pending", "Approved", "Rejected"];
-const TYPE_OPTIONS   = ["All Types", "Second Opinion", "Medical Fitness", "Discharge Summary", "Disability Certificate"];
-const FITNESS_OPTIONS = ["Select fitness status", "Fit — No Restrictions", "Fit with Restrictions", "Temporarily Unfit", "Unfit"];
+const TYPE_OPTIONS = [
+  "All Types",
+  "Second Opinion",
+  "Medical Fitness",
+  "Discharge Summary",
+  "Disability Certificate",
+];
+const FITNESS_OPTIONS = [
+  "Select fitness status",
+  "Fit — No Restrictions",
+  "Fit with Restrictions",
+  "Temporarily Unfit",
+  "Unfit",
+];
 const VALIDITY_OPTIONS = ["1 month", "3 months", "6 months", "1 year"];
 
-// ─── Reusable components ──────────────────────────────────────────────────────
+const BADGE_STYLES = {
+  pending:  "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  warning:  "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
+  approved: "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
+  rejected: "bg-red-50 text-red-700 ring-1 ring-red-200",
+};
 
-function Avatar({ initials, bg, color, size = "sm" }) {
-  const sz = size === "lg" ? "w-12 h-12 text-base" : "w-7 h-7 text-xs";
+const TYPE_BADGE = {
+  "Medical Fitness":      "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  "Second Opinion":       "bg-purple-50 text-purple-700 ring-1 ring-purple-200",
+  "Discharge Summary":    "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
+  "Disability Certificate":"bg-rose-50 text-rose-700 ring-1 ring-rose-200",
+  Fitness:               "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
+  Medical:               "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  "Sick Leave":          "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+};
+
+const AVATAR_COLORS = [
+  ["bg-blue-100", "text-blue-700"],
+  ["bg-teal-100", "text-teal-700"],
+  ["bg-purple-100", "text-purple-700"],
+  ["bg-rose-100", "text-rose-700"],
+  ["bg-amber-100", "text-amber-700"],
+  ["bg-indigo-100", "text-indigo-700"],
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getInitials(name = "") {
+  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function getAvatarColor(name = "") {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h += name.charCodeAt(i);
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
+function isExpiringSoon(dateStr) {
+  if (!dateStr || dateStr === "N/A") return false;
+  const diff = new Date(dateStr) - new Date();
+  return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000;
+}
+
+// ─── Reusable UI ──────────────────────────────────────────────────────────────
+
+function Avatar({ name = "", size = "sm" }) {
+  const [bg, text] = getAvatarColor(name);
+  const sz = size === "lg" ? "w-11 h-11 text-sm" : "w-8 h-8 text-xs";
   return (
-    <div
-      className={`${sz} rounded-full flex items-center justify-center font-semibold flex-shrink-0`}
-      style={{ background: bg || "#E0F2FE", color: color || "#0369A1" }}
-    >
-      {initials}
+    <div className={`${sz} ${bg} ${text} rounded-full flex items-center justify-center font-semibold flex-shrink-0`}>
+      {getInitials(name)}
     </div>
   );
 }
 
-const badgeStyles = {
-  pending:  "bg-yellow-100 text-yellow-800",
-  warning:  "bg-amber-100 text-amber-800",
-  approved: "bg-emerald-100 text-emerald-800",
-  rejected: "bg-red-100 text-red-800",
-  valid:    "bg-emerald-100 text-emerald-800",
-};
-
 function Badge({ status, text }) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${badgeStyles[status] || badgeStyles.pending}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}>
       {text}
     </span>
   );
 }
 
 function FieldError({ msg }) {
-  return msg ? <p className="text-xs text-red-500 mt-1">{msg}</p> : null;
+  return msg ? <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><span>⚠</span>{msg}</p> : null;
 }
 
-// ─── Certificate Modal ────────────────────────────────────────────────────────
-
-function CertificateModal({ cert, onClose }) {
-  if (!cert) return null;
-
-  // Removed: Date of Birth, Registration No. fields
-  const fields = [
-    { label: "Certificate ID", value: cert.id,          mono: true },
-    { label: "Status",         value: "Valid",           badge: "valid" },
-    { label: "Patient Name",   value: cert.patient },
-    { label: "Issued By",      value: "Dr. Priya Sharma" },
-    { label: "Issue Date",     value: cert.issued },
-    { label: "Expiry Date",    value: cert.expires },
-    { label: "Purpose",        value: "Employment" },
-  ];
-
+function SectionCard({ title, children, className = "" }) {
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
-      style={{ background: "rgba(0,0,0,0.5)" }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl w-full max-w-lg overflow-hidden"
-        style={{ boxShadow: "0 25px 60px rgba(0,0,0,0.25)", maxHeight: "92vh", overflowY: "auto" }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-100 sticky top-0 bg-white z-10">
-          <span className="text-sm font-semibold text-gray-700">Medical Certificate</span>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors text-base font-bold"
-          >×</button>
+    <div className={`bg-white border border-gray-200 rounded-2xl p-5 ${className}`}>
+      {title && <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">{title}</p>}
+      {children}
+    </div>
+  );
+}
+
+function MetricCard({ label, value, accent = false, warn = false }) {
+  return (
+    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className={`text-2xl font-semibold ${warn ? "text-amber-600" : accent ? "text-teal-600" : "text-gray-800"}`}>{value}</p>
+    </div>
+  );
+}
+
+// ─── Search Icon ─────────────────────────────────────────────────────────────
+
+function SearchIcon() {
+  return (
+    <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="6.5" cy="6.5" r="5" />
+      <path d="m10.5 10.5 3 3" />
+    </svg>
+  );
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
+function EmptyState({ message = "Nothing here yet.", colSpan = 6 }) {
+  return (
+    <tr>
+      <td colSpan={colSpan} className="py-14 text-center">
+        <div className="flex flex-col items-center gap-2 text-gray-300">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="9" y1="13" x2="15" y2="13" />
+            <line x1="9" y1="17" x2="13" y2="17" />
+          </svg>
+          <p className="text-sm text-gray-400">{message}</p>
         </div>
+      </td>
+    </tr>
+  );
+}
 
-        <div className="p-4 sm:p-5">
-          {/* Header banner */}
-          <div className="bg-teal-600 rounded-xl px-4 py-3 mb-4 text-center">
-            <div className="text-white text-base sm:text-lg font-bold tracking-wide">MediCert System</div>
-            <div className="text-teal-100 text-xs mt-0.5">Digital Medical Certificate Authority — India</div>
-          </div>
+// ─── Table Shell ──────────────────────────────────────────────────────────────
 
-          <div className="text-center mb-4">
-            <span className="text-base font-semibold text-gray-800">{cert.type} Certificate</span>
-          </div>
-
-          {/* Fields grid — responsive 1→2 cols */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4">
-            {fields.map(({ label, value, mono, badge }) => (
-              <div key={label}>
-                <div className="text-xs text-gray-400 mb-0.5">{label}</div>
-                {badge
-                  ? <Badge status={badge} text={value} />
-                  : <div className={`text-sm font-medium text-gray-700 ${mono ? "font-mono" : ""}`}>{value}</div>
-                }
-              </div>
-            ))}
-          </div>
-
-          {/* Disclaimer */}
-          <div className="bg-gray-50 rounded-lg px-3 py-2.5 text-xs text-gray-500 mb-4">
-            <span className="font-semibold text-gray-600">Disclaimer: </span>
-            This certificate is digitally signed and tamper-proof. Verify at{" "}
-            <span className="text-teal-600 font-medium">medicert.in/verify</span>.
-          </div>
-
-          {/* Footer strip */}
-          <div className="flex items-center justify-between bg-teal-700 rounded-xl px-4 py-3 mb-4">
-            <svg viewBox="0 0 48 48" width="48" height="48" fill="white" className="flex-shrink-0">
-              <rect x="4"  y="4"  width="16" height="16" rx="1"/>
-              <rect x="6"  y="6"  width="12" height="12" rx="1" fill="#0F766E"/>
-              <rect x="28" y="4"  width="16" height="16" rx="1"/>
-              <rect x="30" y="6"  width="12" height="12" rx="1" fill="#0F766E"/>
-              <rect x="4"  y="28" width="16" height="16" rx="1"/>
-              <rect x="6"  y="30" width="12" height="12" rx="1" fill="#0F766E"/>
-              <rect x="28" y="28" width="4" height="4" fill="white"/>
-              <rect x="34" y="28" width="4" height="4" fill="white"/>
-              <rect x="40" y="28" width="4" height="4" fill="white"/>
-              <rect x="28" y="34" width="4" height="4" fill="white"/>
-              <rect x="34" y="40" width="4" height="4" fill="white"/>
-              <rect x="40" y="34" width="4" height="10" fill="white"/>
-            </svg>
-            <div className="flex-1 mx-3 min-w-0">
-              <div className="text-teal-100 text-xs font-mono truncate">ID: {cert.id}</div>
-              <div className="text-teal-100 text-xs font-mono">Hash: 3f8a9b2c…e4d1</div>
-              <div className="text-teal-200 text-xs mt-1">✓ Digitally verified · Issued {cert.issued}</div>
-            </div>
-            <div className="flex flex-col items-center gap-1 flex-shrink-0">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="#6EE7B7">
-                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-              </svg>
-              <div className="text-teal-100 text-xs text-center leading-tight">Verified<br/>Authentic</div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            <button className="flex-1 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors">
-              Download Verified Copy
-            </button>
-            <button className="px-4 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors">
-              Share
-            </button>
-          </div>
-        </div>
+function TableShell({ headers, children, minWidth = "600px" }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm" style={{ minWidth }}>
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100">
+              {headers.map((h) => (
+                <th key={h} className="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-// ─── Tab: All Requests (with live search + filter) ────────────────────────────
+// ─── Tab: All Requests ────────────────────────────────────────────────────────
 
-function AllRequests({ onReview }) {
-  const [search, setSearch]       = useState("");
+function AllRequests({ requests, onReview }) {
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatus] = useState("All Status");
-  const [typeFilter, setType]     = useState("All Types");
+  const [typeFilter, setType] = useState("All Types");
 
   const filtered = useMemo(() => {
-    return requests.filter(r => {
-      const matchSearch = r.name.toLowerCase().includes(search.toLowerCase()) ||
-                          r.id.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = statusFilter === "All Status" || r.statusText === statusFilter;
-      const matchType   = typeFilter   === "All Types"  || r.type       === typeFilter;
+    return requests.filter((r) => {
+      const matchSearch =
+        r.name.toLowerCase().includes(search.toLowerCase()) ||
+        r.id.toLowerCase().includes(search.toLowerCase());
+      const matchStatus =
+        statusFilter === "All Status" ||
+        r.statusText.toLowerCase() === statusFilter.toLowerCase();
+      const matchType =
+        typeFilter === "All Types" ||
+        r.type.toLowerCase() === typeFilter.toLowerCase();
       return matchSearch && matchStatus && matchType;
     });
-  }, [search, statusFilter, typeFilter]);
+  }, [search, statusFilter, typeFilter, requests]);
 
-  const pendingCount = requests.filter(r => r.status === "pending" || r.status === "warning").length;
+  const pendingCount = requests.filter(
+    (r) => r.status === "pending" || r.status === "warning"
+  ).length;
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-5 sm:p-7">
       {/* Header */}
-      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Certificate Requests</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Review and manage patient certificate requests</p>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Certificate Requests</h1>
+          <p className="text-sm text-gray-400 mt-1">Review and manage patient certificate requests</p>
         </div>
         <div className="flex gap-3">
-          <div className="bg-white border border-gray-200 rounded-lg px-3 sm:px-4 py-2">
-            <div className="text-xs text-gray-500 mb-0.5">Pending</div>
-            <div className="text-lg font-bold text-yellow-600">{pendingCount}</div>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-lg px-3 sm:px-4 py-2">
-            <div className="text-xs text-gray-500 mb-0.5">Total</div>
-            <div className="text-lg font-bold text-gray-700">{requests.length}</div>
-          </div>
+          <MetricCard label="Pending" value={pendingCount} accent />
+          <MetricCard label="Total" value={requests.length} />
         </div>
       </div>
 
-      {/* Live filters */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mb-4">
-        <div className="relative w-full sm:w-56">
-          <svg className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
-          </svg>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 mb-5">
+        <div className="relative w-full sm:w-60">
+          <SearchIcon />
           <input
             placeholder="Search by name or ID…"
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={e => setStatus(e.target.value)}
-          className="w-full sm:w-auto border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-        >
-          {STATUS_OPTIONS.map(o => <option key={o}>{o}</option>)}
-        </select>
-        <select
-          value={typeFilter}
-          onChange={e => setType(e.target.value)}
-          className="w-full sm:w-auto border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-        >
-          {TYPE_OPTIONS.map(o => <option key={o}>{o}</option>)}
-        </select>
-        {(search || statusFilter !== "All Status" || typeFilter !== "All Types") && (
-          <button
-            onClick={() => { setSearch(""); setStatus("All Status"); setType("All Types"); }}
-            className="text-xs text-teal-600 hover:text-teal-800 underline self-center"
+        {[
+          [STATUS_OPTIONS, statusFilter, setStatus],
+          [TYPE_OPTIONS, typeFilter, setType],
+        ].map(([opts, val, set], i) => (
+          <select
+            key={i}
+            value={val}
+            onChange={(e) => set(e.target.value)}
+            className="w-full sm:w-auto border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
           >
-            Clear filters
-          </button>
-        )}
+            {opts.map((o) => <option key={o}>{o}</option>)}
+          </select>
+        ))}
       </div>
 
-      {/* Table — scrollable on mobile */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead>
-              <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-                {["Request ID","Patient","Type","Submitted","Status","Action"].map(h => (
-                  <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
-                    No requests match your filters.
-                  </td>
-                </tr>
-              ) : filtered.map(r => (
-                <tr key={r.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3"><span className="font-mono text-xs text-gray-600">{r.id}</span></td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Avatar initials={r.initials} bg={r.bg} color={r.color}/>
-                      <span className="font-medium text-gray-700 whitespace-nowrap">{r.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{r.type}</td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{r.date}</td>
-                  <td className="px-4 py-3"><Badge status={r.status} text={r.statusText}/></td>
-                  <td className="px-4 py-3">
-                    {r.status === "pending" || r.status === "warning" ? (
-                      <button onClick={onReview} className="px-3 py-1.5 bg-teal-600 text-white text-xs rounded-lg hover:bg-teal-700 transition-colors whitespace-nowrap">
-                        Review →
-                      </button>
-                    ) : (
-                      <button className="px-3 py-1.5 border border-gray-200 text-gray-600 text-xs rounded-lg hover:bg-gray-50 transition-colors">
-                        View
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Table */}
+      <TableShell headers={["Request ID", "Patient", "Type", "Submitted", "Status", "Action"]}>
+        {filtered.length === 0 ? (
+          <EmptyState message="No requests match your filters." />
+        ) : (
+          filtered.map((r) => (
+            <tr key={r.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td className="px-5 py-4">
+                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">{r.id}</span>
+              </td>
+              <td className="px-5 py-4">
+                <div className="flex items-center gap-2.5">
+                 
+                  <span className="font-medium text-gray-800 whitespace-nowrap">{r.name}</span>
+                </div>
+              </td>
+              <td className="px-5 py-4">
+                <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[r.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}>
+                  {r.type}
+                </span>
+              </td>
+              <td className="px-5 py-4 text-sm text-gray-400 whitespace-nowrap">{r.date}</td>
+              <td className="px-5 py-4">
+                <Badge status={r.status} text={r.statusText} />
+              </td>
+              <td className="px-5 py-4">
+                {r.status === "pending" || r.status === "warning" ? (
+                  <button
+                    onClick={() => onReview(r.id)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
+                  >
+                    Review
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button className="px-3.5 py-1.5 border border-gray-200 text-gray-500 text-xs font-medium rounded-xl hover:bg-gray-50 transition-colors">
+                    View
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))
+        )}
+      </TableShell>
+
+      {/* Footer count */}
+      {filtered.length > 0 && (
+        <p className="text-xs text-gray-400 mt-3 px-1">
+          Showing {filtered.length} of {requests.length} requests
+        </p>
+      )}
     </div>
   );
 }
 
-// ─── Tab: Review Patient (with form validation + fitness status) ──────────────
+// ─── Tab: Review Patient ──────────────────────────────────────────────────────
 
-function ReviewPatient({ onBack }) {
-  const [form, setForm] = useState({
-    validity: "1 month",
-    notes: "",
-    fitnessStatus: "",
-  });
+function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, onReject, onBack }) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
   const set = (field, val) => {
-    setForm(f => ({ ...f, [field]: val }));
-    if (errors[field]) setErrors(e => ({ ...e, [field]: "" }));
+    setForm((f) => ({ ...f, [field]: val }));
+    if (errors[field]) setErrors((e) => ({ ...e, [field]: "" }));
   };
 
   const validate = () => {
     const e = {};
-    if (!form.notes.trim())                                e.notes         = "Clinical notes are required before approving.";
+    if (!form.notes.trim()) e.notes = "Clinical notes are required before approving.";
     if (!form.fitnessStatus || form.fitnessStatus === "Select fitness status")
-                                                           e.fitnessStatus = "Please select a fitness status.";
+      e.fitnessStatus = "Please select a fitness status.";
     return e;
   };
 
-  const handleApprove = () => {
+  const handleApproveClick = async () => {
     const e = validate();
     if (Object.keys(e).length > 0) { setErrors(e); return; }
+    await onApprove();
     setSubmitted(true);
   };
 
-  const handleReject = () => {
-    if (!form.notes.trim()) {
-      setErrors({ notes: "Please add a reason for rejection." });
-      return;
-    }
-    alert("Request rejected.");
+  const handleRejectClick = async () => {
+    if (!form.notes.trim()) { setErrors({ notes: "Please add a reason for rejection." }); return; }
+    await onReject();
   };
 
   if (submitted) {
     return (
-      <div className="p-4 sm:p-6 flex flex-col items-center justify-center min-h-64 gap-4">
-        <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+      <div className="p-6 flex flex-col items-center justify-center min-h-72 gap-5">
+        <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 13l4 4L19 7" />
           </svg>
         </div>
         <div className="text-center">
-          <div className="text-base font-semibold text-gray-800 mb-1">Certificate Approved!</div>
-          <div className="text-sm text-gray-500">The certificate has been digitally signed and issued.</div>
+          <p className="text-base font-semibold text-gray-800 mb-1">Certificate Approved!</p>
+          <p className="text-sm text-gray-400">The certificate has been digitally signed and issued.</p>
         </div>
-        <button onClick={onBack} className="mt-2 px-5 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors">
+        <button
+          onClick={onBack}
+          className="mt-1 px-6 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
+        >
           Back to Requests
         </button>
       </div>
     );
   }
 
+  const infoRows = [
+    ["DOB", selectedRequest?.dob || "N/A"],
+    ["Gender", selectedRequest?.gender || "N/A"],
+    ["Blood Group", selectedRequest?.blood_group || "N/A"],
+    ["Height", selectedRequest?.height || "N/A"],
+  ];
+
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-5 sm:p-7">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-      
-        <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Review Request</h1>
-          <p className="text-sm text-gray-500">REQ-2025-0342 · Second Opinion Certificate</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Review Request</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          REQ-{selectedRequest?.id} · {selectedRequest?.certificate_type}
+        </p>
       </div>
 
-      {/* Responsive grid: stacked on mobile, 2-col on desktop */}
-      <div className="flex flex-col lg:grid lg:gap-4" style={{ gridTemplateColumns: "1fr 1.4fr" }}>
+      <div className="flex flex-col lg:grid lg:gap-5" style={{ gridTemplateColumns: "1fr 1.4fr" }}>
 
-        {/* ── Left: Patient Info ── */}
+        {/* ── Left Column ── */}
         <div className="flex flex-col gap-4 mb-4 lg:mb-0">
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="text-sm font-semibold text-gray-700 mb-3">Patient Information</div>
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar initials="RK" bg="#E0F2FE" color="#0369A1" size="lg"/>
+
+          {/* Patient Info */}
+          <SectionCard title="Patient Information">
+            <div className="flex items-center gap-3 mb-5">
+              <Avatar name={selectedRequest?.full_name || ""} size="lg" />
               <div>
-                <div className="font-semibold text-gray-800">Rahul Kumar</div>
-                <div className="text-xs text-gray-500">DOB: 15 Aug 1990 · Male · 34 yrs</div>
-                <div className="text-xs text-gray-500">MRN: PAT-00129847</div>
+                <p className="font-semibold text-gray-800 text-sm">Name: {selectedRequest?.full_name || "--"}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Medical Conditions: {selectedRequest?.medical_conditions || "No known conditions"}</p>
               </div>
             </div>
-            <hr className="border-gray-100 mb-3"/>
-            {/* Removed: Weight & BMI fields — kept Blood Group & Height only */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              {[["Blood Group","A+"],["Height","172 cm"]].map(([l,v]) => (
-                <div key={l}>
-                  <div className="text-xs text-gray-400 mb-0.5">{l}</div>
-                  <div className="text-sm font-semibold text-gray-700">{v}</div>
+            <div className="grid grid-cols-2 gap-3">
+              {infoRows.map(([label, val]) => (
+                <div key={label} className="bg-gray-50 rounded-xl px-3.5 py-3">
+                  <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+                  <p className="text-sm font-semibold text-gray-700">{val}</p>
                 </div>
               ))}
             </div>
-            <hr className="border-gray-100 mb-3"/>
-            {/* Removed: Current Medications field */}
-            <div>
-              <div className="text-xs text-gray-400 mb-1">Known Conditions</div>
-              <div className="text-sm text-gray-600">Mild hypertension (controlled)</div>
-            </div>
-          </div>
+          </SectionCard>
 
-          {/* Uploaded Documents */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="text-sm font-semibold text-gray-700 mb-3">Uploaded Documents</div>
-            {[
-              ["📄","Prescription_March2025.pdf","2.3 MB · Mar 17"],
-              ["🖼️","XRay_Chest_2025.jpg","1.8 MB · Mar 17"],
-            ].map(([icon,name,meta]) => (
-              <div key={name} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg mb-2">
-                <span className="text-base">{icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-700 truncate">{name}</div>
-                  <div className="text-xs text-gray-400">{meta}</div>
-                </div>
-                <button className="px-2.5 py-1 border border-gray-200 text-gray-600 text-xs rounded-lg hover:bg-white transition-colors flex-shrink-0">View</button>
+          {/* Documents */}
+          <SectionCard title="Uploaded Documents">
+            {documents.length === 0 ? (
+              <p className="text-sm text-gray-400">No documents uploaded.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3.5 py-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                      </svg>
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium flex-1 truncate">
+                      {doc.file_url.split("/").pop()}
+                    </p>
+                    <a
+                      href={`${import.meta.env.VITE_API_URL}/${doc.file_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                    >
+                      View →
+                    </a>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </SectionCard>
         </div>
 
-        {/* ── Right: Review Form ── */}
+        {/* ── Right Column ── */}
         <div className="flex flex-col gap-4">
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="text-sm font-semibold text-gray-700 mb-3">Certificate Details</div>
 
-            {/* Removed: Purpose field */}
-            <div className="mb-3">
-              <label className="text-xs text-gray-500 mb-1 block">Certificate Type</label>
-              <input
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-600 cursor-not-allowed"
-                value="Second Opinion Certificate"
-                readOnly
-              />
+          {/* Certificate Details */}
+          <SectionCard title="Certificate Details">
+            {/* Certificate Type */}
+            <div className="mb-4">
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Certificate Type</label>
+              <div className="w-full border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 text-gray-500 cursor-not-allowed">
+                {selectedRequest?.certificate_type || "N/A"}
+              </div>
             </div>
 
-            {/* Patient's Notes (read-only) */}
-            <div className="mb-3">
-              <label className="text-xs text-gray-500 mb-1 block">Patient's Request Notes</label>
-              <div className="bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600">
-                Experiencing chest discomfort since 2 weeks. Need a second opinion on X-ray findings.
+            {/* Patient Notes */}
+            <div className="mb-4">
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Patient's Request Notes</label>
+              <div className="bg-gray-50 border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm text-gray-600 min-h-[60px]">
+                {selectedRequest?.notes || "No notes provided."}
               </div>
             </div>
 
             {/* Validity */}
-            <div className="mb-3">
-              <label className="text-xs text-gray-500 mb-1 block">Validity Period</label>
+            <div className="mb-4">
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Validity Period</label>
               <select
                 value={form.validity}
-                onChange={e => set("validity", e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                onChange={(e) => set("validity", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
               >
-                {VALIDITY_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                {VALIDITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
               </select>
             </div>
 
-            {/* Fitness Status — NEW */}
-            <div className="mb-3">
-              <label className="text-xs text-gray-500 mb-1 block">
+            {/* Fitness Status */}
+            <div className="mb-4">
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
                 Fitness Status <span className="text-red-400">*</span>
               </label>
               <select
                 value={form.fitnessStatus}
-                onChange={e => set("fitnessStatus", e.target.value)}
-                className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 ${
-                  errors.fitnessStatus ? "border-red-400 bg-red-50" : "border-gray-200"
+                onChange={(e) => set("fitnessStatus", e.target.value)}
+                className={`w-full border rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition ${
+                  errors.fitnessStatus ? "border-red-300 bg-red-50" : "border-gray-200"
                 }`}
               >
-                {FITNESS_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                {FITNESS_OPTIONS.map((o) => <option key={o}>{o}</option>)}
               </select>
-              <FieldError msg={errors.fitnessStatus}/>
+              <FieldError msg={errors.fitnessStatus} />
             </div>
 
-            {/* Clinical Notes — required */}
-            <div className="mb-1">
-              <label className="text-xs text-gray-500 mb-1 block">
+            {/* Clinical Notes */}
+            <div>
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
                 Doctor's Clinical Notes <span className="text-red-400">*</span>
               </label>
               <textarea
-                className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none ${
-                  errors.notes ? "border-red-400 bg-red-50" : "border-gray-200"
+                className={`w-full border rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition resize-none ${
+                  errors.notes ? "border-red-300 bg-red-50" : "border-gray-200"
                 }`}
                 placeholder="Add your clinical findings, observations and recommendations…"
                 rows={4}
                 value={form.notes}
-                onChange={e => set("notes", e.target.value)}
+                onChange={(e) => set("notes", e.target.value)}
               />
-              <FieldError msg={errors.notes}/>
+              <FieldError msg={errors.notes} />
             </div>
-          </div>
+          </SectionCard>
 
           {/* Action Bar */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="text-sm font-semibold text-gray-700 mb-3">Take Action</div>
-            <div className="flex flex-col sm:flex-row gap-2 mb-2">
+          <SectionCard title="Take Action">
+            <div className="flex flex-col sm:flex-row gap-2.5 mb-3">
               <button
-                onClick={handleApprove}
-                className="flex-1 px-3 py-2.5 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                onClick={handleApproveClick}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
               >
-                ✓ Approve & Generate Certificate
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+                Approve & Generate Certificate
               </button>
               <button
-                onClick={handleReject}
-                className="sm:w-auto px-4 py-2.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors font-medium"
+                onClick={handleRejectClick}
+                className="sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-sm font-medium rounded-xl hover:bg-red-100 active:scale-95 transition-all"
               >
-                ✕ Reject
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+                Reject
               </button>
             </div>
-            <p className="text-xs text-gray-400">
-              Fields marked <span className="text-red-400">*</span> are required. Approval digitally signs the certificate with registration number MCI-78234.
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Fields marked <span className="text-red-400">*</span> are required. Approval digitally signs the certificate with registration number{" "}
+              <span className="font-mono text-gray-500">MCI-78234</span>.
             </p>
-          </div>
+          </SectionCard>
         </div>
       </div>
     </div>
@@ -512,98 +522,288 @@ function ReviewPatient({ onBack }) {
 // ─── Tab: Issued Certificates ─────────────────────────────────────────────────
 
 function IssuedCerts({ onViewPdf }) {
+  const [issuedCertificates, setIssuedCertificates] = useState([]);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+
+  useEffect(() => {
+    const fetchIssuedCertificates = async () => {
+      try {
+        const res = await getIssuedCertificates();
+        const formattedData = res.data.map((c) => ({
+          id: c.certificate_id,
+          certificate_id: c.certificate_id,
+          patient: c.full_name,
+          type: c.certificate_type,
+          purpose: c.purpose,
+          issued: c.issued_at
+            ? new Date(c.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+            : "N/A",
+          expires: c.expiry_date
+            ? new Date(c.expiry_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+            : "N/A",
+          expiringSoon: isExpiringSoon(c.expiry_date),
+          doctor: c.doctor_name || "Dr. Assigned",
+          file: c.certificate_file,
+        }));
+        setIssuedCertificates(formattedData);
+      } catch (error) {
+        console.error("Error fetching issued certificates:", error);
+      }
+    };
+    fetchIssuedCertificates();
+  }, []);
+
+  const filtered = useMemo(() => {
+    return issuedCertificates.filter((c) => {
+      const matchSearch =
+        c.patient.toLowerCase().includes(search.toLowerCase()) ||
+        c.id.toLowerCase().includes(search.toLowerCase());
+      const matchType = !typeFilter || c.type === typeFilter;
+      return matchSearch && matchType;
+    });
+  }, [search, typeFilter, issuedCertificates]);
+
+  const expiringSoonCount = issuedCertificates.filter((c) => c.expiringSoon).length;
+  const thisMonthCount = issuedCertificates.filter((c) => {
+    const d = new Date(c.issued);
+    const now = new Date();
+    return !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+
   return (
-    <div className="p-4 sm:p-6">
-      <div className="mb-5">
-        <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Issued Certificates</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Certificates you have approved and generated</p>
-      </div>
-
-      {/* Stats — responsive 2×2 on mobile, 4-col on sm+ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        {[["Total Issued","47"],["This Month","12"],["Fitness Certs","28"],["Other Types","19"]].map(([label,value]) => (
-          <div key={label} className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-            <div className="text-xs text-gray-500 mb-1">{label}</div>
-            <div className="text-xl font-bold text-gray-800">{value}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <span className="text-sm font-semibold text-gray-700">Recent Issuances</span>
+    <div className="p-5 sm:p-7">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-7">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Issued Certificates</h1>
+          <p className="text-sm text-gray-400 mt-1">Certificates you have approved and generated</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[520px]">
-            <thead>
-              <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-                {/* Removed: "Expires" column */}
-                {["Cert ID","Patient","Type","Issued On","Actions"].map(h => (
-                  <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {issuedCerts.map(c => (
-                <tr key={c.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3"><span className="font-mono text-xs text-gray-600">{c.id}</span></td>
-                  <td className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">{c.patient}</td>
-                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{c.type}</td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{c.issued}</td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => onViewPdf(c)}
-                      className="px-3 py-1.5 border border-gray-200 text-gray-600 text-xs rounded-lg hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition-colors whitespace-nowrap"
-                    >
-                      View PDF
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex gap-3 flex-wrap">
+          <MetricCard label="Total Issued" value={issuedCertificates.length} />
+          <MetricCard label="This Month" value={thisMonthCount} accent />
+          <MetricCard label="Expiring Soon" value={expiringSoonCount} warn={expiringSoonCount > 0} />
         </div>
       </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-2.5 mb-5">
+        <div className="relative w-full sm:w-60">
+          <SearchIcon />
+          <input
+            type="text"
+            placeholder="Search patient or ID…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
+          />
+        </div>
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="w-full sm:w-auto border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
+        >
+          <option value="">All types</option>
+          <option>Fitness</option>
+          <option>Medical</option>
+          <option>Sick Leave</option>
+          <option>Second Opinion</option>
+          <option>Discharge Summary</option>
+          <option>Disability Certificate</option>
+          <option>Medical Fitness</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <TableShell
+        headers={["Cert ID", "Patient", "Type", "Issued On", "Expires", "Actions"]}
+        minWidth="620px"
+      >
+        {filtered.length === 0 ? (
+          <EmptyState message="No issued certificates found." />
+        ) : (
+          filtered.map((c) => (
+            <tr key={c.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td className="px-5 py-4">
+                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">{c.id}</span>
+              </td>
+              <td className="px-5 py-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-medium text-gray-800">{c.patient}</span>
+                </div>
+              </td>
+              <td className="px-5 py-4">
+                <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[c.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}>
+                  {c.type}
+                </span>
+              </td>
+              <td className="px-5 py-4 text-sm text-gray-400">{c.issued}</td>
+              <td className="px-5 py-4">
+                {c.expiringSoon ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
+                    {c.expires}
+                  </span>
+                ) : (
+                  <span className="text-sm text-gray-400">{c.expires}</span>
+                )}
+              </td>
+              <td className="px-5 py-4">
+                <button
+                  onClick={() => onViewPdf(c)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium border border-gray-200 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 active:scale-95 transition-all"
+                >
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 2h8l4 4v8H2z" />
+                    <path d="M10 2v4h4" />
+                    <path d="M5 9h6M5 11.5h4" />
+                  </svg>
+                  View PDF
+                </button>
+              </td>
+            </tr>
+          ))
+        )}
+      </TableShell>
+
+      {filtered.length > 0 && (
+        <p className="text-xs text-gray-400 mt-3 px-1">
+          Showing {filtered.length} of {issuedCertificates.length} certificates
+        </p>
+      )}
     </div>
   );
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-const tabs = [
+const TABS = [
   { id: "requests", label: "All Requests" },
-  { id: "issued",   label: "Issued Certs"  },
+  { id: "review",   label: "Review Request" },
+  { id: "issued",   label: "Issued Certs" },
 ];
 
 export default function Certificaterequest() {
   const [activeTab, setActiveTab] = useState("requests");
   const [modalCert, setModalCert] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [form, setForm] = useState({ validity: "1 month", notes: "", fitnessStatus: "" });
+
+  const handleViewPdf = (cert) => {
+    setModalCert({
+      id: cert.id,
+      certificate_id: cert.certificate_id,
+      type: cert.type,
+      patient: cert.patient,
+      doctor: cert.doctor,
+      issued_at: cert.issued,
+      expires: cert.expires,
+      status: "Approved",
+      purpose: cert.purpose,
+      onDownload: () => window.open(`${import.meta.env.VITE_API_URL}/${cert.file}`, "_blank"),
+    });
+  };
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const res = await getDoctorRequests();
+        const formattedData = res.data.map((r) => ({
+          id: r.id.toString(),
+          name: r.full_name,
+          type: r.certificate_type,
+          purpose: r.purpose,
+          date: new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+          status: r.status.toLowerCase(),
+          statusText: r.status,
+          initials: getInitials(r.full_name),
+        }));
+        setRequests(formattedData);
+      } catch (error) {
+        console.error("Error fetching doctor requests:", error);
+      }
+    };
+    fetchRequests();
+  }, []);
+
+  const handleReview = async (id) => {
+    try {
+      const res = await getRequestDetails(id);
+      const docs = await getDocuments(id);
+      setSelectedRequest(res.data);
+      setDocuments(docs.data);
+      setActiveTab("review");
+    } catch (error) {
+      console.error("Error fetching request details:", error);
+    }
+  };
+
+  const handleApprove = async () => {
+    try {
+      await approveRequest(selectedRequest.id, {
+        doctor_notes: form.notes,
+        fitness_status: form.fitnessStatus,
+        validity: form.validity,
+      });
+      notify.success("Certificate Approved Successfully");
+      const res = await getDoctorRequests();
+      setRequests(res.data);
+      setActiveTab("issued");
+    } catch (error) {
+      console.error("Approval Error:", error);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await rejectRequest(selectedRequest.id, { doctor_notes: form.notes });
+      notify.error("Request Rejected");
+      setActiveTab("requests");
+    } catch (error) {
+      console.error("Rejection Error:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Tab nav */}
-     
-        <div className="flex gap-0 overflow-x-auto">
-          {tabs.map(t => (
+       
+          {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`py-3.5 px-4 sm:px-5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${
+              className={`py-4 px-5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px ${
                 activeTab === t.id
-                  ? "border-teal-600 text-teal-600"
-                  : "border-transparent text-slate-500 hover:text-gray-700"
+                  ? "border-teal-600 text-teal-700"
+                  : "border-transparent text-gray-400 hover:text-gray-700"
               }`}
             >
               {t.label}
             </button>
           ))}
-      </div>
 
-      {activeTab === "requests" && <AllRequests onReview={() => setActiveTab("review")} />}
-      {activeTab === "review"   && <ReviewPatient onBack={() => setActiveTab("requests")} />}
-      {activeTab === "issued"   && <IssuedCerts onViewPdf={cert => setModalCert(cert)} />}
 
-      <CertificateModal cert={modalCert} onClose={() => setModalCert(null)} />
+
+      {activeTab === "requests" && (
+        <AllRequests requests={requests} onReview={handleReview} />
+      )}
+      {activeTab === "review" && (
+        <ReviewPatient
+          selectedRequest={selectedRequest}
+          documents={documents}
+          form={form}
+          setForm={setForm}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onBack={() => setActiveTab("requests")}
+        />
+      )}
+      {activeTab === "issued" && (
+        <IssuedCerts onViewPdf={handleViewPdf} />
+      )}
+
+      <CertificateModal cert={modalCert} onClose={() => setModalCert(null)} role="doctor" />
     </div>
   );
 }

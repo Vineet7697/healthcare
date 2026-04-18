@@ -64,6 +64,7 @@ import ContactRequests from "../admin/ContactRequests";
 import Mycertificate from "../module/patient/pages/Mycertificate";
 import RequestCertificate from "../module/patient/pages/RequestCertificate";
 import Certificaterequest from "../module/doctor/pages/Certificaterequest";
+import VerifyCertificate from "../utils/VerifyCertificate";
 
 const Router = () => {
   return (
@@ -87,6 +88,10 @@ const Router = () => {
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/verify/:certificateId"
+            element={<VerifyCertificate />}
+          />
         </Route>
 
         {/* comming soon section */}
@@ -114,7 +119,6 @@ const Router = () => {
           <Route path="doctorsdetails/:id" element={<Doctordetails />} />
           <Route path="changepassword" element={<AdminHeaderDashboard />} />
           <Route path="contact-requests" element={<ContactRequests />} />
-         
         </Route>
 
         {/* 🩺 Doctor Dashboard Layout (with HeaderDashboard + Sidebar) */}

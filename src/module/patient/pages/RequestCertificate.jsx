@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { searchVisitDoctors } from "../../../services/patientService";
+import { validateStep } from "../../../controllers/FormValidation";
+import { notify } from "../../../utils/notify";
+import {
+  createRequest,
+  uploadDocuments,
+} from "../../../services/certificateService";
 
 const certificateTypes = [
   {
@@ -37,22 +43,13 @@ const certificateTypes = [
 
 const steps = ["Type", "Medical Info", "Documents", "Review"];
 
-const purposeOptions = [
-  "Employment / Job",
-  "Sports / Athletic activity",
-  "Travel",
-  "School / Education",
-  "Insurance",
-  "Legal/ Court",
-  "Other",
-];
-
 const bloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 const RequestCertificate = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const passedDoctor = state?.doctor || null;
 
   const [doctor, setDoctor] = useState(passedDoctor);
@@ -60,7 +57,7 @@ const RequestCertificate = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedType, setSelectedType] = useState("medical");
-  const [purpose, setPurpose] = useState("Employment / Job");
+  const [purpose, setPurpose] = useState("");
   const [notes, setNotes] = useState("");
 
   const [fullName, setFullName] = useState("");
@@ -71,13 +68,55 @@ const RequestCertificate = () => {
   const [bloodGroup, setBloodGroup] = useState("A+");
   const [conditions, setConditions] = useState("");
   const [medications, setMedications] = useState("");
+  const [documents, setDocuments] = useState({
+    idProof: null,
+    medicalReports: null,
+    prescription: null,
+  });
+
+  const DOC_FIELDS = [
+    {
+      field: "idProof",
+      label: "Government ID Proof",
+      required: true,
+      accept: "image/*,.pdf",
+      hint: "Aadhaar / PAN / Passport",
+    },
+    {
+      field: "medicalReports",
+      label: "Medical Reports",
+      required: false,
+      accept: "image/*,.pdf",
+      hint: "Previous diagnostic reports",
+    },
+    {
+      field: "prescription",
+      label: "Prescription",
+      required: false,
+      accept: "image/*,.pdf",
+      hint: "Doctor's prescription (if available)",
+    },
+  ];
 
   const handleNext = () => {
-    if (currentStep === 0 && !doctor) {
-      alert("Please select an assigned doctor to proceed.");
-      return;
+    const formData = {
+      doctor,
+      purpose,
+      fullName,
+      dob,
+      gender,
+      height,
+      weight,
+      documents,
+    };
+
+    const validationErrors = validateStep(currentStep, formData, validateFile);
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      setCurrentStep((prev) => prev + 1);
     }
-    setCurrentStep((s) => s + 1);
   };
 
   const handleBack = () => {
@@ -85,8 +124,23 @@ const RequestCertificate = () => {
   };
 
   useEffect(() => {
-    if (!passedDoctor) fetchDoctors();
-  }, [passedDoctor]);
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    if (passedDoctor && doctors.length > 0) {
+      const matchedDoctor = doctors.find(
+        (doc) => doc.doctorId === passedDoctor.doctorId,
+      );
+
+      if (matchedDoctor) {
+        setDoctor(matchedDoctor);
+      } else {
+        // fallback: agar list mein match na mile
+        setDoctor(passedDoctor);
+      }
+    }
+  }, [passedDoctor, doctors]);
 
   const fetchDoctors = async () => {
     try {
@@ -105,12 +159,124 @@ const RequestCertificate = () => {
     }
   };
 
-  const handleSubmit = () => {
-    alert(
-      "Certificate request submitted! The assigned doctor will review it shortly.",
-    );
-    navigate("/client/mycertificate");
+  const validateFile = (file) => {
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Only PDF, JPG, and PNG files are allowed.";
+    }
+
+    if (file.size > maxSize) {
+      return "File size must be less than 5MB.";
+    }
+
+    return null;
   };
+
+  const handleFileChange = (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const error = validateFile(file);
+
+    if (error) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: error,
+      }));
+      return;
+    }
+
+    setDocuments((prev) => ({
+      ...prev,
+      [field]: file,
+    }));
+
+    // Clear previous error
+    setErrors((prev) => ({
+      ...prev,
+      [field]: "",
+    }));
+  };
+
+const handleSubmit = async () => {
+  if (isSubmitting) return;
+  setIsSubmitting(true);
+
+  console.log("Submit button clicked");
+
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      notify.error("Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    if (!doctor?.doctorId) {
+      notify.error("Please select an assigned doctor.");
+      return;
+    }
+
+    // Step 1: Create Request
+    const payload = {
+      doctor_id: doctor.doctorId,
+      certificate_type: selectedType,
+      purpose,
+      notes,
+      full_name: fullName,
+      dob,
+      gender,
+      blood_group: bloodGroup,
+      height,
+      weight,
+      medical_conditions: conditions,
+      medications,
+    };
+
+    const res = await createRequest(payload);
+    console.log("✅ Request Created:", res.data);
+
+    const requestId = res.data.requestId;
+
+    // Step 2: Upload Documents (Only if files exist)
+    const hasDocuments = Object.values(documents).some(
+      (file) => file !== null
+    );
+
+    if (hasDocuments) {
+      const docData = new FormData();
+      docData.append("request_id", requestId);
+
+      Object.values(documents).forEach((file) => {
+        if (file) {
+          docData.append("documents", file);
+        }
+      });
+
+      console.log("📤 Uploading Documents...");
+      const uploadRes = await uploadDocuments(docData);
+      console.log("📄 Upload Response:", uploadRes.data);
+    }
+
+    // Step 3: Success Notification
+    notify.success("Certificate request submitted successfully!");
+    console.log("🎉 Success Notification Triggered");
+
+    // Step 4: Navigation
+    navigate("/client/mycertificate", { state: { success: true } });
+    console.log("➡️ Navigation Triggered");
+  } catch (error) {
+    console.error("❌ Submission Error:", error);
+    notify.error(
+      error.response?.data?.message || "Failed to submit request."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   /* ── Step dot style helpers ── */
   const stepDotBg = (index) => {
@@ -124,6 +290,91 @@ const RequestCertificate = () => {
     if (index === currentStep) return "text-[#0086C3]";
     if (index < currentStep) return "text-green-700";
     return "text-slate-400";
+  };
+
+  const FileUploadCard = ({
+    field,
+    label,
+    required,
+    accept,
+    hint,
+    file,
+    onUpload,
+    onDelete,
+    error,
+  }) => {
+    const isImage = file && file.type?.startsWith("image/");
+
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-[12px] font-semibold uppercase tracking-widest text-slate-500">
+            {label} {required && <span className="text-red-500">*</span>}
+          </label>
+
+          {file && (
+            <button
+              onClick={() => onDelete(field)}
+              className="text-xs font-semibold text-red-500 hover:underline"
+            >
+              Remove
+            </button>
+          )}
+        </div>
+
+        {!file ? (
+          <label className="flex items-center gap-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 px-5 py-5 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+              📤
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-700">
+                Click to upload
+              </p>
+              <p className="text-xs text-slate-400">{hint}</p>
+            </div>
+            <input
+              type="file"
+              accept={accept}
+              onChange={(e) => onUpload(e, field)}
+              className="hidden"
+            />
+          </label>
+        ) : (
+          <div className="flex items-center gap-4 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-5 py-4">
+            {isImage ? (
+              <img
+                src={URL.createObjectURL(file)}
+                alt="preview"
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                📄
+              </div>
+            )}
+
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-emerald-800 truncate">
+                {file.name}
+              </p>
+              <p className="text-xs text-emerald-600">
+                {(file.size / 1024).toFixed(0)} KB
+              </p>
+            </div>
+
+            <button
+              onClick={() => window.open(URL.createObjectURL(file))}
+              className="text-blue-600 text-xs font-semibold hover:underline"
+            >
+              View
+            </button>
+          </div>
+        )}
+
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      </div>
+    );
   };
 
   return (
@@ -214,31 +465,26 @@ const RequestCertificate = () => {
               <FieldLabel>
                 🩺 Assigned Doctor <Req />
               </FieldLabel>
-              {doctor ? (
-                <div className="rounded-xl px-4 py-3 bg-[#f8fafc] border border-black/[0.08]">
-                  <p className=" font-semibold text-[#0c1e3a] text-[14px]">
-                    {doctor.doctorName}
-                  </p>
-                  <p className=" text-[12px] text-slate-500 mt-0.5">
-                    {doctor.specialization}
-                  </p>
-                </div>
-              ) : (
-                <StyledSelect
-                  onChange={(e) => {
-                    const selected = doctors.find(
-                      (doc) => doc.doctorId === Number(e.target.value),
-                    );
-                    setDoctor(selected);
-                  }}
-                >
-                  <option value="">Select Doctor</option>
-                  {doctors.map((doc) => (
-                    <option key={doc.doctorId} value={doc.doctorId}>
-                      {doc.doctorName} — {doc.specialization}
-                    </option>
-                  ))}
-                </StyledSelect>
+              <StyledSelect
+                value={doctor?.doctorId || ""}
+                onChange={(e) => {
+                  const selected = doctors.find(
+                    (doc) => doc.doctorId === Number(e.target.value),
+                  );
+                  setDoctor(selected);
+                  setErrors((prev) => ({ ...prev, doctor: "" }));
+                }}
+              >
+                <option value="">Select Doctor</option>
+                {doctors.map((doc) => (
+                  <option key={doc.doctorId} value={doc.doctorId}>
+                    {doc.doctorName} — {doc.specialization}
+                  </option>
+                ))}
+              </StyledSelect>
+
+              {errors.doctor && (
+                <p className="text-red-500 text-xs mt-1">{errors.doctor}</p>
               )}
             </div>
 
@@ -249,12 +495,26 @@ const RequestCertificate = () => {
               </FieldLabel>
               <StyledSelect
                 value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
+                onChange={(e) => {
+                  setPurpose(e.target.value);
+                  setErrors((prev) => ({ ...prev, purpose: "" }));
+                }}
               >
-                {purposeOptions.map((opt) => (
-                  <option key={opt}>{opt}</option>
-                ))}
+                <option value="">Select Purpose</option>
+                <option value="Employment / Job">Employment / Job</option>
+                <option value="Sports / Athletic activity">
+                  Sports / Athletic activity
+                </option>
+                <option value="Travel">Travel</option>
+                <option value="School / Education">School / Education</option>
+                <option value="Insurance">Insurance</option>
+                <option value="Legal/ Court">Legal/ Court</option>
+                <option value="Other">Other</option>
               </StyledSelect>
+
+              {errors.purpose && (
+                <p className="text-red-500 text-xs mt-1">{errors.purpose}</p>
+              )}
             </div>
 
             {/* Notes */}
@@ -290,6 +550,9 @@ const RequestCertificate = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
+                {errors.fullName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+                )}
               </FieldBox>
 
               <FieldBox label="Date of Birth">
@@ -298,6 +561,9 @@ const RequestCertificate = () => {
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
                 />
+                {errors.dob && (
+                  <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
+                )}
               </FieldBox>
               <FieldBox label="Gender">
                 <StyledSelect
@@ -309,6 +575,9 @@ const RequestCertificate = () => {
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </StyledSelect>
+                {errors.gender && (
+                  <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                )}
               </FieldBox>
 
               <FieldBox label="🩸 Blood Group">
@@ -329,6 +598,9 @@ const RequestCertificate = () => {
                   value={height}
                   onChange={(e) => setHeight(e.target.value)}
                 />
+                {errors.height && (
+                  <p className="text-red-500 text-xs mt-1">{errors.height}</p>
+                )}
               </FieldBox>
               <FieldBox label="⚖️ Weight (kg)">
                 <StyledInput
@@ -337,6 +609,9 @@ const RequestCertificate = () => {
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
                 />
+                {errors.weight && (
+                  <p className="text-red-500 text-xs mt-1">{errors.weight}</p>
+                )}
               </FieldBox>
             </div>
 
@@ -366,29 +641,27 @@ const RequestCertificate = () => {
         {/* ── Step 3 — Documents ── */}
         {currentStep === 2 && (
           <StepCard>
-            <h2 className=" text-[17px] font-bold text-[#0c1e3a] mb-4">
+            <h2 className="text-[17px] font-bold text-[#0c1e3a] mb-4">
               Step 3 — Upload Documents
             </h2>
 
-            {[
-              "ID Proof (Aadhar / PAN)",
-              "Previous Medical Reports",
-              "Prescription (if any)",
-            ].map((docLabel, i) => (
-              <div className="mb-4" key={i}>
-                <FieldLabel>📎 {docLabel}</FieldLabel>
-                <label className="w-full flex flex-col items-center justify-center rounded-xl py-6 cursor-pointer transition-all duration-200 border-[1.5px] border-dashed border-[rgba(0,134,195,0.35)] bg-[rgba(0,134,195,0.03)] hover:bg-[rgba(0,134,195,0.07)]">
-                  <span className="text-[22px]">📂</span>
-                  <p className=" text-[13px] font-semibold mt-1 text-[#0086C3]">
-                    Click to upload
-                  </p>
-                  <p className=" text-[11px] text-slate-400">
-                    PDF, JPG, PNG — max 5MB
-                  </p>
-                  <input type="file" className="hidden" />
-                </label>
-              </div>
-            ))}
+            <div className="space-y-4">
+              {DOC_FIELDS.map((doc) => (
+                <FileUploadCard
+                  key={doc.field}
+                  {...doc}
+                  file={documents[doc.field]}
+                  error={errors[doc.field]}
+                  onUpload={handleFileChange}
+                  onDelete={(field) =>
+                    setDocuments((prev) => ({
+                      ...prev,
+                      [field]: null,
+                    }))
+                  }
+                />
+              ))}
+            </div>
 
             <div className="mt-6">
               <ActionButtons onBack={handleBack} onNext={handleNext} />
@@ -436,7 +709,6 @@ const RequestCertificate = () => {
                   value: weight ? `${weight} kg` : "—",
                   icon: "⚖️",
                 },
-                
               ].map((item, i) => (
                 <div
                   key={i}
@@ -461,6 +733,58 @@ const RequestCertificate = () => {
               )}
             </div>
 
+            {/* Uploaded Documents */}
+            {Object.values(documents).some((doc) => doc) && (
+              <div className="mb-5">
+                <h3 className="text-[15px] font-bold text-[#0c1e3a] mb-3">
+                  📄 Uploaded Documents
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {Object.entries(documents).map(([key, file]) => {
+                    if (!file) return null;
+
+                    const isImage = file.type?.startsWith("image/");
+                    const labels = {
+                      idProof: "ID Proof",
+                      medicalReports: "Medical Reports",
+                      prescription: "Prescription",
+                    };
+
+                    return (
+                      <div
+                        key={key}
+                        className="rounded-xl border border-black/[0.05] bg-[#f8fafc] p-3"
+                      >
+                        <p className="text-xs font-semibold text-slate-400 mb-2">
+                          {labels[key]}
+                        </p>
+
+                        {isImage ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={labels[key]}
+                            className="w-full h-24 object-cover rounded-lg mb-2"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-24 rounded-lg bg-blue-100 mb-2">
+                            📄 PDF Document
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => window.open(URL.createObjectURL(file))}
+                          className="text-blue-600 text-xs font-semibold hover:underline"
+                        >
+                          View Document
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Disclaimer */}
             <div className="rounded-xl px-4 py-3 mb-5 bg-[rgba(0,134,195,0.06)] border border-[rgba(0,134,195,0.15)]">
               <p className=" text-[12px] text-[#0c1e3a]">
@@ -479,9 +803,16 @@ const RequestCertificate = () => {
               </button>
               <button
                 onClick={handleSubmit}
-                className=" font-bold text-[14px] text-white px-8 py-2.5 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 bg-gradient-to-br from-[#0086C3] to-[#00b4d8] shadow-[0_4px_14px_rgba(0,134,195,0.35)] hover:shadow-[0_6px_20px_rgba(0,134,195,0.5)]"
+                disabled={isSubmitting}
+                className={`font-bold text-[14px] text-white px-8 py-2.5 rounded-xl
+    ${
+      isSubmitting
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-gradient-to-br from-[#0086C3] to-[#00b4d8] hover:-translate-y-0.5"
+    }
+  `}
               >
-                ✅ Submit Request
+                {isSubmitting ? "Submitting..." : "✅ Submit Request"}
               </button>
             </div>
           </StepCard>
