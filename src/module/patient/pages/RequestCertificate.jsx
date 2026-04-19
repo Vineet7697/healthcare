@@ -200,83 +200,83 @@ const RequestCertificate = () => {
     }));
   };
 
-const handleSubmit = async () => {
-  if (isSubmitting) return;
-  setIsSubmitting(true);
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-  console.log("Submit button clicked");
+    console.log("Submit button clicked");
 
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    if (!token) {
-      notify.error("Please login again.");
-      navigate("/login");
-      return;
+      if (!token) {
+        notify.error("Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      if (!doctor?.doctorId) {
+        notify.error("Please select an assigned doctor.");
+        return;
+      }
+
+      // Step 1: Create Request
+      const payload = {
+        doctor_id: doctor.doctorId,
+        certificate_type: selectedType,
+        purpose,
+        notes,
+        full_name: fullName,
+        dob,
+        gender,
+        blood_group: bloodGroup,
+        height,
+        weight,
+        medical_conditions: conditions,
+        medications,
+      };
+
+      const res = await createRequest(payload);
+      console.log("✅ Request Created:", res.data);
+
+      const requestId = res.data.requestId;
+
+      // Step 2: Upload Documents (Only if files exist)
+      const hasDocuments = Object.values(documents).some(
+        (file) => file !== null,
+      );
+
+      if (hasDocuments) {
+        const docData = new FormData();
+        docData.append("request_id", requestId);
+
+        Object.values(documents).forEach((file) => {
+          if (file) {
+            docData.append("documents", file);
+          }
+        });
+
+        console.log("📤 Uploading Documents...");
+        const uploadRes = await uploadDocuments(docData);
+        console.log("📄 Upload Response:", uploadRes.data);
+      }
+
+      // Step 3: Success Notification
+      notify.success("Certificate request submitted successfully!");
+      console.log("🎉 Success Notification Triggered");
+
+      // Step 4: Navigation
+      navigate("/client/mycertificate", { state: { success: true } });
+      console.log("➡️ Navigation Triggered");
+    } catch (error) {
+      console.error("❌ Submission Error:", error);
+      notify.error(
+        error.response?.data?.message || "Failed to submit request.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (!doctor?.doctorId) {
-      notify.error("Please select an assigned doctor.");
-      return;
-    }
-
-    // Step 1: Create Request
-    const payload = {
-      doctor_id: doctor.doctorId,
-      certificate_type: selectedType,
-      purpose,
-      notes,
-      full_name: fullName,
-      dob,
-      gender,
-      blood_group: bloodGroup,
-      height,
-      weight,
-      medical_conditions: conditions,
-      medications,
-    };
-
-    const res = await createRequest(payload);
-    console.log("✅ Request Created:", res.data);
-
-    const requestId = res.data.requestId;
-
-    // Step 2: Upload Documents (Only if files exist)
-    const hasDocuments = Object.values(documents).some(
-      (file) => file !== null
-    );
-
-    if (hasDocuments) {
-      const docData = new FormData();
-      docData.append("request_id", requestId);
-
-      Object.values(documents).forEach((file) => {
-        if (file) {
-          docData.append("documents", file);
-        }
-      });
-
-      console.log("📤 Uploading Documents...");
-      const uploadRes = await uploadDocuments(docData);
-      console.log("📄 Upload Response:", uploadRes.data);
-    }
-
-    // Step 3: Success Notification
-    notify.success("Certificate request submitted successfully!");
-    console.log("🎉 Success Notification Triggered");
-
-    // Step 4: Navigation
-    navigate("/client/mycertificate", { state: { success: true } });
-    console.log("➡️ Navigation Triggered");
-  } catch (error) {
-    console.error("❌ Submission Error:", error);
-    notify.error(
-      error.response?.data?.message || "Failed to submit request."
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   /* ── Step dot style helpers ── */
   const stepDotBg = (index) => {
@@ -394,9 +394,14 @@ const handleSubmit = async () => {
             Apply for Certificate
           </h1>
           {doctor && (
-            <p className=" text-[13px] mt-1 text-slate-500">
+            <p className="text-[13px] mt-1 text-slate-500">
               Requesting from{" "}
-              <span className="font-semibold text-[#0086C3]">
+              <span
+                onClick={() =>
+                  navigate(`/client/doctor-profile/${doctor.doctorId}`)
+                }
+                className="font-semibold text-[#0086C3] cursor-pointer hover:underline"
+              >
                 {doctor.doctorName}
               </span>{" "}
               — {doctor.specialization}
@@ -467,6 +472,7 @@ const handleSubmit = async () => {
               </FieldLabel>
               <StyledSelect
                 value={doctor?.doctorId || ""}
+                disabled={!!doctor?.doctorId} // 👈 key line
                 onChange={(e) => {
                   const selected = doctors.find(
                     (doc) => doc.doctorId === Number(e.target.value),

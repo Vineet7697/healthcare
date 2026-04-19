@@ -39,3 +39,11 @@
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* PDF fix (Tailwind oklch issue) */
+.no-tailwind * {
+  color: #000 !important;
+  background: #fff !important;
+  border-color: #000 !important;
+  box-shadow: none !important;
+}

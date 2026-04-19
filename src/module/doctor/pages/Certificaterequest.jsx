@@ -30,20 +30,20 @@ const FITNESS_OPTIONS = [
 const VALIDITY_OPTIONS = ["1 month", "3 months", "6 months", "1 year"];
 
 const BADGE_STYLES = {
-  pending:  "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
-  warning:  "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
+  pending: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  warning: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
   approved: "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
   rejected: "bg-red-50 text-red-700 ring-1 ring-red-200",
 };
 
 const TYPE_BADGE = {
-  "Medical Fitness":      "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-  "Second Opinion":       "bg-purple-50 text-purple-700 ring-1 ring-purple-200",
-  "Discharge Summary":    "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
-  "Disability Certificate":"bg-rose-50 text-rose-700 ring-1 ring-rose-200",
-  Fitness:               "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
-  Medical:               "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-  "Sick Leave":          "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  "Medical Fitness": "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  "Second Opinion": "bg-purple-50 text-purple-700 ring-1 ring-purple-200",
+  "Discharge Summary": "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
+  "Disability Certificate": "bg-rose-50 text-rose-700 ring-1 ring-rose-200",
+  Fitness: "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
+  Medical: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  "Sick Leave": "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
 };
 
 const AVATAR_COLORS = [
@@ -58,7 +58,12 @@ const AVATAR_COLORS = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getInitials(name = "") {
-  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 function getAvatarColor(name = "") {
@@ -79,7 +84,9 @@ function Avatar({ name = "", size = "sm" }) {
   const [bg, text] = getAvatarColor(name);
   const sz = size === "lg" ? "w-11 h-11 text-sm" : "w-8 h-8 text-xs";
   return (
-    <div className={`${sz} ${bg} ${text} rounded-full flex items-center justify-center font-semibold flex-shrink-0`}>
+    <div
+      className={`${sz} ${bg} ${text} rounded-full flex items-center justify-center font-semibold flex-shrink-0`}
+    >
       {getInitials(name)}
     </div>
   );
@@ -87,20 +94,33 @@ function Avatar({ name = "", size = "sm" }) {
 
 function Badge({ status, text }) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}
+    >
       {text}
     </span>
   );
 }
 
 function FieldError({ msg }) {
-  return msg ? <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><span>⚠</span>{msg}</p> : null;
+  return msg ? (
+    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+      <span>⚠</span>
+      {msg}
+    </p>
+  ) : null;
 }
 
 function SectionCard({ title, children, className = "" }) {
   return (
-    <div className={`bg-white border border-gray-200 rounded-2xl p-5 ${className}`}>
-      {title && <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">{title}</p>}
+    <div
+      className={`bg-white border border-gray-200 rounded-2xl p-5 ${className}`}
+    >
+      {title && (
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+          {title}
+        </p>
+      )}
       {children}
     </div>
   );
@@ -110,7 +130,11 @@ function MetricCard({ label, value, accent = false, warn = false }) {
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
-      <p className={`text-2xl font-semibold ${warn ? "text-amber-600" : accent ? "text-teal-600" : "text-gray-800"}`}>{value}</p>
+      <p
+        className={`text-2xl font-semibold ${warn ? "text-amber-600" : accent ? "text-teal-600" : "text-gray-800"}`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
@@ -119,7 +143,17 @@ function MetricCard({ label, value, accent = false, warn = false }) {
 
 function SearchIcon() {
   return (
-    <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="6.5" cy="6.5" r="5" />
       <path d="m10.5 10.5 3 3" />
     </svg>
@@ -133,7 +167,16 @@ function EmptyState({ message = "Nothing here yet.", colSpan = 6 }) {
     <tr>
       <td colSpan={colSpan} className="py-14 text-center">
         <div className="flex flex-col items-center gap-2 text-gray-300">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <polyline points="14 2 14 8 20 8" />
             <line x1="9" y1="13" x2="15" y2="13" />
@@ -156,7 +199,10 @@ function TableShell({ headers, children, minWidth = "600px" }) {
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
               {headers.map((h) => (
-                <th key={h} className="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                <th
+                  key={h}
+                  className="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-widest"
+                >
                   {h}
                 </th>
               ))}
@@ -192,7 +238,7 @@ function AllRequests({ requests, onReview }) {
   }, [search, statusFilter, typeFilter, requests]);
 
   const pendingCount = requests.filter(
-    (r) => r.status === "pending" || r.status === "warning"
+    (r) => r.status === "pending" || r.status === "warning",
   ).length;
 
   return (
@@ -200,8 +246,12 @@ function AllRequests({ requests, onReview }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Certificate Requests</h1>
-          <p className="text-sm text-gray-400 mt-1">Review and manage patient certificate requests</p>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+            Certificate Requests
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Review and manage patient certificate requests
+          </p>
         </div>
         <div className="flex gap-3">
           <MetricCard label="Pending" value={pendingCount} accent />
@@ -230,33 +280,54 @@ function AllRequests({ requests, onReview }) {
             onChange={(e) => set(e.target.value)}
             className="w-full sm:w-auto border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
           >
-            {opts.map((o) => <option key={o}>{o}</option>)}
+            {opts.map((o) => (
+              <option key={o}>{o}</option>
+            ))}
           </select>
         ))}
       </div>
 
       {/* Table */}
-      <TableShell headers={["Request ID", "Patient", "Type", "Submitted", "Status", "Action"]}>
+      <TableShell
+        headers={[
+          "Request ID",
+          "Patient",
+          "Type",
+          "Submitted",
+          "Status",
+          "Action",
+        ]}
+      >
         {filtered.length === 0 ? (
           <EmptyState message="No requests match your filters." />
         ) : (
           filtered.map((r) => (
-            <tr key={r.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+            <tr
+              key={r.id}
+              className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
+            >
               <td className="px-5 py-4">
-                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">{r.id}</span>
+                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">
+                  {r.id}
+                </span>
               </td>
               <td className="px-5 py-4">
                 <div className="flex items-center gap-2.5">
-                 
-                  <span className="font-medium text-gray-800 whitespace-nowrap">{r.name}</span>
+                  <span className="font-medium text-gray-800 whitespace-nowrap">
+                    {r.name}
+                  </span>
                 </div>
               </td>
               <td className="px-5 py-4">
-                <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[r.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}>
+                <span
+                  className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[r.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}
+                >
                   {r.type}
                 </span>
               </td>
-              <td className="px-5 py-4 text-sm text-gray-400 whitespace-nowrap">{r.date}</td>
+              <td className="px-5 py-4 text-sm text-gray-400 whitespace-nowrap">
+                {r.date}
+              </td>
               <td className="px-5 py-4">
                 <Badge status={r.status} text={r.statusText} />
               </td>
@@ -267,7 +338,16 @@ function AllRequests({ requests, onReview }) {
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
                   >
                     Review
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M3 8h10M9 4l4 4-4 4" />
                     </svg>
                   </button>
@@ -294,7 +374,16 @@ function AllRequests({ requests, onReview }) {
 
 // ─── Tab: Review Patient ──────────────────────────────────────────────────────
 
-function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, onReject, onBack }) {
+function ReviewPatient({
+  selectedRequest,
+  documents,
+  form,
+  setForm,
+  onApprove,
+  onReject,
+  onBack,
+  loading,
+}) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -305,21 +394,29 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
 
   const validate = () => {
     const e = {};
-    if (!form.notes.trim()) e.notes = "Clinical notes are required before approving.";
+    if (!form.notes.trim())
+      e.notes = "Clinical notes are required before approving.";
     if (!form.fitnessStatus || form.fitnessStatus === "Select fitness status")
       e.fitnessStatus = "Please select a fitness status.";
     return e;
   };
 
   const handleApproveClick = async () => {
+    if (loading) return;
     const e = validate();
-    if (Object.keys(e).length > 0) { setErrors(e); return; }
+    if (Object.keys(e).length > 0) {
+      setErrors(e);
+      return;
+    }
     await onApprove();
     setSubmitted(true);
   };
 
   const handleRejectClick = async () => {
-    if (!form.notes.trim()) { setErrors({ notes: "Please add a reason for rejection." }); return; }
+    if (!form.notes.trim()) {
+      setErrors({ notes: "Please add a reason for rejection." });
+      return;
+    }
     await onReject();
   };
 
@@ -327,13 +424,26 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-72 gap-5">
         <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#0f766e"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M5 13l4 4L19 7" />
           </svg>
         </div>
         <div className="text-center">
-          <p className="text-base font-semibold text-gray-800 mb-1">Certificate Approved!</p>
-          <p className="text-sm text-gray-400">The certificate has been digitally signed and issued.</p>
+          <p className="text-base font-semibold text-gray-800 mb-1">
+            Certificate Approved!
+          </p>
+          <p className="text-sm text-gray-400">
+            The certificate has been digitally signed and issued.
+          </p>
         </div>
         <button
           onClick={onBack}
@@ -346,7 +456,9 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
   }
 
   const infoRows = [
-    ["DOB", selectedRequest?.dob || "N/A"],
+    ["DOB", selectedRequest?.dob
+  ? new Date(selectedRequest.dob).toLocaleDateString("en-IN")
+  : "N/A"],
     ["Gender", selectedRequest?.gender || "N/A"],
     ["Blood Group", selectedRequest?.blood_group || "N/A"],
     ["Height", selectedRequest?.height || "N/A"],
@@ -356,24 +468,32 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
     <div className="p-5 sm:p-7">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Review Request</h1>
+        <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+          Review Request
+        </h1>
         <p className="text-sm text-gray-400 mt-1">
           REQ-{selectedRequest?.id} · {selectedRequest?.certificate_type}
         </p>
       </div>
 
-      <div className="flex flex-col lg:grid lg:gap-5" style={{ gridTemplateColumns: "1fr 1.4fr" }}>
-
+      <div
+        className="flex flex-col lg:grid lg:gap-5"
+        style={{ gridTemplateColumns: "1fr 1.4fr" }}
+      >
         {/* ── Left Column ── */}
         <div className="flex flex-col gap-4 mb-4 lg:mb-0">
-
           {/* Patient Info */}
           <SectionCard title="Patient Information">
             <div className="flex items-center gap-3 mb-5">
               <Avatar name={selectedRequest?.full_name || ""} size="lg" />
               <div>
-                <p className="font-semibold text-gray-800 text-sm">Name: {selectedRequest?.full_name || "--"}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Medical Conditions: {selectedRequest?.medical_conditions || "No known conditions"}</p>
+                <p className="font-semibold text-gray-800 text-sm">
+                  Name: {selectedRequest?.full_name || "--"}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Medical Conditions:{" "}
+                  {selectedRequest?.medical_conditions || "No known conditions"}
+                </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -393,9 +513,21 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
             ) : (
               <div className="flex flex-col gap-2">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3.5 py-3">
+                  <div
+                    key={doc.id}
+                    className="flex items-center gap-3 bg-gray-50 rounded-xl px-3.5 py-3"
+                  >
                     <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#2563eb"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
                       </svg>
@@ -420,12 +552,13 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
 
         {/* ── Right Column ── */}
         <div className="flex flex-col gap-4">
-
           {/* Certificate Details */}
           <SectionCard title="Certificate Details">
             {/* Certificate Type */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Certificate Type</label>
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                Certificate Type
+              </label>
               <div className="w-full border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 text-gray-500 cursor-not-allowed">
                 {selectedRequest?.certificate_type || "N/A"}
               </div>
@@ -433,7 +566,9 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
 
             {/* Patient Notes */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Patient's Request Notes</label>
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                Patient's Request Notes
+              </label>
               <div className="bg-gray-50 border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm text-gray-600 min-h-[60px]">
                 {selectedRequest?.notes || "No notes provided."}
               </div>
@@ -441,13 +576,17 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
 
             {/* Validity */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Validity Period</label>
+              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                Validity Period
+              </label>
               <select
                 value={form.validity}
                 onChange={(e) => set("validity", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
               >
-                {VALIDITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                {VALIDITY_OPTIONS.map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
               </select>
             </div>
 
@@ -460,10 +599,14 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
                 value={form.fitnessStatus}
                 onChange={(e) => set("fitnessStatus", e.target.value)}
                 className={`w-full border rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition ${
-                  errors.fitnessStatus ? "border-red-300 bg-red-50" : "border-gray-200"
+                  errors.fitnessStatus
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-200"
                 }`}
               >
-                {FITNESS_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                {FITNESS_OPTIONS.map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
               </select>
               <FieldError msg={errors.fitnessStatus} />
             </div>
@@ -491,25 +634,48 @@ function ReviewPatient({ selectedRequest, documents, form, setForm, onApprove, o
             <div className="flex flex-col sm:flex-row gap-2.5 mb-3">
               <button
                 onClick={handleApproveClick}
+                disabled={loading}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M5 13l4 4L19 7" />
                 </svg>
                 Approve & Generate Certificate
               </button>
+
               <button
                 onClick={handleRejectClick}
-                className="sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-sm font-medium rounded-xl hover:bg-red-100 active:scale-95 transition-all"
+                disabled={loading}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-sm font-medium rounded-xl hover:bg-red-100 active:scale-95 transition-all"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
                 Reject
               </button>
             </div>
             <p className="text-xs text-gray-400 leading-relaxed">
-              Fields marked <span className="text-red-400">*</span> are required. Approval digitally signs the certificate with registration number{" "}
+              Fields marked <span className="text-red-400">*</span> are
+              required. Approval digitally signs the certificate with
+              registration number{" "}
               <span className="font-mono text-gray-500">MCI-78234</span>.
             </p>
           </SectionCard>
@@ -537,10 +703,18 @@ function IssuedCerts({ onViewPdf }) {
           type: c.certificate_type,
           purpose: c.purpose,
           issued: c.issued_at
-            ? new Date(c.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+            ? new Date(c.issued_at).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
             : "N/A",
           expires: c.expiry_date
-            ? new Date(c.expiry_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+            ? new Date(c.expiry_date).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
             : "N/A",
           expiringSoon: isExpiringSoon(c.expiry_date),
           doctor: c.doctor_name || "Dr. Assigned",
@@ -564,11 +738,17 @@ function IssuedCerts({ onViewPdf }) {
     });
   }, [search, typeFilter, issuedCertificates]);
 
-  const expiringSoonCount = issuedCertificates.filter((c) => c.expiringSoon).length;
+  const expiringSoonCount = issuedCertificates.filter(
+    (c) => c.expiringSoon,
+  ).length;
   const thisMonthCount = issuedCertificates.filter((c) => {
     const d = new Date(c.issued);
     const now = new Date();
-    return !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return (
+      !isNaN(d) &&
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear()
+    );
   }).length;
 
   return (
@@ -576,13 +756,21 @@ function IssuedCerts({ onViewPdf }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Issued Certificates</h1>
-          <p className="text-sm text-gray-400 mt-1">Certificates you have approved and generated</p>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+            Issued Certificates
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Certificates you have approved and generated
+          </p>
         </div>
         <div className="flex gap-3 flex-wrap">
           <MetricCard label="Total Issued" value={issuedCertificates.length} />
           <MetricCard label="This Month" value={thisMonthCount} accent />
-          <MetricCard label="Expiring Soon" value={expiringSoonCount} warn={expiringSoonCount > 0} />
+          <MetricCard
+            label="Expiring Soon"
+            value={expiringSoonCount}
+            warn={expiringSoonCount > 0}
+          />
         </div>
       </div>
 
@@ -616,16 +804,28 @@ function IssuedCerts({ onViewPdf }) {
 
       {/* Table */}
       <TableShell
-        headers={["Cert ID", "Patient", "Type", "Issued On", "Expires", "Actions"]}
+        headers={[
+          "Cert ID",
+          "Patient",
+          "Type",
+          "Issued On",
+          "Expires",
+          "Actions",
+        ]}
         minWidth="620px"
       >
         {filtered.length === 0 ? (
           <EmptyState message="No issued certificates found." />
         ) : (
           filtered.map((c) => (
-            <tr key={c.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+            <tr
+              key={c.id}
+              className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
+            >
               <td className="px-5 py-4">
-                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">{c.id}</span>
+                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">
+                  {c.id}
+                </span>
               </td>
               <td className="px-5 py-4">
                 <div className="flex items-center gap-2.5">
@@ -633,7 +833,9 @@ function IssuedCerts({ onViewPdf }) {
                 </div>
               </td>
               <td className="px-5 py-4">
-                <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[c.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}>
+                <span
+                  className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[c.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}
+                >
                   {c.type}
                 </span>
               </td>
@@ -653,7 +855,16 @@ function IssuedCerts({ onViewPdf }) {
                   onClick={() => onViewPdf(c)}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium border border-gray-200 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 active:scale-95 transition-all"
                 >
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M2 2h8l4 4v8H2z" />
                     <path d="M10 2v4h4" />
                     <path d="M5 9h6M5 11.5h4" />
@@ -679,8 +890,7 @@ function IssuedCerts({ onViewPdf }) {
 
 const TABS = [
   { id: "requests", label: "All Requests" },
-  { id: "review",   label: "Review Request" },
-  { id: "issued",   label: "Issued Certs" },
+  { id: "issued", label: "Issued Certs" },
 ];
 
 export default function Certificaterequest() {
@@ -689,7 +899,13 @@ export default function Certificaterequest() {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [documents, setDocuments] = useState([]);
-  const [form, setForm] = useState({ validity: "1 month", notes: "", fitnessStatus: "" });
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    validity: "1 month",
+    notes: "",
+    fitnessStatus: "",
+  });
 
   const handleViewPdf = (cert) => {
     setModalCert({
@@ -702,29 +918,35 @@ export default function Certificaterequest() {
       expires: cert.expires,
       status: "Approved",
       purpose: cert.purpose,
-      onDownload: () => window.open(`${import.meta.env.VITE_API_URL}/${cert.file}`, "_blank"),
+      onDownload: () =>
+        window.open(`${import.meta.env.VITE_API_URL}/${cert.file}`, "_blank"),
     });
   };
 
+  const fetchRequests = async () => {
+    try {
+      const res = await getDoctorRequests();
+      const formattedData = res.data.map((r) => ({
+        id: r.id.toString(),
+        name: r.full_name,
+        type: r.certificate_type,
+        purpose: r.purpose,
+        date: new Date(r.created_at).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        status: r.status.toLowerCase(),
+        statusText: r.status,
+        initials: getInitials(r.full_name),
+      }));
+      setRequests(formattedData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const res = await getDoctorRequests();
-        const formattedData = res.data.map((r) => ({
-          id: r.id.toString(),
-          name: r.full_name,
-          type: r.certificate_type,
-          purpose: r.purpose,
-          date: new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
-          status: r.status.toLowerCase(),
-          statusText: r.status,
-          initials: getInitials(r.full_name),
-        }));
-        setRequests(formattedData);
-      } catch (error) {
-        console.error("Error fetching doctor requests:", error);
-      }
-    };
     fetchRequests();
   }, []);
 
@@ -742,48 +964,72 @@ export default function Certificaterequest() {
 
   const handleApprove = async () => {
     try {
+      setLoading(true);
+
       await approveRequest(selectedRequest.id, {
         doctor_notes: form.notes,
         fitness_status: form.fitnessStatus,
         validity: form.validity,
       });
+
       notify.success("Certificate Approved Successfully");
-      const res = await getDoctorRequests();
-      setRequests(res.data);
+
+      // 🔥 YAHI LAGANA HAI (IMPORTANT)
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === selectedRequest.id.toString()
+            ? { ...r, status: "approved", statusText: "Approved" }
+            : r,
+        ),
+      );
       setActiveTab("issued");
     } catch (error) {
       console.error("Approval Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleReject = async () => {
     try {
-      await rejectRequest(selectedRequest.id, { doctor_notes: form.notes });
+      setLoading(true);
+      await rejectRequest(selectedRequest.id, {
+        doctor_notes: form.notes,
+      });
+
       notify.error("Request Rejected");
+
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === selectedRequest.id.toString()
+            ? { ...r, status: "rejected", statusText: "Rejected" }
+            : r,
+        ),
+      );
+
       setActiveTab("requests");
     } catch (error) {
       console.error("Rejection Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-       
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className={`py-4 px-5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px ${
-                activeTab === t.id
-                  ? "border-teal-600 text-teal-700"
-                  : "border-transparent text-gray-400 hover:text-gray-700"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-
-
+      {TABS.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => setActiveTab(t.id)}
+          className={`py-4 px-5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px ${
+            activeTab === t.id
+              ? "border-teal-600 text-teal-700"
+              : "border-transparent text-gray-400 hover:text-gray-700"
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
 
       {activeTab === "requests" && (
         <AllRequests requests={requests} onReview={handleReview} />
@@ -797,13 +1043,16 @@ export default function Certificaterequest() {
           onApprove={handleApprove}
           onReject={handleReject}
           onBack={() => setActiveTab("requests")}
+          loading={loading}
         />
       )}
-      {activeTab === "issued" && (
-        <IssuedCerts onViewPdf={handleViewPdf} />
-      )}
+      {activeTab === "issued" && <IssuedCerts onViewPdf={handleViewPdf} />}
 
-      <CertificateModal cert={modalCert} onClose={() => setModalCert(null)} role="doctor" />
+      <CertificateModal
+        cert={modalCert}
+        onClose={() => setModalCert(null)}
+        role="doctor"
+      />
     </div>
   );
 }

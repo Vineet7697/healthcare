@@ -356,33 +356,6 @@ function TrackTab({ requestId }) {
               No timeline events yet.
             </div>
           )}
-
-          {/* Upload zone */}
-          <div
-            className={`border-[1.5px] border-dashed rounded-xl p-5 text-center mt-5 cursor-pointer transition-all duration-150 ${
-              hoverUpload ? "bg-[#fafaf8] border-[#bbb]" : "bg-transparent border-[#ddd]"
-            }`}
-            onMouseEnter={() => setHoverUpload(true)}
-            onMouseLeave={() => setHoverUpload(false)}
-          >
-            <div className="text-[22px] mb-1.5">📎</div>
-            <div className="text-[13px] font-semibold text-[#333] mb-0.5">
-              Upload lab reports
-            </div>
-            <div className="text-[11px] text-[#aaa] font-mono">
-              PDF, JPG, PNG · up to 10 MB
-            </div>
-          </div>
-
-          {/* Action row */}
-          <div className="flex gap-2.5 mt-3.5">
-            <button className="text-[13px] px-4 py-2 rounded-[10px] border-none bg-[#111] text-white font-medium cursor-pointer hover:bg-[#333] transition-colors">
-              Submit documents
-            </button>
-            <button className="text-[13px] px-4 py-2 rounded-[10px] border border-[#ddd] bg-transparent text-[#555] font-medium cursor-pointer hover:bg-gray-50 transition-colors">
-              Message doctor
-            </button>
-          </div>
         </div>
       )}
     </div>

@@ -16,6 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../utils/notify";
 import api from "../../services/api";
+
 import {
   cancelRemainingAppointments,
   updateClinicStatus,
@@ -24,9 +25,9 @@ import {
 import useDoctorProfile from "../../hooks/doctorHooks/useDoctorProfile";
 
 const QRCodeCanvas = lazy(() =>
-  import("qrcode.react").then(module => ({
+  import("qrcode.react").then((module) => ({
     default: module.QRCodeCanvas,
-  }))
+  })),
 );
 
 const FALLBACK_IMAGE =
@@ -182,16 +183,33 @@ const DoctorDashboard = () => {
     }
   };
 
-  const downloadQR = () => {
-    const canvas = document.getElementById("doctor-qr-modal");
-    if (!canvas || !doctorId) return;
-    const pngUrl = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = pngUrl;
-    a.download = `doctor-${doctorId}-qr.png`;
-    a.click();
-  };
+const downloadQR = async () => {
+  try {
+    const res = await api.post(
+      "/doctor/download-qr",
+      {
+        qrValue,
+        doctorName,
+        specialization: profile?.specialization,
+      },
+      {
+        responseType: "blob", // ✅ VERY IMPORTANT
+      }
+    );
 
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `doctor-${doctorId}-qr.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    console.error("Download failed", err);
+    notify.error("Failed to download QR");
+  }
+};
   const greeting = (() => {
     const h = new Date().getHours();
     if (h < 12) return "Good Morning";
