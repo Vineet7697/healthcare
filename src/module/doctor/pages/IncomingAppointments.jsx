@@ -185,8 +185,8 @@ const Appointments = () => {
                       )}
                       <div className="min-w-0">
                         <p className="font-dm font-semibold text-[15px] text-[#1c2b33] truncate">{displayName}</p>
-                        <p className="font-dm text-[12px] text-[#6b7f8a]">
-                          {a.appointment_slot} · {new Date(a.appointment_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                        <p className="font-dm text-[14px] font-semibold  text-[#6b7f8a]">
+                          {a.appointment_slot} <span className="font-bold text-[#000000]">· {new Date(a.appointment_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
                         </p>
                       </div>
                     </div>
