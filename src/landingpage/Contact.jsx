@@ -190,7 +190,7 @@ const handleSubmit = async (e) => {
             <div className="flex flex-col gap-3 items-center md:items-start">
               {[
                 { icon: ICONS.phone, label: "+91 7084630273",           href: "tel:+917084630273",               color: "#7ec8f8" },
-                { icon: ICONS.mail,  label: "yodoctor99099@gmail.com",  href: "mailto:yodoctor99099@gmail.com",  color: "#a5f3c0" },
+                { icon: ICONS.mail,  label: "founder@yodoctor.in",  href: "mailto:founder@yodoctor.in",  color: "#a5f3c0" },
                 { icon: ICONS.pin,   label: "Jhansi, Uttar Pradesh",    href: "#map",                            color: "#fcd34d" },
                 { icon: ICONS.clock, label: "Mon – Sat · 9 AM – 8 PM", href: null,                              color: "#c4b5fd" },
               ].map((item, i) => (
@@ -334,7 +334,7 @@ const handleSubmit = async (e) => {
           <div className="grid sm:grid-cols-3 gap-6 mb-14">
             {[
               { icon: ICONS.pin,   title: t.location, sub: "Jhansi, Uttar Pradesh",   color: "#0072BC", href: "#map" },
-              { icon: ICONS.mail,  title: t.email_us, sub: "yodoctor99099@gmail.com", color: "#7c3aed", href: "mailto:yodoctor99099@gmail.com" },
+              { icon: ICONS.mail,  title: t.email_us, sub: "founder@yodoctor.in", color: "#7c3aed", href: "mailto:founder@yodoctor.in" },
               { icon: ICONS.phone, title: t.call_us,  sub: "+91 7084630273",           color: "#059669", href: "tel:+917084630273" },
             ].map((c, i) => (
               <a key={i} href={c.href}
@@ -418,7 +418,7 @@ const handleSubmit = async (e) => {
 
               {/* CTA row */}
               <div className="flex flex-wrap gap-3 mt-1">
-                <a href="mailto:yodoctor99099@gmail.com"
+                <a href="mailto:founder@yodoctor.in"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
                   style={{ background: "#0072BC" }}
                   onMouseEnter={(e) => e.currentTarget.style.background = "#005fa3"}

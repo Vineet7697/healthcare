@@ -69,12 +69,20 @@ const RequestCertificate = () => {
   const [conditions, setConditions] = useState("");
   const [medications, setMedications] = useState("");
   const [documents, setDocuments] = useState({
+    profilePhoto: null,
     idProof: null,
     medicalReports: null,
     prescription: null,
   });
 
   const DOC_FIELDS = [
+    {
+      field: "profilePhoto",
+      label: "Profile Photo",
+      required: true,
+      accept: "image/*",
+      hint: "upload your profile picture (jpg, png)",
+    },
     {
       field: "idProof",
       label: "Government ID Proof",
@@ -249,12 +257,17 @@ const RequestCertificate = () => {
       if (hasDocuments) {
         const docData = new FormData();
         docData.append("request_id", requestId);
+          
+            if (documents.profilePhoto)
+              docData.append("profilePhoto", documents.profilePhoto);
 
-        Object.values(documents).forEach((file) => {
-          if (file) {
-            docData.append("documents", file);
-          }
-        });
+            if (documents.idProof) docData.append("idProof", documents.idProof);
+
+            if (documents.medicalReports)
+              docData.append("medicalReports", documents.medicalReports);
+
+            if (documents.prescription)
+              docData.append("prescription", documents.prescription);
 
         console.log("📤 Uploading Documents...");
         const uploadRes = await uploadDocuments(docData);
@@ -752,6 +765,7 @@ const RequestCertificate = () => {
 
                     const isImage = file.type?.startsWith("image/");
                     const labels = {
+                      profilePhoto: "Profile Photo",
                       idProof: "ID Proof",
                       medicalReports: "Medical Reports",
                       prescription: "Prescription",

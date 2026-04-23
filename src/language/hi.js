@@ -181,13 +181,13 @@ ambulance_desc:
   
   labTest: "लैब टेस्ट",
   medicine: "दवा डिलीवरी",
-  homeConsultation: "घर पर परामर्श",
+  booknurse: "नर्स/होम केयर सेवा बुक करें",
   onlineAppointment: "ऑनलाइन अपॉइंटमेंट बुक करें",
   bloodDonor: "रक्तदाता खोजें",
   manualbooking: " मैनुअल बुकिंग",
 Qrcode: "क्यूआर कोड से बुकिंग",
 onlinebooking: "ऑनलाइन अपॉइंटमेंट",
-videoconsult: "वीडियो कंसल्टेशन"
+Certificate: "चिकित्सा प्रमाणपत्र के लिए आवेदन"
 
 
  

@@ -45,6 +45,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { key: "dashboard", label: "Admin Dashboard", icon: <FaChartBar /> },
     { key: "doctors", label: "Doctors", icon: <FaUserMd /> },
     { key: "contact-requests", label: "Enquiries", icon: <FaEdit /> },
+    { key: "homecare-bookings", label: "Home Care Bookings", icon: <FaCalendarCheck /> },
   ];
 
   const navItems =

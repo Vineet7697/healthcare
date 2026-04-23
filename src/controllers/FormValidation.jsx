@@ -662,6 +662,13 @@ export const validateStep = (
 
   /* ================= STEP 3: DOCUMENT VALIDATION ================= */
   if (currentStep === 2) {
+    if (!documents.profilePhoto) {
+      newErrors.profilePhoto = "Profile Photo is required.";
+    } else {
+      const error = validateFile(documents.profilePhoto);
+      if (error) newErrors.profilePhoto = error;
+    }
+
     if (!documents.idProof) {
       newErrors.idProof = "ID Proof is required.";
     } else {

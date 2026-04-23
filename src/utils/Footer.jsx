@@ -154,9 +154,8 @@ const Footer = () => {
           🩺 Yo Doctor — <span className="font-semibold">Smart care</span> with
           a <span className="font-semibold">human touch</span>
         </span>
-        <p className="text-xs sm:text-sm text-white/50">
-          © 2026 <span className="font-bold text-white">YoDoctor</span>. All
-          rights reserved.
+        <p className="text-xs sm:text-sm text-white/80">
+        Copyright &copy; 2026, Levesque Private Limited. All rights reserved.
         </p>
       </div>
     </footer>

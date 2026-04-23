@@ -201,7 +201,7 @@ function TableShell({ headers, children, minWidth = "600px" }) {
               {headers.map((h) => (
                 <th
                   key={h}
-                  className="text-left px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-widest"
+                  className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-widest"
                 >
                   {h}
                 </th>
@@ -823,7 +823,7 @@ function IssuedCerts({ onViewPdf }) {
               className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
             >
               <td className="px-5 py-4">
-                <span className="font-mono text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg">
+                <span className="font-mono text-xs  bg-gray-100 px-2.5 py-1 rounded-lg">
                   {c.id}
                 </span>
               </td>
@@ -839,7 +839,7 @@ function IssuedCerts({ onViewPdf }) {
                   {c.type}
                 </span>
               </td>
-              <td className="px-5 py-4 text-sm text-gray-400">{c.issued}</td>
+              <td className="px-5 py-4 text-sm ">{c.issued}</td>
               <td className="px-5 py-4">
                 {c.expiringSoon ? (
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
@@ -847,13 +847,13 @@ function IssuedCerts({ onViewPdf }) {
                     {c.expires}
                   </span>
                 ) : (
-                  <span className="text-sm text-gray-400">{c.expires}</span>
+                  <span className="text-sm ">{c.expires}</span>
                 )}
               </td>
               <td className="px-5 py-4">
                 <button
                   onClick={() => onViewPdf(c)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium border border-gray-200 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 active:scale-95 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium border bg-green-600 text-white cursor-pointer border-gray-200 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 active:scale-95 transition-all"
                 >
                   <svg
                     width="12"
@@ -1016,7 +1016,13 @@ export default function Certificaterequest() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div 
+       className="font-dm min-h-screen bg-[#f5f3ef] "
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 10% 5%, rgba(14,116,144,0.05) 0%, transparent 50%)",
+      }}
+    >
       {TABS.map((t) => (
         <button
           key={t.id}

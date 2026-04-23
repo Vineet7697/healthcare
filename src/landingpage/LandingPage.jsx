@@ -38,13 +38,13 @@ const LandingPage = () => {
   }, [navigate]);
 
   const services = [
-    { img: manualBooking,    label: t.manualbooking,    link: "" },
-    { img: qrBooking,        label: t.Qrcode,           link: "" },
-    { img: onlineBooking,    label: t.onlinebooking,    link: "" },
-    { img: videoConsult,     label: t.videoconsult,     link: "" },
+    { img: manualBooking,    label: t.manualbooking,    link: "/clientloginpage" },
+    { img: qrBooking,        label: t.Qrcode,           link: "/clientloginpage" },
+    { img: onlineBooking,    label: t.onlinebooking,    link: "/clientloginpage" },
+    { img: videoConsult,     label: t.Certificate,     link: "/clientloginpage" },
     { img: labTesting,       label: t.labTest,          link: "/lab-test" },
     { img: medicineDelivery, label: t.medicine,         link: "/medicine" },
-    { img: homeConsultation, label: t.homeConsultation, link: "/home-consultation" },
+    { img: homeConsultation, label: t.booknurse, link: "/home-service-booking" },
     { img: bloodDonor,       label: t.bloodDonor,       link: "/blood-donor" },
   ];
 

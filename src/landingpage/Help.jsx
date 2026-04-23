@@ -149,7 +149,7 @@ const ARTICLES = [
     desc: "Reach our support team for any queries or urgent help.",
     color: "#0891b2",
     details: [
-      { q: "How to contact customer support?", a: "Live chat (Mon–Sat, 9 AM–8 PM) or email support@yoDoctor.com or call +91-8839003275." },
+      { q: "How to contact customer support?", a: "Live chat (Mon–Sat, 9 AM–8 PM) or email founder@yodoctor.in or call +91-8839003275." },
       { q: "Is emergency support available?", a: "For emergencies, please call 108 or visit the nearest hospital. We do not provide emergency diagnosis." },
       { q: "How to send feedback or complaints?", a: "Use the 'Send Feedback' form at the bottom of the Help page to contact our team." },
     ],
@@ -409,7 +409,7 @@ const Help = () => {
                   <p className="text-xs font-bold text-white mb-1">Still need help?</p>
                   <p className="text-xs mb-3" style={{ color: "rgba(180,210,255,0.7)" }}>Our team is ready to assist you</p>
                   <div className="space-y-2">
-                    <a href="mailto:support@yodoctor.com" className="flex items-center gap-2 text-xs font-semibold rounded-lg px-3 py-2"
+                    <a href="mailto:founder@yodoctor.in" className="flex items-center gap-2 text-xs font-semibold rounded-lg px-3 py-2"
                       style={{ background: "#0072BC", color: "#fff" }}>
                       <Icon d={ICONS.mail} size={13} color="#fff" /> yodoctor99099@gmail.com
                     </a>
@@ -441,7 +441,7 @@ const Help = () => {
                     Our support team is available Mon–Sat, 9 AM – 8 PM
                   </p>
                   <div className="flex flex-wrap gap-3 justify-center">
-                    <a href="mailto:support@yodoctor.com"
+                    <a href="mailto:founder@yodoctor.in"
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
                       style={{ background: "#0072BC" }}>
                       <Icon d={ICONS.mail} size={15} color="#fff" /> Email Support

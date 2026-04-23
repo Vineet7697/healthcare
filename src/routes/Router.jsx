@@ -65,6 +65,8 @@ import Mycertificate from "../module/patient/pages/Mycertificate";
 import RequestCertificate from "../module/patient/pages/RequestCertificate";
 import Certificaterequest from "../module/doctor/pages/Certificaterequest";
 import VerifyCertificate from "../utils/VerifyCertificate";
+import PatientBookHomeService from "../landingpage/PatientBookHomeService";
+import AdminHomeCareBookings from "../admin/AdminHomeCareBookings";
 
 const Router = () => {
   return (
@@ -88,6 +90,8 @@ const Router = () => {
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/home-service-booking" element={<PatientBookHomeService />} />
+
           <Route
             path="/verify/:certificateId"
             element={<VerifyCertificate />}
@@ -97,7 +101,6 @@ const Router = () => {
         {/* comming soon section */}
         <Route path="/lab-test" element={<ComingSoon />} />
         <Route path="/medicine" element={<ComingSoon />} />
-        <Route path="/home-consultation" element={<ComingSoon />} />
         <Route path="/blood-donor" element={<ComingSoon />} />
 
         <Route
@@ -119,6 +122,7 @@ const Router = () => {
           <Route path="doctorsdetails/:id" element={<Doctordetails />} />
           <Route path="changepassword" element={<AdminHeaderDashboard />} />
           <Route path="contact-requests" element={<ContactRequests />} />
+          <Route path="homecare-bookings" element={<AdminHomeCareBookings />} />
         </Route>
 
         {/* 🩺 Doctor Dashboard Layout (with HeaderDashboard + Sidebar) */}

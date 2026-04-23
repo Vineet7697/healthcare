@@ -188,7 +188,7 @@ const ApprovalStatusPage = () => {
               </button>
 
               <button
-                onClick={() => window.open("mailto:support@yodoctor.com")}
+                onClick={() => window.open("mailto:founder@yodoctor.in")}
                 className="flex-1 flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white tracking-wide font-[family-name:var(--font-dm)] bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/35 transition-all duration-200 active:scale-[0.99]"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
