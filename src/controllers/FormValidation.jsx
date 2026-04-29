@@ -689,3 +689,71 @@ export const validateStep = (
 
   return newErrors;
 };
+
+// ✅ Home Care Booking Validation
+export const validateHomeCareForm = (form) => {
+  const e = {};
+
+  if (!form.fullName?.trim()) {
+    e.fullName = "Full name is required";
+  } else if (form.fullName.length < 3) {
+    e.fullName = "Minimum 3 characters required";
+  } else if (!/^[a-zA-Z\s]+$/.test(form.fullName)) {
+    e.fullName = "Only letters allowed";
+  }
+
+if (!form.contact?.trim()) {
+  e.contact = "Mobile number is required";
+} else if (!/^[6-9]\d{9}$/.test(form.contact)) {
+  e.contact = "Enter valid 10-digit number";
+}
+
+  if (!form.address?.trim()) {
+    e.address = "Address is required";
+  }
+
+  if (!form.service) {
+    e.service = "Select service";
+  }
+
+  if (!form.condition?.trim()) {
+    e.condition = "Medical condition required";
+  } else if (form.condition.length < 10) {
+    e.condition = "Minimum 10 characters required";
+  }
+
+  if (!form.durationType) {
+    e.durationType = "Select duration";
+  }
+
+  if (!form.numDays) {
+    e.numDays = "Enter number of days";
+  } else if (isNaN(form.numDays) || Number(form.numDays) <= 0) {
+    e.numDays = "Must be greater than 0";
+  } else if (Number(form.numDays) > 365) {
+    e.numDays = "Too many days";
+  }
+
+if (!form.prefDate) {
+  e.prefDate = "Select date";
+} else {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selected = new Date(form.prefDate + "T00:00:00");
+
+  if (selected.getTime() < today.getTime()) {
+    e.prefDate = "Past date not allowed";
+  }
+}
+
+  if (!form.timeSlot) {
+    e.timeSlot = "Select time slot";
+  }
+
+  if (form.notes && form.notes.length > 50) {
+    e.notes = "Max 50 characters allowed";
+  }
+
+  return e;
+};

@@ -15,8 +15,8 @@ const DoctorReviews = () => {
     setLoading(true);
     try {
       const { data } = await getDoctorReviews(currentPage);
-
-      setReviews(data.reviews || []);
+ console.log("API DATA:", data)
+     setReviews(Array.isArray(data.reviews) ? data.reviews : []);
       setHasMore(data.hasMore ?? data.reviews?.length > 0);
 
       // ✅ NEW

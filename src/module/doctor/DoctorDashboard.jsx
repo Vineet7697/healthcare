@@ -193,7 +193,7 @@ const downloadQR = async () => {
         specialization: profile?.specialization,
       },
       {
-        responseType: "blob", // ✅ VERY IMPORTANT
+        responseType: "blob", 
       }
     );
 
@@ -212,9 +212,12 @@ const downloadQR = async () => {
 };
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return "Good Morning";
-    if (h < 17) return "Good Afternoon";
-    return "Good Evening";
+
+  if (h >= 5 && h < 12) return "Good Morning";
+  if (h >= 12 && h < 17) return "Good Afternoon";
+  if (h >= 17 && h < 21) return "Good Evening";
+  if (h >= 21 && h < 24) return "Good Late Night";
+  return "Good Night";
   })();
 
   return (

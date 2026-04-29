@@ -1,108 +1,273 @@
 import { useState } from "react";
 import api from "../services/api";
+import { validateHomeCareForm } from "../controllers/FormValidation";
 
 const SERVICES = [
   {
-    val: "nurse",
+    val: "Nurse",
     name: "Nurse",
-    desc: "Trained nursing care at home",
-    bg: "#E6F1FB",
-    iconColor: "#185FA5",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width={18} height={18}>
-        <path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2z" />
-        <path d="M12 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z" />
-        <line x1="12" y1="7" x2="12" y2="11" />
-        <line x1="10" y1="9" x2="14" y2="9" />
-      </svg>
-    ),
+    desc: "Professional nursing care",
+    icon: "🏥",
   },
   {
-    val: "homecare",
+    val: "Home Care",
     name: "Home Care",
-    desc: "Daily assistance & support",
-    bg: "#E1F5EE",
-    iconColor: "#0F6E56",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width={18} height={18}>
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
-        <path d="M9 21V12h6v9" />
-      </svg>
-    ),
+    desc: "Daily living assistance",
+    icon: "🏠",
   },
   {
-    val: "consultation",
+    val: "Home Consultation",
     name: "Consultation",
-    desc: "Doctor visit at home",
-    bg: "#FAEEDA",
-    iconColor: "#854F0B",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width={18} height={18}>
-        <rect x="3" y="3" width="18" height="18" rx="3" />
-        <line x1="8" y1="9" x2="16" y2="9" />
-        <line x1="8" y1="13" x2="13" y2="13" />
-        <circle cx="17" cy="17" r="2.5" fill="#FAEEDA" />
-        <line x1="17" y1="15.8" x2="17" y2="17.5" />
-        <line x1="17" y1="18.1" x2="17" y2="18.5" />
-      </svg>
-    ),
+    desc: "Doctor home visit",
+    icon: "🩺",
   },
 ];
 
 const DURATIONS = [
-  { val: "1day", label: "1 Day", days: 1 },
-  { val: "multiple", label: "Multiple Days", days: null },
-  { val: "weekly", label: "Weekly", days: 7 },
-  { val: "monthly", label: "Monthly", days: 30 },
+  { val: "1 Day", label: "1 Day", days: 1 },
+  { val: "Multiple Days", label: "Multiple Days", days: null },
+  { val: "Weekly", label: "Weekly", days: 7 },
+  { val: "Monthly", label: "Monthly", days: 30 },
 ];
 
 const TIME_SLOTS = [
-  { val: "morning", label: "Morning", range: "6am – 12pm", icon: "🌅" },
-  { val: "afternoon", label: "Afternoon", range: "12pm – 5pm", icon: "☀️" },
-  { val: "evening", label: "Evening", range: "5pm – 9pm", icon: "🌆" },
-  { val: "night", label: "Night", range: "9pm – 6am", icon: "🌙" },
+  { val: "Morning", label: "Morning", range: "6am – 12pm", icon: "🌅" },
+  { val: "Afternoon", label: "Afternoon", range: "12pm – 5pm", icon: "☀️" },
+  { val: "Evening", label: "Evening", range: "5pm – 9pm", icon: "🌆" },
+  { val: "Night", label: "Night", range: "9pm – 6am", icon: "🌙" },
 ];
 
 const today = new Date().toISOString().split("T")[0];
 
-const SectionLabel = ({ children }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-    <span style={{
-      fontSize: 11, fontWeight: 500, letterSpacing: "0.07em",
-      textTransform: "uppercase", color: "#888", whiteSpace: "nowrap"
-    }}>
+// ─── Confirmation Modal ───────────────────────────────────────────────────────
+function ConfirmModal({ form, onConfirm, onCancel, loading }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={!loading ? onCancel : undefined}
+      />
+
+      {/* Modal — bottom sheet on mobile, centered card on sm+ */}
+      <div
+        className="relative bg-white w-full sm:max-w-sm sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden"
+        style={{ animation: "fadeUp 0.22s ease" }}
+      >
+        {/* Top accent */}
+        <div
+          className="h-1.5"
+          style={{
+            background: "linear-gradient(135deg,#0C447C,#185FA5,#378ADD)",
+          }}
+        />
+
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-gray-200" />
+        </div>
+
+        <div className="px-5 pb-6 pt-3 sm:p-6">
+          {/* Icon */}
+          <div
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4"
+            style={{ background: "#E6F1FB" }}
+          >
+            <svg
+              className="w-6 h-6 sm:w-7 sm:h-7"
+              style={{ color: "#185FA5" }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+
+          <h2
+            className="text-base sm:text-lg font-bold text-center mb-1"
+            style={{ color: "#0C447C" }}
+          >
+            Confirm Booking?
+          </h2>
+          <p
+            className="text-xs text-center mb-4 sm:mb-5"
+            style={{ color: "#888" }}
+          >
+            Please review your details before submitting.
+          </p>
+
+          {/* Summary */}
+          <div
+            className="rounded-xl p-3.5 sm:p-4 mb-4 sm:mb-5 space-y-2"
+            style={{ background: "#F4F8FD" }}
+          >
+            {[
+              { label: "Name", val: form.fullName },
+              { label: "Contact", val: form.contact },
+              { label: "Service", val: form.service },
+              {
+                label: "Duration",
+                val: `${form.durationType}${form.numDays && form.durationType !== "1 Day" ? ` · ${form.numDays} days` : ""}`,
+              },
+              { label: "Date", val: form.prefDate },
+              { label: "Time", val: form.timeSlot },
+            ].map(({ label, val }) =>
+              val ? (
+                <div
+                  key={label}
+                  className="flex justify-between items-center gap-2"
+                >
+                  <span
+                    className="text-[11px] font-medium"
+                    style={{ color: "#999" }}
+                  >
+                    {label}
+                  </span>
+                  <span
+                    className="text-[11px] font-semibold text-right"
+                    style={{ color: "#1a1a1a" }}
+                  >
+                    {val}
+                  </span>
+                </div>
+              ) : null,
+            )}
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2.5">
+            <button
+              onClick={onCancel}
+              disabled={loading}
+              className="flex-1 py-3 sm:py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+              style={{
+                border: "0.5px solid #d0d0d0",
+                color: "#555",
+                background: "#fff",
+              }}
+            >
+              Edit Details
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className="flex-1 py-3 sm:py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-60"
+              style={{ background: "linear-gradient(135deg,#185FA5,#378ADD)" }}
+            >
+              {loading ? (
+                <svg
+                  className="animate-spin w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+              Yes, Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Section Label ────────────────────────────────────────────────────────────
+function SectionLabel({ children }) {
+  return (
+    <div className="flex items-center gap-2.5 mb-4">
+      <span
+        className="text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
+        style={{ color: "#378ADD" }}
+      >
+        {children}
+      </span>
+      <div className="flex-1 h-px" style={{ background: "#E6F1FB" }} />
+    </div>
+  );
+}
+
+// ─── Field Label ──────────────────────────────────────────────────────────────
+function FieldLabel({ children, optional }) {
+  return (
+    <label
+      className="block text-xs font-semibold mb-1.5"
+      style={{ color: "#555" }}
+    >
       {children}
-    </span>
-    <div style={{ flex: 1, height: "0.5px", background: "#e0e0e0" }} />
-  </div>
-);
+      {optional ? (
+        <span className="font-normal ml-1" style={{ color: "#bbb" }}>
+          (optional)
+        </span>
+      ) : (
+        <span className="ml-0.5" style={{ color: "#E24B4A" }}>
+          *
+        </span>
+      )}
+    </label>
+  );
+}
 
-const Required = () => <span style={{ color: "#E24B4A", marginLeft: 2 }}>*</span>;
+// ─── Error Message ────────────────────────────────────────────────────────────
+function ErrorMsg({ msg }) {
+  if (!msg) return null;
+  return (
+    <p className="text-[11px] mt-1" style={{ color: "#E24B4A" }}>
+      {msg}
+    </p>
+  );
+}
 
-const FieldLabel = ({ children, optional }) => (
-  <label style={{ fontSize: 12, fontWeight: 500, color: "#666", display: "block", marginBottom: 5 }}>
-    {children}
-    {optional
-      ? <span style={{ fontWeight: 400, color: "#aaa" }}> (optional)</span>
-      : <Required />}
-  </label>
-);
-
-const inputStyle = {
-  width: "100%",
-  padding: "9px 12px",
-  borderRadius: 8,
-  border: "0.5px solid #d0d0d0",
-  background: "#f8f8f7",
-  fontSize: 14,
-  color: "#1a1a1a",
-  outline: "none",
-  boxSizing: "border-box",
-  fontFamily: "inherit",
-  transition: "border-color 0.15s, box-shadow 0.15s",
-};
-
-const InputField = ({ id, type = "text", placeholder, value, onChange, min, disabled, style }) => {
+// ─── Input ────────────────────────────────────────────────────────────────────
+function InputField({
+  id,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  min,
+  disabled,
+  hasError,
+}) {
   const [focused, setFocused] = useState(false);
   return (
     <input
@@ -113,21 +278,31 @@ const InputField = ({ id, type = "text", placeholder, value, onChange, min, disa
       onChange={onChange}
       min={min}
       disabled={disabled}
-      style={{
-        ...inputStyle,
-        borderColor: focused ? "#378ADD" : "#d0d0d0",
-        boxShadow: focused ? "0 0 0 3px rgba(55,138,221,0.1)" : "none",
-        background: focused ? "#fff" : "#f8f8f7",
-        ...(disabled ? { opacity: 0.6, cursor: "not-allowed" } : {}),
-        ...style,
-      }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
+      // py-3 on mobile for bigger tap target, py-2.5 on sm+
+      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl text-sm outline-none transition-all"
+      style={{
+        border: hasError
+          ? "1px solid #E24B4A"
+          : focused
+            ? "1px solid #378ADD"
+            : "0.5px solid #d0d0d0",
+        background: hasError ? "#fff5f5" : focused ? "#fff" : "#f8f8f7",
+        color: "#1a1a1a",
+        boxShadow:
+          focused && !hasError ? "0 0 0 3px rgba(55,138,221,0.12)" : "none",
+        opacity: disabled ? 0.55 : 1,
+        cursor: disabled ? "not-allowed" : "text",
+        fontFamily: "inherit",
+        fontSize: "16px", // prevents iOS zoom on focus
+      }}
     />
   );
-};
+}
 
-const TextAreaField = ({ id, placeholder, value, onChange, minHeight = 80 }) => {
+// ─── Textarea ─────────────────────────────────────────────────────────────────
+function TextAreaField({ id, placeholder, value, onChange, minHeight = 80 }) {
   const [focused, setFocused] = useState(false);
   return (
     <textarea
@@ -135,279 +310,479 @@ const TextAreaField = ({ id, placeholder, value, onChange, minHeight = 80 }) => 
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      style={{
-        ...inputStyle,
-        minHeight,
-        resize: "vertical",
-        lineHeight: 1.6,
-        borderColor: focused ? "#378ADD" : "#d0d0d0",
-        boxShadow: focused ? "0 0 0 3px rgba(55,138,221,0.1)" : "none",
-        background: focused ? "#fff" : "#f8f8f7",
-      }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
+      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl text-sm outline-none transition-all resize-y leading-relaxed"
+      style={{
+        minHeight,
+        border: focused ? "1px solid #378ADD" : "0.5px solid #d0d0d0",
+        background: focused ? "#fff" : "#f8f8f7",
+        color: "#1a1a1a",
+        boxShadow: focused ? "0 0 0 3px rgba(55,138,221,0.12)" : "none",
+        fontFamily: "inherit",
+        fontSize: "16px", // prevents iOS zoom
+      }}
     />
   );
-};
+}
 
-const Card = ({ children, style }) => (
-  <div style={{
-    background: "#fff",
-    border: "0.5px solid #e8e8e6",
-    borderRadius: 12,
-    padding: "1.25rem 1.5rem",
-    marginBottom: "1rem",
-    ...style,
-  }}>
-    {children}
-  </div>
-);
+// ─── Card ─────────────────────────────────────────────────────────────────────
+function Card({ children, className = "" }) {
+  return (
+    <div
+      className={`rounded-2xl p-4 sm:p-5 mb-3 ${className}`}
+      style={{
+        background: "#fff",
+        border: "0.5px solid #e8e8e6",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function PatientBookHomeService() {
   const [form, setForm] = useState({
-    fullName: "", address: "", contact: "",
-    service: "", condition: "",
-    durationType: "", numDays: "", prefDate: "", timeSlot: "", notes: "",
+    fullName: "",
+    address: "",
+    contact: "",
+    service: "",
+    condition: "",
+    durationType: "",
+    numDays: "",
+    prefDate: "",
+    timeSlot: "",
+    notes: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+  const set = (key, val) => {
+    setForm((f) => ({ ...f, [key]: val }));
+    setErrors((e) => ({ ...e, [key]: "" }));
+  };
 
   const selectDuration = (dur) => {
     set("durationType", dur.val);
     if (dur.days !== null) set("numDays", String(dur.days));
-    else if (dur.val === "multiple") set("numDays", "");
+    else if (dur.val === "Multiple Days") set("numDays", "");
   };
 
-  const validate = () => {
-    const e = {};
-    if (!form.fullName) e.fullName = true;
-    if (!form.contact) e.contact = true;
-    if (!form.address) e.address = true;
-    if (!form.service) e.service = true;
-    if (!form.condition) e.condition = true;
-    if (!form.durationType) e.durationType = true;
-    if (!form.numDays) e.numDays = true;
-    if (!form.prefDate) e.prefDate = true;
-    if (!form.timeSlot) e.timeSlot = true;
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const handleSubmitClick = () => {
+    const errs = validateHomeCareForm(form);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    setShowModal(true);
   };
 
-const handleSubmit = async () => {
-  if (!validate()) return;
-
-  try {
-    const res = await api.post("/patient/bookhomecare", {
-      full_name: form.fullName,
-      address: form.address,
-      contact_number: form.contact,
-      service_type: form.service,
-      medical_condition: form.condition,
-      duration_type: form.durationType,
-      number_of_days: form.numDays,
-      preferred_date: form.prefDate,
-      time_slot: form.timeSlot,
-      notes: form.notes,
-    });
-
-    if (res.data.success) {
-      setSubmitted(true);
+  const handleConfirm = async () => {
+    setLoading(true);
+    try {
+      const res = await api.post("/patient/bookhomecare", {
+        full_name: form.fullName,
+        address: form.address,
+        contact_number: form.contact,
+        service_type: form.service,
+        medical_condition: form.condition,
+        duration_type: form.durationType,
+        number_of_days: form.numDays,
+        preferred_date: form.prefDate,
+        time_slot: form.timeSlot,
+        notes: form.notes,
+      });
+      if (res.data.success) {
+        setShowModal(false);
+        setSubmitted(true);
+      }
+    } catch (error) {
+      console.error("Booking Error:", error);
+      alert("Booking failed!");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Booking Error:", error);
-    alert("Booking failed!");
-  }
-};
+  };
 
   const reset = () => {
-    setForm({ fullName: "", address: "", contact: "", service: "", condition: "", durationType: "", numDays: "", prefDate: "", timeSlot: "", notes: "" });
+    setForm({
+      fullName: "",
+      address: "",
+      contact: "",
+      service: "",
+      condition: "",
+      durationType: "",
+      numDays: "",
+      prefDate: "",
+      timeSlot: "",
+      notes: "",
+    });
     setErrors({});
     setSubmitted(false);
   };
 
+  const chipSelected = {
+    border: "1.5px solid #185FA5",
+    background: "#E6F1FB",
+    boxShadow: "0 0 0 1px #185FA5",
+    color: "#0C447C",
+  };
+  const chipDefault = {
+    border: "0.5px solid #d8d8d8",
+    background: "#f8f8f7",
+    color: "#666",
+  };
+
+  // ── Success Screen ──────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "2rem 1rem", fontFamily: "'DM Sans', sans-serif" }}>
-        <Card style={{ textAlign: "center", padding: "2.5rem 2rem", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#EAF3DE", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" strokeWidth="2.2">
+      <div
+        className="min-h-screen flex items-center justify-center px-4 py-12"
+        style={{
+          fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+          background: "#f5f6f8",
+        }}
+      >
+        <div
+          className="w-full max-w-sm sm:max-w-md rounded-2xl p-8 sm:p-10 flex flex-col items-center text-center gap-4"
+          style={{
+            background: "#fff",
+            border: "0.5px solid #e8e8e6",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+          }}
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "#EAF3DE" }}
+          >
+            <svg
+              className="w-8 h-8"
+              style={{ color: "#3B6D11" }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <p style={{ fontSize: 20, fontWeight: 600, margin: 0, color: "#1a1a1a" }}>Booking request submitted!</p>
-          <p style={{ fontSize: 13, color: "#888", margin: 0, lineHeight: 1.7, maxWidth: 360 }}>
-            Thank you, <strong>{form.fullName}</strong>. Our team will review your request and contact you at <strong>{form.contact}</strong> within 24 hours to confirm.
+          <h2 className="text-xl font-bold" style={{ color: "#1a1a1a" }}>
+            Booking Submitted!
+          </h2>
+          <p className="text-sm leading-relaxed" style={{ color: "#888" }}>
+            Thank you,{" "}
+            <strong style={{ color: "#1a1a1a" }}>{form.fullName}</strong>. Our
+            team will contact you at{" "}
+            <strong style={{ color: "#1a1a1a" }}>{form.contact}</strong> within
+            24 hours to confirm.
           </p>
-          <button onClick={reset} style={{ marginTop: 8, padding: "10px 28px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#185FA5,#378ADD)", color: "#fff", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
-            Book another
+          <button
+            onClick={reset}
+            className="mt-1 w-full sm:w-auto px-8 py-3 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: "linear-gradient(135deg,#185FA5,#378ADD)" }}
+          >
+            Book Another
           </button>
-        </Card>
+        </div>
       </div>
     );
   }
 
+  // ── Main Form ───────────────────────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: 640, margin: "0 auto", padding: "1rem 1rem 2rem", fontFamily: "'DM Sans', 'Segoe UI', sans-serif", marginTop: "4rem" }}>
+    <div
+      // px-3 on mobile → px-4 on sm → px-6 on md; max-w grows with screen
+      className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pt-6 sm:pt-10 pb-10 mt-0 sm:mt-10 md:mt-14"
+      style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}
+    >
+      {/* ── Header ── */}
+      <div
+        className="relative rounded-2xl px-5 sm:px-6 py-6 sm:py-7 mb-3 sm:mb-4 overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg,#0C447C 0%,#185FA5 60%,#378ADD 100%)",
+        }}
+      >
+        <div
+          className="absolute -top-8 -right-8 w-32 sm:w-36 h-32 sm:h-36 rounded-full"
+          style={{ background: "rgba(255,255,255,0.06)" }}
+        />
+        <div
+          className="absolute -bottom-6 -left-6 w-20 sm:w-24 h-20 sm:h-24 rounded-full"
+          style={{ background: "rgba(255,255,255,0.05)" }}
+        />
 
-      {/* Header */}
-      <div style={{
-        background: "linear-gradient(135deg,#0C447C 0%,#185FA5 60%,#378ADD 100%)",
-        borderRadius: 12, padding: "1.75rem 2rem 1.5rem",
-        marginBottom: "1.25rem", position: "relative", overflow: "hidden",
-      }}>
-        <div style={{ position: "absolute", top: -30, right: -30, width: 130, height: 130, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.15)", color: "#B5D4F4", fontSize: 11, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 20, marginBottom: 10 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#5DCAA5", display: "inline-block" }} />
+        <span
+          className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
+          style={{ background: "rgba(255,255,255,0.15)", color: "#B5D4F4" }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full inline-block"
+            style={{ background: "#5DCAA5" }}
+          />
           Home Healthcare Services
-        </div>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: 22, fontWeight: 600, color: "#fff", margin: "0 0 6px", lineHeight: 1.3 }}>Book a Care Service</h1>
-        <p style={{ fontSize: 13, color: "#85B7EB", margin: 0, lineHeight: 1.6 }}>Fill in your details to schedule a nurse, home care, or home consultation.</p>
+        </span>
+        <h1 className="text-xl sm:text-2xl font-bold text-white mb-1.5 leading-snug">
+          Book a Care Service
+        </h1>
+        <p
+          className="text-xs sm:text-sm leading-relaxed"
+          style={{ color: "#85B7EB" }}
+        >
+          Schedule a nurse, home care, or consultation at your doorstep.
+        </p>
       </div>
 
-      {/* Personal Details */}
+      {/* ── Personal Details ── */}
       <Card>
-        <SectionLabel>Personal details</SectionLabel>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+        <SectionLabel>Personal Details</SectionLabel>
+        {/* Stack on mobile, 2-col on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
-            <FieldLabel>Full name</FieldLabel>
-            <InputField id="fullName" placeholder="e.g. Ramesh Patel" value={form.fullName} onChange={e => set("fullName", e.target.value)} style={errors.fullName ? { borderColor: "#E24B4A" } : {}} />
+            <FieldLabel>Full Name</FieldLabel>
+            <InputField
+              id="fullName"
+              placeholder="Enter Your Full Name"
+              value={form.fullName}
+              onChange={(e) => set("fullName", e.target.value)}
+              hasError={!!errors.fullName}
+            />
+            <ErrorMsg msg={errors.fullName} />
           </div>
           <div>
-            <FieldLabel>Contact number</FieldLabel>
-            <InputField id="contact" type="tel" placeholder="+91 98765 43210" value={form.contact} onChange={e => set("contact", e.target.value)} style={errors.contact ? { borderColor: "#E24B4A" } : {}} />
+            <FieldLabel>Contact Number</FieldLabel>
+            <InputField
+              id="contact"
+              type="tel"
+              placeholder="Enter Your Phone Number"
+              value={form.contact}
+              maxLength={10}
+              onChange={(e) => {
+                let value = e.target.value.replace(/\D/g, ""); // sirf digits
+                if (value.length > 10) value = value.slice(0, 10); // hard limit
+                set("contact", value);
+              }}
+              onKeyDown={(e) => {
+                if (
+                  !/[0-9]/.test(e.key) &&
+                  e.key !== "Backspace" &&
+                  e.key !== "ArrowLeft" &&
+                  e.key !== "ArrowRight" &&
+                  e.key !== "Tab"
+                ) {
+                  e.preventDefault();
+                }
+              }}
+              hasError={!!errors.contact}
+            />
+            <ErrorMsg msg={errors.contact} />
           </div>
         </div>
         <div>
           <FieldLabel>Address</FieldLabel>
-          <InputField id="address" placeholder="House no., street, area, city" value={form.address} onChange={e => set("address", e.target.value)} style={errors.address ? { borderColor: "#E24B4A" } : {}} />
+          <InputField
+            id="address"
+            placeholder="House no., street, area, city"
+            value={form.address}
+            onChange={(e) => set("address", e.target.value)}
+            hasError={!!errors.address}
+          />
+          <ErrorMsg msg={errors.address} />
         </div>
       </Card>
 
-      {/* Service Type */}
+      {/* ── Service Type ── */}
       <Card>
-        <SectionLabel>Type of service</SectionLabel>
-        {errors.service && <p style={{ fontSize: 12, color: "#E24B4A", margin: "-8px 0 10px" }}>Please select a service type.</p>}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
-          {SERVICES.map(s => (
-            <div key={s.val} onClick={() => set("service", s.val)} style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-              padding: "14px 10px", borderRadius: 8, textAlign: "center", cursor: "pointer",
-              border: form.service === s.val ? `1.5px solid #185FA5` : "0.5px solid #d8d8d8",
-              background: form.service === s.val ? "#E6F1FB" : "#f8f8f7",
-              boxShadow: form.service === s.val ? "0 0 0 1px #185FA5" : "none",
-              transition: "all 0.15s",
-            }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", color: s.iconColor }}>
-                {s.icon}
+        <SectionLabel>Type of Service</SectionLabel>
+        {errors.service && (
+          <p className="text-[11px] mb-3" style={{ color: "#E24B4A" }}>
+            Please select a service type.
+          </p>
+        )}
+        {/* 1-col mobile → 3-col sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {SERVICES.map((s) => (
+            <button
+              key={s.val}
+              type="button"
+              onClick={() => set("service", s.val)}
+              // horizontal layout on mobile, vertical on sm+
+              className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-1.5 py-3 sm:py-4 px-4 sm:px-2 rounded-xl text-left sm:text-center transition-all cursor-pointer"
+              style={form.service === s.val ? chipSelected : chipDefault}
+            >
+              <span className="text-2xl">{s.icon}</span>
+              <div className="flex flex-col sm:items-center">
+                <span
+                  className="text-xs sm:text-[11px] font-semibold"
+                  style={{ color: "#1a1a1a" }}
+                >
+                  {s.name}
+                </span>
+                <span
+                  className="text-[10px] sm:text-[9px] leading-tight"
+                  style={{ color: "#888" }}
+                >
+                  {s.desc}
+                </span>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#1a1a1a" }}>{s.name}</span>
-              <span style={{ fontSize: 10, color: "#888", lineHeight: 1.4 }}>{s.desc}</span>
-            </div>
+            </button>
           ))}
         </div>
       </Card>
 
-      {/* Medical Condition */}
+      {/* ── Medical Condition ── */}
       <Card>
-        <SectionLabel>Medical condition</SectionLabel>
-        <FieldLabel>Health issue / Bimari</FieldLabel>
-        <TextAreaField id="condition" placeholder="Describe the patient's medical condition, current symptoms, or ongoing treatment…" value={form.condition} onChange={e => set("condition", e.target.value)} />
-        {errors.condition && <p style={{ fontSize: 12, color: "#E24B4A", margin: "4px 0 0" }}>Please describe the medical condition.</p>}
+        <SectionLabel>Medical Condition</SectionLabel>
+        <FieldLabel>Health Issue / Bimari</FieldLabel>
+        <TextAreaField
+          id="condition"
+          placeholder="Describe the patient's medical condition, current symptoms, or ongoing treatment…"
+          value={form.condition}
+          onChange={(e) => set("condition", e.target.value)}
+        />
+        <ErrorMsg msg={errors.condition} />
       </Card>
 
-      {/* Duration */}
+      {/* ── Duration ── */}
       <Card>
-        <SectionLabel>Service duration</SectionLabel>
-        <div style={{ marginBottom: 14 }}>
-          <FieldLabel>Duration type</FieldLabel>
-          {errors.durationType && <p style={{ fontSize: 12, color: "#E24B4A", margin: "-4px 0 8px" }}>Please select a duration.</p>}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
-            {DURATIONS.map(d => (
-              <div key={d.val} onClick={() => selectDuration(d)} style={{
-                padding: "8px 6px", borderRadius: 8, textAlign: "center", cursor: "pointer",
-                fontSize: 12, fontWeight: 500,
-                border: form.durationType === d.val ? "1.5px solid #185FA5" : "0.5px solid #d8d8d8",
-                background: form.durationType === d.val ? "#E6F1FB" : "#f8f8f7",
-                color: form.durationType === d.val ? "#0C447C" : "#666",
-                boxShadow: form.durationType === d.val ? "0 0 0 1px #185FA5" : "none",
-                transition: "all 0.15s",
-              }}>
+        <SectionLabel>Service Duration</SectionLabel>
+        <div className="mb-3">
+          <FieldLabel>Duration Type</FieldLabel>
+          {errors.durationType && (
+            <p className="text-[11px] mb-2" style={{ color: "#E24B4A" }}>
+              Please select a duration.
+            </p>
+          )}
+          {/* 2-col on mobile → 4-col on sm+ */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {DURATIONS.map((d) => (
+              <button
+                key={d.val}
+                type="button"
+                onClick={() => selectDuration(d)}
+                className="py-2.5 sm:py-2 px-2 rounded-xl text-xs sm:text-[11px] font-semibold text-center transition-all cursor-pointer"
+                style={form.durationType === d.val ? chipSelected : chipDefault}
+              >
                 {d.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        {/* Stack on mobile → 2-col on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <FieldLabel>Number of days</FieldLabel>
+            <FieldLabel>Number of Days</FieldLabel>
             <InputField
-              id="numDays" type="number" placeholder="e.g. 7"
+              id="numDays"
+              type="number"
+              placeholder="e.g. 7"
               value={form.numDays}
-              onChange={e => set("numDays", e.target.value)}
+              onChange={(e) => set("numDays", e.target.value)}
               min="1"
-              disabled={form.durationType === "1day"}
-              style={errors.numDays ? { borderColor: "#E24B4A" } : {}}
+              disabled={form.durationType === "1 Day"}
+              hasError={!!errors.numDays}
             />
+            <ErrorMsg msg={errors.numDays} />
           </div>
           <div>
-            <FieldLabel>Preferred start date</FieldLabel>
+            <FieldLabel>Preferred Start Date</FieldLabel>
             <InputField
-              id="prefDate" type="date"
+              id="prefDate"
+              type="date"
               value={form.prefDate}
-              onChange={e => set("prefDate", e.target.value)}
+              onChange={(e) => set("prefDate", e.target.value)}
               min={today}
-              style={errors.prefDate ? { borderColor: "#E24B4A" } : {}}
+              hasError={!!errors.prefDate}
             />
+            <ErrorMsg msg={errors.prefDate} />
           </div>
         </div>
       </Card>
 
-      {/* Time Slot */}
+      {/* ── Time Slot ── */}
       <Card>
-        <SectionLabel>Time preference</SectionLabel>
-        {errors.timeSlot && <p style={{ fontSize: 12, color: "#E24B4A", margin: "-8px 0 10px" }}>Please select a time slot.</p>}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
-          {TIME_SLOTS.map(t => (
-            <div key={t.val} onClick={() => set("timeSlot", t.val)} style={{
-              padding: "10px 6px", borderRadius: 8, textAlign: "center", cursor: "pointer",
-              border: form.timeSlot === t.val ? "1.5px solid #185FA5" : "0.5px solid #d8d8d8",
-              background: form.timeSlot === t.val ? "#E6F1FB" : "#f8f8f7",
-              boxShadow: form.timeSlot === t.val ? "0 0 0 1px #185FA5" : "none",
-              transition: "all 0.15s",
-            }}>
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{t.icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: "#1a1a1a" }}>{t.label}</div>
-              <div style={{ fontSize: 9, color: "#888", marginTop: 2 }}>{t.range}</div>
-            </div>
+        <SectionLabel>Time Preference</SectionLabel>
+        {errors.timeSlot && (
+          <p className="text-[11px] mb-3" style={{ color: "#E24B4A" }}>
+            Please select a time slot.
+          </p>
+        )}
+        {/* 2-col on mobile → 4-col on sm+ */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {TIME_SLOTS.map((t) => (
+            <button
+              key={t.val}
+              type="button"
+              onClick={() => set("timeSlot", t.val)}
+              className="flex flex-col items-center gap-1 py-3.5 sm:py-3 px-1.5 rounded-xl text-center transition-all cursor-pointer"
+              style={form.timeSlot === t.val ? chipSelected : chipDefault}
+            >
+              <span className="text-2xl sm:text-xl">{t.icon}</span>
+              <span
+                className="text-xs sm:text-[10px] font-semibold"
+                style={{ color: "#1a1a1a" }}
+              >
+                {t.label}
+              </span>
+              <span
+                className="text-[10px] sm:text-[9px]"
+                style={{ color: "#888" }}
+              >
+                {t.range}
+              </span>
+            </button>
           ))}
         </div>
       </Card>
 
-      {/* Notes */}
+      {/* ── Notes ── */}
       <Card>
-        <SectionLabel>Additional notes</SectionLabel>
+        <SectionLabel>Additional Notes</SectionLabel>
         <FieldLabel optional>Any special instructions?</FieldLabel>
-        <TextAreaField id="notes" placeholder="e.g. patient is wheelchair-bound, prefer female caregiver, building access code…" value={form.notes} onChange={e => set("notes", e.target.value)} minHeight={70} />
+        <TextAreaField
+          id="notes"
+          placeholder="e.g. patient is wheelchair-bound, prefer female caregiver, building access code…"
+          value={form.notes}
+          onChange={(e) => set("notes", e.target.value)}
+          minHeight={70}
+        />
       </Card>
 
-      {/* Submit */}
-      <button onClick={handleSubmit} style={{
-        width: "100%", padding: "13px", borderRadius: 8, border: "none",
-        background: "linear-gradient(135deg,#185FA5,#378ADD)",
-        color: "#fff", fontFamily: "inherit", fontSize: 14, fontWeight: 500,
-        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-        transition: "opacity 0.15s",
-      }}
-        onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-        onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+      {/* ── Submit Button ── */}
+      <button
+        type="button"
+        onClick={handleSubmitClick}
+        className="w-full py-4 sm:py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 active:scale-[0.99]"
+        style={{
+          background: "linear-gradient(135deg,#185FA5,#378ADD)",
+          boxShadow: "0 4px 16px rgba(24,95,165,0.28)",
+          fontFamily: "inherit",
+        }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M22 2L11 13" /><path d="M22 2L15 22l-4-9-9-4 20-7z" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+        >
+          <path d="M22 2L11 13" />
+          <path d="M22 2L15 22l-4-9-9-4 20-7z" />
         </svg>
         Submit Booking Request
       </button>
+
+      {/* ── Confirmation Modal ── */}
+      {showModal && (
+        <ConfirmModal
+          form={form}
+          onConfirm={handleConfirm}
+          onCancel={() => setShowModal(false)}
+          loading={loading}
+        />
+      )}
     </div>
   );
 }

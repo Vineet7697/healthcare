@@ -129,7 +129,7 @@ const Footer = () => {
             LinkedIn
           </a>
           <a
-            href=" https://www.youtube.com/@YoDoctor_Official"
+            href=" https://www.youtube.com/@voice_ofbundelkhand"
             target="_blank"
             rel="noopener noreferrer"
             className="text-white/80 hover:text-white transition-colors duration-200"

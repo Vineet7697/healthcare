@@ -19,26 +19,53 @@ const ClientLoginPage = () => {
   const params = new URLSearchParams(location.search);
   const redirect = params.get("redirect");
 
+  // useEffect(() => {
+  //   const token =
+  //     localStorage.getItem("token") || sessionStorage.getItem("token");
+  //   const raw =
+  //     localStorage.getItem("loggedInUser") ||
+  //     sessionStorage.getItem("loggedInUser");
+  //   if (token && raw) {
+  //     try {
+  //       const user = JSON.parse(raw);
+  //       if (redirect) {
+  //         navigate(redirect);
+  //       } else {
+  //         if (role === "ADMIN") navigate("/admin/dashboard");
+  //         else if (role === "PATIENT") navigate("/client/dashboard");
+  //         else notify.error("Unauthorized role");
+  //       }
+  //     } catch {}
+  //   }
+  //   setChecking(false);
+  // }, []);
+
+
   useEffect(() => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    const raw =
-      localStorage.getItem("loggedInUser") ||
-      sessionStorage.getItem("loggedInUser");
-    if (token && raw) {
-      try {
-        const user = JSON.parse(raw);
-        if (redirect) {
-          navigate(redirect);
-        } else {
-          if (role === "ADMIN") navigate("/admin/dashboard");
-          else if (role === "PATIENT") navigate("/client/dashboard");
-          else notify.error("Unauthorized role");
-        }
-      } catch {}
-    }
-    setChecking(false);
-  }, []);
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  const raw =
+    localStorage.getItem("loggedInUser") ||
+    sessionStorage.getItem("loggedInUser");
+
+  if (token && raw) {
+    try {
+      const user = JSON.parse(raw); 
+      const role = user.role;       
+
+      if (redirect) {
+        navigate(redirect);
+      } else {
+        if (role === "ADMIN") navigate("/admin/dashboard");
+        else if (role === "PATIENT") navigate("/client/dashboard");
+        else notify.error("Unauthorized role");
+      }
+    } catch {}
+  }
+
+  setChecking(false);
+}, []);
 
   if (checking) return null;
 
@@ -70,9 +97,14 @@ const ClientLoginPage = () => {
         sessionStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
       }
       notify.success("Login successful");
-      if (role === "ADMIN") navigate("/admin/dashboard");
-      else if (role === "PATIENT") navigate("/client/dashboard");
-      else notify.error("Unauthorized role");
+
+      if (redirect) {
+        navigate(redirect);
+      } else {
+        if (role === "ADMIN") navigate("/admin/dashboard");
+        else if (role === "PATIENT") navigate("/client/dashboard");
+        else notify.error("Unauthorized role");
+      }
     } catch (err) {
       notify.error(err.response?.data?.message || "Login failed");
     }

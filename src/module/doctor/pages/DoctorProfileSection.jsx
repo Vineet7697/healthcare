@@ -227,11 +227,6 @@ const cleanImage = profileImage?.split("?")[0];
       />
 
       <div className="relative z-10 max-w-[1100px] mx-auto">
-        <div className="mb-8">
-          <h1 className="font-playfair text-[clamp(28px,4vw,42px)] font-bold text-[#1c2b33] leading-tight m-0">
-            Your Profile
-          </h1>
-        </div>
 
         <form
           onSubmit={(e) => {
@@ -239,13 +234,9 @@ const cleanImage = profileImage?.split("?")[0];
             setShowConfirm(true);
           }}
         >
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
+          <div className="flex flex-col lg:flex-row gap-6 items-stretch">
             <aside
-              className="w-full lg:w-[270px] flex-shrink-0 bg-white border border-black/[0.08] rounded-[18px] p-8 flex flex-col items-center lg:sticky lg:top-6"
-              style={{
-                boxShadow:
-                  "0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)",
-              }}
+              className="w-full lg:w-[280px] flex-shrink-0 bg-white border border-black/[0.08] rounded-[20px] p-6 flex flex-col items-center lg:sticky lg:top-6 h-fit"
             >
               <div className="relative mb-[18px]">
                 <div
@@ -340,9 +331,9 @@ const cleanImage = profileImage?.split("?")[0];
               </div>
             </aside>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div
-                className="bg-white border border-black/[0.08] rounded-[14px] p-1.5 flex flex-wrap justify-between gap-1 mb-4"
+               className="bg-white border border-black/[0.08] rounded-[14px] p-2 flex flex-wrap gap-2 mb-4"
                 style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
               >
                 {TABS.map((tab) => (
@@ -360,7 +351,7 @@ const cleanImage = profileImage?.split("?")[0];
               </div>
 
               <div
-                className="bg-white border border-black/[0.08] rounded-[18px] p-8"
+                className="bg-white border border-black/[0.08] rounded-[20px] p-6 h-full flex flex-col"
                 style={{
                   boxShadow:
                     "0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)",
@@ -867,7 +858,7 @@ const cleanImage = profileImage?.split("?")[0];
                 )}
 
                 {activeTab !== "documents" && (
-                  <div className="flex justify-end gap-3 mt-7 pt-6 border-t border-black/[0.07]">
+                  <div className="flex justify-end gap-3 mt-auto pt-6 border-t border-black/[0.07]">
                     <button
                       type="button"
                       onClick={() => navigate(-1)}

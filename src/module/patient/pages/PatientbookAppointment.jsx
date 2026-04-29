@@ -3,11 +3,11 @@ import Webcam from "react-webcam";
 import QrScanner from "qr-scanner";
 import Typewriter from "typewriter-effect";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   getCities,
   getDiseases,
   getDoctorNames,
-
 } from "../../../services/patientService";
 
 import {
@@ -56,7 +56,17 @@ const PatientbookAppointment = () => {
   const [diseases, setDiseases] = useState([]);
   const [doctorNames, setDoctorNames] = useState([]);
 
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const autoScan = params.get("autoScan");
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+  if (autoScan === "true") {
+    setScanning(true); 
+  }
+}, [autoScan]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -90,7 +100,7 @@ const PatientbookAppointment = () => {
   }, []);
 
   const filteredCities = cities.filter((c) =>
-    c.name?.toLowerCase().includes(cityQuery.toLowerCase())
+    c.name?.toLowerCase().includes(cityQuery.toLowerCase()),
   );
 
   const combinedSearch = (() => {
@@ -103,7 +113,7 @@ const PatientbookAppointment = () => {
   })();
 
   const filteredDiseases = combinedSearch.filter((d) =>
-    d.name?.toLowerCase().includes(diseaseQuery.toLowerCase())
+    d.name?.toLowerCase().includes(diseaseQuery.toLowerCase()),
   );
 
   const handleCitySelect = (city) => {
@@ -119,8 +129,8 @@ const PatientbookAppointment = () => {
   const handleSearch = () => {
     navigate(
       `/client/cards?city=${encodeURIComponent(
-        cityQuery
-      )}&search=${encodeURIComponent(diseaseQuery)}`
+        cityQuery,
+      )}&search=${encodeURIComponent(diseaseQuery)}`,
     );
   };
 
@@ -154,7 +164,7 @@ const PatientbookAppointment = () => {
           }
           navigate(`/client/bookappointmentpage/${doctorId}?fromQR=true`);
         },
-        { returnDetailedScanResult: true }
+        { returnDetailedScanResult: true },
       );
 
       qrScannerRef.current = scanner;
@@ -243,7 +253,9 @@ const PatientbookAppointment = () => {
                       </li>
                     ))
                   ) : (
-                    <li className="px-4 py-2 text-gray-500">No results found</li>
+                    <li className="px-4 py-2 text-gray-500">
+                      No results found
+                    </li>
                   )}
                 </ul>
               )}
@@ -279,7 +291,9 @@ const PatientbookAppointment = () => {
                         </li>
                       ))
                     ) : (
-                      <li className="px-4 py-2 text-gray-500">No results found</li>
+                      <li className="px-4 py-2 text-gray-500">
+                        No results found
+                      </li>
                     )}
                   </ul>
                 )}
@@ -297,13 +311,15 @@ const PatientbookAppointment = () => {
           </div>
 
           <div className="flex flex-col items-center justify-center text-center gap-3 py-6">
-            <p className="text-gray-100 font-semibold text-xl sm:text-3xl">OR</p>
+            <p className="text-gray-100 font-semibold text-xl sm:text-3xl">
+              OR
+            </p>
             <h2 className="text-base sm:text-lg font-bold">Scan any QR code</h2>
 
             <div
               onClick={() => {
                 if (!scanning) {
-                  setDatas(""); 
+                  setDatas("");
                   setScanning(true);
                 }
               }}
@@ -404,8 +420,14 @@ const PatientbookAppointment = () => {
         <div className="mt-16 flex flex-wrap justify-center items-center gap-10 text-center">
           {[
             { src: "/images/secure-server.webp", text: "Secure Cloud Servers" },
-            { src: "/images/trusted-doctors.webp", text: "Verified Medical Experts" },
-            { src: "/images/privacy-shield.webp", text: "Strong Privacy Protection" },
+            {
+              src: "/images/trusted-doctors.webp",
+              text: "Verified Medical Experts",
+            },
+            {
+              src: "/images/privacy-shield.webp",
+              text: "Strong Privacy Protection",
+            },
             { src: "/images/support.webp", text: "24×7 Customer Support" },
           ].map((item, i) => (
             <div key={i}>
