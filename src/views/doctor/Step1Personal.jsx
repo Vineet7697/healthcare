@@ -5,6 +5,7 @@ import {
   createDoctorAccount,
 } from "../../services/doctor/doctorRegisterServiceApi";
 import { notify } from "../../utils/notify";
+import { FaArrowRight } from "react-icons/fa";
 
 const Step1Personal = ({ formData, setFormData, nextStep }) => {
   const data = formData.personal;
@@ -43,11 +44,11 @@ const Step1Personal = ({ formData, setFormData, nextStep }) => {
 
     try {
       setLoading(true);
-
+  sessionStorage.removeItem("tempToken");
       const res = await createDoctorAccount(data);
 
       if (res.token) {
-        localStorage.setItem("token", res.token);
+        sessionStorage.setItem("tempToken", res.token); 
       }
 
       notify.success(res.message || "Step 1 saved");
@@ -381,16 +382,8 @@ const Step1Personal = ({ formData, setFormData, nextStep }) => {
               </>
             ) : (
               <>
-                Continue to Professional Details
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M5 12h14M13 6l6 6-6 6"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                Continue to Professional Details <FaArrowRight />
+                
               </>
             )}
           </button>

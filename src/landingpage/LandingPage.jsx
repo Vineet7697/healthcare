@@ -37,7 +37,6 @@ const LandingPage = () => {
     }
   }, [navigate]);
   const heroCards = [
-    
     {
       img: medicineDelivery,
       label: t.medicine || "24/7 Medicines",
@@ -204,123 +203,39 @@ const LandingPage = () => {
         {/* ── SERVICES SECTION ── */}
         <div className="relative z-10 px-6 sm:px-10 lg:px-20 pb-20">
           <div className="max-w-7xl mx-auto">
-            {/* <div className="animate-[fadeUp_0.8s_0.4s_cubic-bezier(0.22,1,0.36,1)_both] grid grid-cols-1 sm:grid-cols-3 gap-10 mb-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 md:gap-10 mb-5 px-10 sm:px-0">
               {heroCards.map((card, i) => (
                 <Link
                   key={i}
                   to={card.link}
-                  className="group relative block rounded-[22px] overflow-hidden no-underline transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02]"
-                  style={{
-                    aspectRatio: "3/4",
-                    border: "1px solid rgba(255,255,255,0.09)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = `0 28px 64px rgba(0,0,0,0.55), 0 0 0 1px ${card.accentColor}44`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                 
-                  <img
-                    src={card.img}
-                    alt={card.label}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    style={{ filter: "brightness(0.6) saturate(0.8)" }}
-                    loading="lazy"
-                  />
-
-                
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to top, rgba(4,8,15,0.95) 0%, rgba(4,8,15,0.45) 45%, transparent 100%)",
-                    }}
-                  />
-
-                 
-                  <span
-                    className={`absolute top-4 right-4 z-10 ${card.tagBg} text-white text-[10px] font-bold tracking-[0.16em] px-3 py-1 rounded-full`}
-                  >
-                    {card.tag}
-                  </span>
-
-                 
-                  <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
-                    <p
-                      className="text-white font-extrabold leading-tight mb-2"
-                      style={{ fontSize: "clamp(20px,2.2vw,28px)" }}
-                    >
-                      {card.label}
-                    </p>
-                    <p
-                      className="text-[13px] font-medium mb-5"
-                      style={{ color: "rgba(255,255,255,0.5)" }}
-                    >
-                      {card.sub}
-                    </p>
-                    <span
-                      className="inline-flex items-center justify-center w-11 h-11 rounded-full transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-                      style={{
-                        border: `1.5px solid ${card.accentColor}66`,
-                        background: `${card.accentColor}18`,
-                      }}
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={card.accentColor}
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div> */}
-
-            <div className=" md:grid-cols-3  grid grid-cols-1 sm:grid-cols-2 gap-10 mb-5">
-              {heroCards.map((card, i) => (
-                <Link
-                  key={i}
-                  to={card.link}
-                  className="group relative rounded-[28px] p-7 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-                  style={{
-                    background: card.accentColor,
-                    minHeight: "380px",
-                  }}
+                  className="group relative rounded-[16px] sm:rounded-[28px] p-4 sm:p-7 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl min-h-[160px] sm:min-h-[300px] md:min-h-[380px]"
+                  style={{ background: card.accentColor }}
                 >
                   {/* TEXT */}
                   <div>
-                    <h2 className="text-white font-bold text-[28px] leading-tight mb-2">
+                    <h2 className="text-white font-bold text-[15px] sm:text-[24px] md:text-[28px] leading-tight mb-1">
                       {card.label}
                     </h2>
-
                     {card.sub && (
-                      <p className="text-white/80 text-[14px]">{card.sub}</p>
+                      <p className="text-white/80 text-[11px] sm:text-[14px]">
+                        {card.sub}
+                      </p>
                     )}
                   </div>
 
-                  {/* IMAGE (illustration) */}
+                  {/* IMAGE */}
                   <img
                     src={card.img}
                     alt={card.label}
-                    className="absolute bottom-0 right-0 w-[55%] object-contain pointer-events-none select-none"
+                    className="absolute bottom-0 right-0 w-[40%] sm:w-[55%] object-contain pointer-events-none select-none"
                   />
 
                   {/* ARROW BUTTON */}
-                  <div className="absolute bottom-5 left-5">
-                    <div className="w-10 h-10 rounded-full bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition">
+                  <div className="absolute bottom-3 sm:bottom-5 left-3 sm:left-5">
+                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition">
                       <svg
-                        width="18"
-                        height="18"
+                        width="13"
+                        height="13"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="white"

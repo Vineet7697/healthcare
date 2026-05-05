@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 import { validateHomeCareForm } from "../controllers/FormValidation";
+import { notify } from "../utils/notify";
 
 const SERVICES = [
   {
@@ -400,7 +401,7 @@ export default function PatientBookHomeService() {
       }
     } catch (error) {
       console.error("Booking Error:", error);
-      alert("Booking failed!");
+      notify.error(error?.response?.data?.message || "Booking failed");
     } finally {
       setLoading(false);
     }
@@ -494,12 +495,12 @@ export default function PatientBookHomeService() {
   return (
     <div
       // px-3 on mobile → px-4 on sm → px-6 on md; max-w grows with screen
-      className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pt-6 sm:pt-10 pb-10 mt-0 sm:mt-10 md:mt-14"
+      className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pt-6 sm:pt-10 pb-10 mt-14"
       style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}
     >
       {/* ── Header ── */}
       <div
-        className="relative rounded-2xl px-5 sm:px-6 py-6 sm:py-7 mb-3 sm:mb-4 overflow-hidden"
+        className="relative rounded-2xl px-5 sm:px-6 py-6 sm:py-7 mb-3 sm:mb-4 overflow-hidden "
         style={{
           background:
             "linear-gradient(135deg,#0C447C 0%,#185FA5 60%,#378ADD 100%)",

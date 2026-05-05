@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 
-const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+const DEFAULT_AVATAR =
+  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
 const getStoredUser = () => {
   const raw = localStorage.getItem("loggedInUser");
@@ -19,7 +20,7 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
 
   const [profileImage, setProfileImage] = useState(
-    localStorage.getItem("profileImage") || DEFAULT_AVATAR
+    localStorage.getItem("profileImage") || DEFAULT_AVATAR,
   );
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -39,9 +40,12 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/admin/notifications`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       const data = await res.json();
 
       if (data.notifications) {
@@ -56,10 +60,13 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const markNotificationRead = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${import.meta.env.VITE_API_URL}/admin/notifications/${id}/read`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/admin/notifications/${id}/read`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       fetchNotifications();
     } catch (error) {
       console.error("Mark read error:", error);
@@ -119,7 +126,9 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     localStorage.removeItem("profileImage");
     localStorage.removeItem("token");
 
-    window.dispatchEvent(new CustomEvent("userLogout", { detail: { role: "admin" } }));
+    window.dispatchEvent(
+      new CustomEvent("userLogout", { detail: { role: "admin" } }),
+    );
     navigate("/");
   };
 
@@ -127,11 +136,10 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     <nav
       className={`fixed top-0 z-50 h-20 bg-white border-b border-gray-200
         transition-all duration-300
-        ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-20 md:w-[calc(100%-5rem)]"}
+        ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-24 md:w-[calc(100%-6rem)]"}
         left-0 w-full`}
     >
       <div className="h-full px-4 flex items-center">
-
         <button
           onClick={toggleSidebar}
           className="md:hidden text-xl text-gray-700 mr-4"
@@ -140,17 +148,23 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
           <FaBars />
         </button>
 
-        <div className="flex-1" />
+        <div className="flex-1 flex justify-center items-center gap-4">
+          
+          <img
+            src="/images/logo.webp" 
+            alt="logo"
+            className="h-8 md:hidden"
+          />
+        </div>
 
         <div className="flex items-center gap-4 relative">
-
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {
                 setNotificationOpen((prev) => !prev);
                 setProfileOpen(false);
               }}
-              className="relative text-xl text-gray-700 hover:text-blue-600 transition"
+              className="relative text-2xl text-gray-700 hover:text-blue-600 transition"
               aria-label="Notifications"
             >
               <FaBell />
@@ -162,8 +176,14 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
             </button>
 
             {notificationOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-lg border z-20">
-                <div className="p-3 font-semibold border-b">Admin Notifications</div>
+              <div
+                className="fixed sm:absolute top-20 sm:top-auto sm:mt-3
+                right-2 sm:right-0 w-[calc(100vw-1rem)] sm:w-80 max-w-sm
+                bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50"
+              >
+                <div className="p-3 font-semibold border-b">
+                  Admin Notifications
+                </div>
                 <ul className="max-h-72 overflow-y-auto">
                   {notifications.length === 0 ? (
                     <li className="px-4 py-6 text-center text-gray-500 text-sm">
@@ -175,17 +195,23 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
                         key={note.id}
                         onClick={() => markNotificationRead(note.id)}
                         className={`flex gap-3 px-4 py-3 border-b hover:bg-cyan-50 cursor-pointer transition ${
-                          !note.is_read ? "bg-cyan-50 border-l-4 border-cyan-500" : ""
+                          !note.is_read
+                            ? "bg-cyan-50 border-l-4 border-cyan-500"
+                            : ""
                         }`}
                       >
                         <div className="w-9 h-9 flex items-center justify-center rounded-full bg-cyan-100 text-cyan-600 text-lg">
                           🔔
                         </div>
                         <div className="flex-1">
-                          <p className={`${!note.is_read ? "font-semibold" : ""}`}>
+                          <p
+                            className={`${!note.is_read ? "font-semibold" : ""}`}
+                          >
                             {note.title}
                           </p>
-                          <p className="text-xs text-gray-500">{note.message}</p>
+                          <p className="text-xs text-gray-500">
+                            {note.message}
+                          </p>
                           <p className="text-xs text-gray-400 mt-1">
                             {new Date(note.created_at).toLocaleString()}
                           </p>

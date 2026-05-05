@@ -10,22 +10,12 @@ const DoctorLoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [formValues, setFormValues] = useState({ identifier: "", password: "" });
+  const [formValues, setFormValues] = useState({
+    identifier: "",
+    password: "",
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const raw = localStorage.getItem("loggedInUser");
-    if (token && raw) {
-      const user = JSON.parse(raw);
-      if (user.role === "DOCTOR") {
-        if (user.status === "APPROVED") navigate("/doctordashboard", { replace: true });
-        else if (user.status === "IN_PROGRESS") navigate("/doctorregistration", { replace: true });
-        else if (user.status === "PENDING") navigate("/approvalstatuspage", { replace: true });
-      }
-    }
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +42,11 @@ const DoctorLoginPage = () => {
       const redirect = res.data.redirect;
       const nextStep = res.data.nextStep;
       const status = res.data.status;
-      const loggedInUser = { role: "DOCTOR", identifier: formValues.identifier, status };
+      const loggedInUser = {
+        role: "DOCTOR",
+        identifier: formValues.identifier,
+        status,
+      };
       window.dispatchEvent(new Event("userLogin"));
 
       if (redirect === "dashboard") {
@@ -80,11 +74,37 @@ const DoctorLoginPage = () => {
         return;
       }
     } catch (err) {
-      notify.error(err.response?.data?.message || "Invalid email/mobile or password");
+      notify.error(
+        err.response?.data?.message || "Invalid email/mobile or password",
+      );
     } finally {
       setLoading(false);
     }
   };
+
+useEffect(() => {
+  const loginToken = localStorage.getItem("token");
+  const raw = localStorage.getItem("loggedInUser");
+  const tempToken = sessionStorage.getItem("tempToken");
+
+  // ✅ LOGIN FLOW
+  if (loginToken && raw) {
+    const user = JSON.parse(raw);
+
+    if (user.role === "DOCTOR") {
+      if (user.status === "APPROVED") {
+        navigate("/doctordashboard", { replace: true });
+        return;
+      }
+
+      if (user.status === "PENDING") {
+        navigate("/approvalstatuspage", { replace: true });
+        return;
+      }
+    }
+  }
+
+}, []);
 
   const inputCls = (field) =>
     `w-full px-4 py-2.5 rounded-lg text-sm text-gray-800 outline-none border transition-colors duration-150 ${
@@ -96,18 +116,19 @@ const DoctorLoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
       <div className="w-full max-w-4xl rounded-2xl overflow-hidden md:flex shadow-md border border-gray-100">
-
         <div className="w-full md:w-1/2 bg-white px-8 py-10 flex flex-col justify-center">
-
           <div className="text-center mb-8">
             <h1 className=" font-[family-name:var(--font-playfair)] text-3xl font-bold text-gray-800 leading-tight">
               Login to{" "}
-              <img src="/images/logo.webp" alt="YoDoctor" className="h-7 inline align-middle ml-1" />
+              <img
+                src="/images/logo.webp"
+                alt="YoDoctor"
+                className="h-7 inline align-middle ml-1"
+              />
             </h1>
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
                 Email / Mobile Number
@@ -183,18 +204,24 @@ const DoctorLoginPage = () => {
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin " />
                     Logging in...
                   </span>
-                ) : "Login"}
+                ) : (
+                  "Login"
+                )}
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate("/doctorregistration")}
+                onClick={() => {
+                  sessionStorage.removeItem("tempToken");
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("loggedInUser");
+                  navigate("/doctorregistration");
+                }}
                 className="flex-1 text-[#0086C3] cursor-pointer border border-[#0086C3]/40 hover:bg-[#0086C3]/5 font-semibold text-sm py-2.5 rounded-lg transition-colors duration-150"
               >
                 Register
               </button>
             </div>
-
           </form>
         </div>
 
@@ -205,7 +232,6 @@ const DoctorLoginPage = () => {
             className="w-full h-full object-cover"
           />
         </div>
-
       </div>
     </div>
   );

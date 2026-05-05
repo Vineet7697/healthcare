@@ -447,14 +447,14 @@ export default function MyAppointments() {
                   className="flex-1 font-[family-name:var(--font-dm)] font-bold text-[13px] py-2.5 rounded-xl text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg,#0086C3,#00b4d8)", boxShadow: "0 4px 12px rgba(0,134,195,0.35)" }}
                 >
-                  <Star size={14} /> Submit Rating
+                  <Star size={20} /> Submit Rating
                 </button>
                 <button
                   onClick={handleDownloadPrescription}
-                  className="flex-1 font-[family-name:var(--font-dm)] font-bold text-[13px] py-2.5 rounded-xl text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                   className="flex-1 font-[family-name:var(--font-dm)] font-bold text-[13px] py-2.5 rounded-xl text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg,#2ecc71,#1aab5a)", boxShadow: "0 4px 12px rgba(46,204,113,0.35)" }}
                 >
-                  <Download size={14} /> Download Prescription
+                  <Download size={20} className="ml-2" /> Download Prescription
                 </button>
               </div>
             </div>

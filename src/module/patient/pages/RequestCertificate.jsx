@@ -177,7 +177,7 @@ const ActionButtons = ({
     ) : (
       <button
         onClick={onNext}
-        className="text-[14px] font-bold text-white px-6 sm:px-8 py-2.5 rounded-xl bg-gradient-to-br from-[#0086C3] to-[#00b4d8] hover:-translate-y-0.5 shadow-[0_4px_14px_rgba(0,134,195,0.35)] hover:shadow-[0_6px_20px_rgba(0,134,195,0.45)] transition-all duration-200"
+        className="text-[14px] font-bold cursor-pointer text-white px-6 sm:px-8 py-2.5 rounded-xl bg-gradient-to-br from-[#0086C3] to-[#00b4d8] hover:-translate-y-0.5 shadow-[0_4px_14px_rgba(0,134,195,0.35)] hover:shadow-[0_6px_20px_rgba(0,134,195,0.45)] transition-all duration-200"
       >
         Next Step →
       </button>

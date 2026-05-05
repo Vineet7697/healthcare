@@ -82,7 +82,8 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="relative overflow-hidden" style={{ height: 195 }}>
+      {/* IMAGE HEIGHT RESPONSIVE */}
+      <div className="relative overflow-hidden h-[120px] sm:h-[195px]">
         <img
           src={img}
           alt={title}
@@ -113,7 +114,9 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
           <Icon d={ICONS[iconKey]} />
         </div>
       </div>
-      <div className="flex flex-col flex-1 p-5 gap-2">
+
+      {/* CONTENT */}
+      <div className="flex flex-col flex-1 p-3 sm:p-5 gap-2">
         <h3
           className="font-bold text-sm leading-snug"
           style={{
@@ -140,7 +143,7 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
           className="flex items-center gap-1 text-xs font-bold mt-1 w-fit"
           style={{ color: "#0072BC" }}
         >
-        {expanded ? "Show Less" : "Read More"}
+          {expanded ? "Show Less" : "Read More"}
           <svg
             width="13"
             height="13"
@@ -402,7 +405,7 @@ const Service = () => {
         id="services"
         style={{ background: "#eef3fb", padding: "64px 0 88px" }}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="max-w-7xl mx-auto px-10 sm:px-8 md:px-12">
           <div className="flex items-stretch gap-4 mb-10">
             <div style={{ width: 4, background: "#0072BC", borderRadius: 4 }} />
             <div>
@@ -417,7 +420,7 @@ const Service = () => {
               </h2>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4  gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {services.map((s, i) => (
               <ServiceCard key={i} {...s} />
             ))}

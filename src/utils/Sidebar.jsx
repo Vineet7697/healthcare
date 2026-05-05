@@ -78,7 +78,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           overflow-y-auto overflow-x-hidden
           transition-all duration-300 ease-in-out
           z-50 md:z-40
-          ${isOpen ? "w-64" : "w-20"}
+          ${isOpen ? "w-64" : "w-24"}
         `}
         style={{ backgroundColor: "#0072BC" }}
       >
@@ -91,7 +91,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           )}
           <button
             onClick={() => setIsOpen((prev) => !prev)}
-            className="  text-xl flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 hover:bg-white/20 flex-shrink-0"
+            className="  text-2xl flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 hover:bg-white/20 flex-shrink-0"
             title={isOpen ? "Collapse sidebar " : "Expand sidebar "}
           >
             {isOpen ? <FaBars className=" text-black" /> : <FaBars className=" text-white" />}
@@ -105,7 +105,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <div
                 key={item.key}
                 onClick={() => handleNavClick(item)}
-                onMouseEnter={() => !isOpen && setTooltip(item.key)}
                 onMouseLeave={() => setTooltip(null)}
                 className={`
                   relative flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer
@@ -121,7 +120,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-white" />
                 )}
 
-                <div className="text-lg flex-shrink-0">{item.icon}</div>
+                <div className="text-2xl flex-shrink-0">{item.icon}</div>
 
                 {isOpen && (
                   <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>

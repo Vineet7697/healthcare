@@ -1,6 +1,6 @@
 import axios from "axios";
 
-console.log("API BASE URL 👉", import.meta.env.VITE_API_URL);
+// console.log("API BASE URL 👉", import.meta.env.VITE_API_URL);
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -13,7 +13,9 @@ const api = axios.create({
 /* ✅ YAHI SABSE IMPORTANT PART THA */
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token =
+  sessionStorage.getItem("tempToken") ||
+  localStorage.getItem("token");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

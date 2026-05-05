@@ -6,6 +6,8 @@ const en = {
     help: "Help",
     download: "Download App",
 
+    // ===== ABOUT PAGE =====
+
  about_title:
       "India’s Digital Healthcare Startup — Delivering Quality Healthcare to Your Doorstep",
 

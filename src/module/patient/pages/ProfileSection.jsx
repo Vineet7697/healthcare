@@ -232,7 +232,7 @@ setImage(rawUrl);
 
   return (
     <div
-      className="font-dm min-h-screen bg-[#faf8f5] flex items-start justify-center px-4 py-12"
+      className="font-dm min-h-screen bg-[#faf8f5] flex items-start justify-center px-4 py-4"
       style={{
         backgroundImage:
           "radial-gradient(ellipse at 20% 10%, rgba(61,107,142,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 90%, rgba(61,107,142,0.04) 0%, transparent 50%)",

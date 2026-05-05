@@ -130,7 +130,7 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     <nav
       className={`fixed top-0 z-50 h-20 bg-white border-b border-gray-200
       transition-all duration-300
-      ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-20 md:w-[calc(100%-5rem)]"}
+      ${isSidebarOpen ? "md:left-64 md:w-[calc(100%-16rem)]" : "md:left-24 md:w-[calc(100%-6rem)]"}
       left-0 w-full`}
     >
       <div className="h-full px-4 flex items-center w-full">
@@ -141,7 +141,15 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
           <FaBars />
         </button>
 
-        <div className="flex-1" />
+        <div className="flex-1 flex justify-center items-center gap-4">
+          
+          <img
+            src="/images/logo.webp" 
+            alt="logo"
+            className="h-8 md:hidden"
+          />
+        </div>
+
 
         <div className="flex items-center gap-3 relative">
           <div className="relative" ref={notificationRef}>
@@ -150,7 +158,7 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
                 setNotificationOpen((p) => !p);
                 setProfileOpen(false);
               }}
-              className="relative text-xl text-gray-700 hover:text-blue-600"
+              className="relative text-2xl text-gray-700 hover:text-blue-600"
             >
               <FaBell />
               {unreadCount > 0 && (
@@ -161,7 +169,16 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
             </button>
 
             {notificationOpen && (
-              <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+              <div
+                className="
+      fixed sm:absolute
+      top-20 sm:top-auto sm:mt-3
+      right-2 sm:right-0
+      w-[calc(100vw-1rem)] sm:w-80
+      max-w-sm
+      bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50
+    "
+              >
                 <div className="flex justify-between items-center px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
                   <h3 className="font-semibold text-sm">Notifications</h3>
                   <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
@@ -219,7 +236,7 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
               <img
                 src={profileImage}
                 alt="avatar"
-                className="w-8 h-8 rounded-full border object-cover"
+                className="w-12 h-12 rounded-full border object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = DEFAULT_AVATAR;

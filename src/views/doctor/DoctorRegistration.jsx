@@ -87,7 +87,7 @@ function PremiumStepIcon(props) {
 const DoctorRegistration = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [maxStepReached, setMaxStepReached] = useState(0);
-const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     personal: {
       fullName: "",

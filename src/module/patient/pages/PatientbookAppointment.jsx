@@ -59,32 +59,51 @@ const PatientbookAppointment = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const autoScan = params.get("autoScan");
+  const [loadingCities, setLoadingCities] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-  if (autoScan === "true") {
-    setScanning(true); 
-  }
-}, [autoScan]);
+    if (autoScan === "true") {
+      setScanning(true);
+    }
+  }, [autoScan]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [cityRes, diseaseRes, doctorRes] = await Promise.all([
-          getCities(),
+        const [diseaseRes, doctorRes] = await Promise.all([
           getDiseases(),
           getDoctorNames(),
         ]);
-        setCities(cityRes.data.data || []);
         setDiseases(diseaseRes.data.data || []);
         setDoctorNames(doctorRes.data.data || []);
       } catch (error) {
-        console.error("Failed to load cities/diseases/doctors", error);
+        console.error(error);
       }
     };
     loadData();
   }, []);
+
+  const fetchCities = async (query) => {
+    try {
+      setLoadingCities(true);
+      const res = await getCities(query);
+      setCities(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchCities(cityQuery);
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [cityQuery]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -99,9 +118,13 @@ const PatientbookAppointment = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredCities = cities.filter((c) =>
-    c.name?.toLowerCase().includes(cityQuery.toLowerCase()),
-  );
+  const filteredCities = cities;
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   const combinedSearch = (() => {
     const seen = new Set();
@@ -117,7 +140,7 @@ const PatientbookAppointment = () => {
   );
 
   const handleCitySelect = (city) => {
-    setCityQuery(city.name);
+    setCityQuery(city.city);
     setShowCityDropdown(false);
   };
 
@@ -235,6 +258,7 @@ const PatientbookAppointment = () => {
                 <input
                   value={cityQuery}
                   onChange={(e) => setCityQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   onFocus={() => setShowCityDropdown(true)}
                   placeholder="Location"
                   className="outline-none bg-transparent w-full"
@@ -242,18 +266,27 @@ const PatientbookAppointment = () => {
               </div>
               {showCityDropdown && (
                 <ul className="absolute w-full bg-white border mt-1 shadow z-20 max-h-40 overflow-y-auto rounded-lg">
-                  {filteredCities.length > 0 ? (
+                  {loadingCities ? (
+                    // 🔄 Loading state
+                    <li className="px-4 py-3 flex justify-center">
+                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </li>
+                  ) : filteredCities.length > 0 ? (
+                    // ✅ Data list
                     filteredCities.map((city, index) => (
                       <li
-                        key={city.id || city.name || index}
+                        key={index}
                         onClick={() => handleCitySelect(city)}
                         className="px-4 py-2 cursor-pointer hover:bg-blue-100 text-black"
                       >
-                        {city.name}
+                        <div className="font-medium">{city.city}</div>
+                        <div className="text-xs text-gray-500">
+                          {city.address || city.landmark  }
+                        </div>
                       </li>
                     ))
                   ) : (
-                    <li className="px-4 py-2 text-gray-500">
+                    <li className="px-4 py-2 text-gray-500 text-center">
                       No results found
                     </li>
                   )}
