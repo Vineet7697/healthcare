@@ -217,15 +217,7 @@ const About = () => {
                   loading="lazy"
                   className="relative z-10 w-full h-auto rounded-2xl shadow-xl block"
                 />
-                <div className="absolute bottom-[-16px] sm:bottom-[-20px] right-3 sm:right-5 z-20
-                                flex items-center gap-2 sm:gap-3
-                                bg-[#0072BC] px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl shadow-lg">
-                  <Icon d={ICONS.star} size={16} color="#f5c518" sw={2} />
-                  <div>
-                    <p className="text-white text-xs font-extrabold leading-none">Trusted Platform</p>
-                    <p className="text-xs mt-0.5 text-blue-200/85">Verified by NABH</p>
-                  </div>
-                </div>
+                
               </div>
             </FadeIn>
 
@@ -386,15 +378,6 @@ const About = () => {
                   loading="lazy"
                   className="w-full h-auto rounded-2xl shadow-lg block"
                 />
-                <div className="absolute bottom-[-16px] sm:bottom-[-20px] right-3 sm:right-5
-                                flex items-center gap-2 sm:gap-3
-                                bg-[#0072BC] px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl shadow-lg">
-                  <Icon d={ICONS.team} size={16} color="#fff" sw={1.8} />
-                  <div>
-                    <p className="text-white text-xs font-extrabold leading-none">Expert Team</p>
-                    <p className="text-xs mt-0.5 text-blue-200/90">Healthcare Professionals</p>
-                  </div>
-                </div>
               </div>
             </FadeIn>
 

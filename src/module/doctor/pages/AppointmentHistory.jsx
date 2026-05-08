@@ -176,7 +176,7 @@ const AppointmentHistory = () => {
         (res.data.appointments || []).map((a) => ({
           id: a.id,
           token: a.token_number,
-          patientName: a.familyMemberName || a.patientName || "Walk-in Patient",
+          patientName: a.familyMemberName || a.patientName || a.walk_in_patient_name || "Walk-in Patient",
           image: a.patientImage
             ? a.patientImage.startsWith("http") ? a.patientImage : `${BASE_URL}/${a.patientImage}`
             : null,

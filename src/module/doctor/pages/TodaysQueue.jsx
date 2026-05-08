@@ -22,11 +22,26 @@ const BASE_URL = import.meta.env.VITE_API_URL || "";
 const FALLBACK_IMAGE = "https://ui-avatars.com/api/?name=Patient";
 
 const getImageUrl = (imagePath) => {
-  if (!imagePath) return FALLBACK_IMAGE;
-  if (imagePath.startsWith("http")) return imagePath;
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http")) {
+    return imagePath;
+  }
   return `${BASE_URL}/${imagePath}`.replace(/([^:])\/\//g, "$1/");
 };
 
+const getInitial = (name) => {
+  if (!name) return "WP";
+
+  const words = name.trim().split(" ").filter(Boolean);
+
+  if (words.length === 0) return "WP";
+
+  if (words.length === 1) {
+    return words[0][0].toUpperCase();
+  }
+
+  return words[0][0].toUpperCase() + words[1][0].toUpperCase();
+};
 
 const STATUS = {
   ACCEPTED: {
@@ -93,15 +108,14 @@ const TodaysQueue = () => {
   const [nextPatient, setNextPatient] = useState(null);
   const [currentPatient, setCurrentPatient] = useState(null);
 
-  
   const [actionProcessing, setActionProcessing] = useState({
     noShow: false,
     skip: false,
-    recall: null, 
+    recall: null,
   });
 
   const hasSkipped = queue.some((p) => p.status === "SKIPPED");
-  
+
   const loadQueue = useCallback(async () => {
     try {
       setLoading(true);
@@ -133,7 +147,6 @@ const TodaysQueue = () => {
     }
   }, [slot]);
 
-  
   useEffect(() => {
     const refreshAll = () => {
       loadQueue();
@@ -152,12 +165,14 @@ const TodaysQueue = () => {
       loadQueue();
     } catch (err) {
       console.error("Start appointment error:", err);
-      notify.error(err.response?.data?.message || "Unable to start appointment");
+      notify.error(
+        err.response?.data?.message || "Unable to start appointment",
+      );
     }
   };
 
   const handleCallNext = async () => {
-    if (callingNext) return; 
+    if (callingNext) return;
     try {
       setCallingNext(true);
       const res = await callNextToken({ slot });
@@ -171,7 +186,6 @@ const TodaysQueue = () => {
     }
   };
 
- 
   const handleMarkNoShow = async () => {
     if (actionProcessing.noShow) return;
     try {
@@ -187,12 +201,11 @@ const TodaysQueue = () => {
     }
   };
 
-
   const handleSkipAppointment = async () => {
     if (actionProcessing.skip) return;
     try {
       setActionProcessing((prev) => ({ ...prev, skip: true }));
-    
+
       const { data } = await getTodayQueue(slot);
       const freshQueue = data.queue || [];
       const current = freshQueue.find((p) => p.status === "IN_PROGRESS");
@@ -212,7 +225,6 @@ const TodaysQueue = () => {
     }
   };
 
- 
   const handleRecall = async (id) => {
     if (actionProcessing.recall === id) return;
     try {
@@ -228,19 +240,18 @@ const TodaysQueue = () => {
     }
   };
 
-
   const handleStopOnly = async () => {
-  try {
-    await callNextToken({ slot }); 
-   
-    notify.success("Last appointment completed");
-    loadQueue();
-    loadCurrentPatient();
-    loadNextPatient();
-  } catch (err) {
-    notify.error("Failed to stop appointment");
-  }
-};
+    try {
+      await callNextToken({ slot });
+
+      notify.success("Last appointment completed");
+      loadQueue();
+      loadCurrentPatient();
+      loadNextPatient();
+    } catch (err) {
+      notify.error("Failed to stop appointment");
+    }
+  };
 
   const { total, waiting, done, inProgress } = useMemo(
     () => ({
@@ -383,21 +394,34 @@ const TodaysQueue = () => {
               </p>
               {currentPatient ? (
                 <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={getImageUrl(currentPatient.profile_image)}
-                    alt="patient"
-                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white/30 flex-shrink-0"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = FALLBACK_IMAGE;
-                    }}
-                  />
+                  {currentPatient.profile_image ? (
+                    <img
+                      src={getImageUrl(currentPatient.profile_image)}
+                      alt="patient"
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white/30 flex-shrink-0"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/20 border-2 border-white/30 flex items-center justify-center text-white font-bold text-lg sm:text-xl flex-shrink-0">
+                      {getInitial(
+                        currentPatient.walk_in_patient_name ||
+                          currentPatient.familyMemberName ||
+                          currentPatient.patientName ||
+                          "Patient",
+                      )}
+                    </div>
+                  )}
+
                   <div className="min-w-0">
                     <h3 className="font-playfair text-[16px] sm:text-[18px] font-bold leading-tight truncate">
-                      {currentPatient.familyMemberName ||
+                      {currentPatient.walk_in_patient_name ||
+                        currentPatient.familyMemberName ||
                         currentPatient.patientName ||
                         "Patient"}
                     </h3>
+
                     <p className="font-dm text-[12px] text-white/70">
                       Token #{currentPatient.token_number}
                     </p>
@@ -409,31 +433,32 @@ const TodaysQueue = () => {
                 </p>
               )}
             </div>
-{currentPatient &&
-  (inProgress ? (
-    nextPatient ? (
-      <button
-        disabled
-        className="self-start bg-gray-300 text-gray-600 font-semibold px-4 py-2 rounded-full cursor-not-allowed"
-      >
-        Consulting Patient
-      </button>
-    ) : (
-      <button
-        onClick={handleStopOnly}
-        className="self-start bg-red-600 text-white font-semibold px-4 py-2 rounded-full"
-      >
-        ⏹ Stop Patient
-      </button>
-    )
-  ) : (
-    <button
-      onClick={() => handleStart(currentPatient.id)}
-      className="self-start bg-white text-emerald-700 font-semibold px-4 py-2 rounded-full"
-    >
-      ▶ Start Appointment
-    </button>
-  ))}
+
+            {currentPatient &&
+              (inProgress ? (
+                nextPatient ? (
+                  <button
+                    disabled
+                    className="self-start bg-gray-300 text-gray-600 font-semibold px-4 py-2 rounded-full cursor-not-allowed"
+                  >
+                    Consulting Patient
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleStopOnly}
+                    className="self-start bg-red-600 text-white font-semibold px-4 py-2 rounded-full"
+                  >
+                    ⏹ Stop Patient
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={() => handleStart(currentPatient.id)}
+                  className="self-start bg-white text-emerald-700 font-semibold px-4 py-2 rounded-full"
+                >
+                  ▶ Start Appointment
+                </button>
+              ))}
           </div>
 
           {/* NEXT */}
@@ -448,23 +473,38 @@ const TodaysQueue = () => {
               <p className="font-dm text-[10px] font-semibold tracking-[0.12em] uppercase text-white/70 mb-2">
                 Next Patient
               </p>
+
               {nextPatient ? (
                 <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={getImageUrl(nextPatient.profile_image)}
-                    alt="patient"
-                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white/30 flex-shrink-0"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = FALLBACK_IMAGE;
-                    }}
-                  />
+                  {nextPatient.profile_image ? (
+                    <img
+                      src={getImageUrl(nextPatient.profile_image)}
+                      alt="patient"
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white/30 flex-shrink-0"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = FALLBACK_IMAGE;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/20 border-2 border-white/30 flex items-center justify-center text-white font-bold text-lg sm:text-xl flex-shrink-0">
+                      {getInitial(
+                        nextPatient.walk_in_patient_name ||
+                          nextPatient.familyMemberName ||
+                          nextPatient.patientName ||
+                          "Patient",
+                      )}
+                    </div>
+                  )}
+
                   <div className="min-w-0">
                     <h3 className="font-playfair text-[16px] sm:text-[18px] font-bold leading-tight truncate">
-                      {nextPatient.familyMemberName ||
+                      {nextPatient.walk_in_patient_name ||
+                        nextPatient.familyMemberName ||
                         nextPatient.patientName ||
                         "Patient"}
                     </h3>
+
                     <p className="font-dm text-[12px] text-white/70">
                       Token #{nextPatient.token_number}
                     </p>
@@ -476,26 +516,25 @@ const TodaysQueue = () => {
                 </p>
               )}
             </div>
-            {nextPatient && (
-  !inProgress ? (
-    // ✅ FIRST TIME → START (Token #3 se hi start hoga)
-    <button
-      onClick={() => handleStart(nextPatient.id)}
-      className="self-start bg-white text-emerald-700 font-semibold px-4 py-2 rounded-full"
-    >
-      ▶ Start Appointment
-    </button>
-  ) : (
-    // ✅ AFTER START → CALL NEXT
-    <button
-      onClick={handleCallNext}
-      disabled={callingNext}
-      className="self-start bg-white text-[#0e7490] font-semibold px-4 py-2 rounded-full"
-    >
-      📢 {callingNext ? "Calling..." : "Call Next Token"}
-    </button>
-  )
-)}
+            {nextPatient &&
+              (!inProgress ? (
+                // ✅ FIRST TIME → START (Token #3 se hi start hoga)
+                <button
+                  onClick={() => handleStart(nextPatient.id)}
+                  className="self-start bg-white text-emerald-700 font-semibold px-4 py-2 rounded-full"
+                >
+                  ▶ Start Appointment
+                </button>
+              ) : (
+                // ✅ AFTER START → CALL NEXT
+                <button
+                  onClick={handleCallNext}
+                  disabled={callingNext}
+                  className="self-start bg-white text-[#0e7490] font-semibold px-4 py-2 rounded-full"
+                >
+                  📢 {callingNext ? "Calling..." : "Call Next Token"}
+                </button>
+              ))}
           </div>
         </div>
 
@@ -539,35 +578,55 @@ const TodaysQueue = () => {
                     style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
                   >
                     {/* Left — avatar + name + token */}
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={getImageUrl(p.patientImage)}
-                        alt="patient"
-                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-black/[0.08] flex-shrink-0"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = FALLBACK_IMAGE;
-                        }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`font-dm font-semibold text-[13px] sm:text-[14px] text-[#1c2b33] truncate ${p.status === "COMPLETED" ? "line-through" : ""}`}
-                        >
-                          {p.familyMemberName || p.patientName || "Walk-in"}
-                        </p>
-                        <p className="font-dm text-[11px] sm:text-[12px] text-[#6b7f8a]">
-                          {p.reason || "Consultation"}
-                        </p>
-                      </div>
-                      <div className="text-center ml-auto sm:ml-0">
-                        <p className="font-dm text-[9px] font-semibold tracking-widest uppercase text-[#9fb0b8]">
-                          TOKEN
-                        </p>
-                        <p className="font-playfair text-[20px] sm:text-[22px] font-bold text-[#1c2b33] leading-none">
-                          {p.token_number}
-                        </p>
-                      </div>
-                    </div>
+<div className="flex items-center gap-3">
+  {p.patientImage ? (
+    <img
+      src={getImageUrl(p.patientImage)}
+      alt="patient"
+      className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-black/[0.08] flex-shrink-0"
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = FALLBACK_IMAGE;
+      }}
+    />
+  ) : (
+    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#0e7490] text-white flex items-center justify-center font-bold text-sm sm:text-base border border-black/[0.08] flex-shrink-0">
+      {getInitial(
+        p.walk_in_patient_name ||
+          p.familyMemberName ||
+          p.patientName ||
+          "Walk-in"
+      )}
+    </div>
+  )}
+
+  <div className="min-w-0 flex-1">
+    <p
+      className={`font-dm font-semibold text-[13px] sm:text-[14px] text-[#1c2b33] truncate ${
+        p.status === "COMPLETED" ? "line-through" : ""
+      }`}
+    >
+      {p.walk_in_patient_name ||
+        p.familyMemberName ||
+        p.patientName ||
+        "Walk-in"}
+    </p>
+
+    <p className="font-dm text-[11px] sm:text-[12px] text-[#6b7f8a]">
+      {p.reason || "Consultation"}
+    </p>
+  </div>
+
+  <div className="text-center ml-auto sm:ml-0">
+    <p className="font-dm text-[9px] font-semibold tracking-widest uppercase text-[#9fb0b8]">
+      TOKEN
+    </p>
+
+    <p className="font-playfair text-[20px] sm:text-[22px] font-bold text-[#1c2b33] leading-none">
+      {p.token_number}
+    </p>
+  </div>
+</div>
 
                     {/* Right — status + actions */}
                     <div className="flex items-center gap-2 flex-wrap">

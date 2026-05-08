@@ -159,7 +159,7 @@ const Appointments = () => {
             </div>
           ) : (
             filteredAppointments.map((a) => {
-              const displayName = a.familyMemberName || a.patientName || a.patient_name ||"Walk-in Patient";
+              const displayName = a.familyMemberName || a.patientName || a.patient_name || a.walk_in_patient_name || "Walk-in Patient";
               const isProcessing = processingId === a.id;
               const imgUrl = getImageUrl(a.profile_image);
               return (

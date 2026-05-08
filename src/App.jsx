@@ -7,7 +7,7 @@ import { ImageProvider } from "./context/ImageContext";
 const App = () => {
   return (
     <HelmetProvider>
-      <ImageProvider>   {/* ✅ YEH ADD KARNA HAI */}
+      <ImageProvider>  
         <LanguageProvider>
           <Router />
         </LanguageProvider>

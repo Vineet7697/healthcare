@@ -82,29 +82,28 @@ const DoctorLoginPage = () => {
     }
   };
 
-useEffect(() => {
-  const loginToken = localStorage.getItem("token");
-  const raw = localStorage.getItem("loggedInUser");
-  const tempToken = sessionStorage.getItem("tempToken");
+  useEffect(() => {
+    const loginToken = localStorage.getItem("token");
+    const raw = localStorage.getItem("loggedInUser");
+    const tempToken = sessionStorage.getItem("tempToken");
 
-  // ✅ LOGIN FLOW
-  if (loginToken && raw) {
-    const user = JSON.parse(raw);
+    // ✅ LOGIN FLOW
+    if (loginToken && raw) {
+      const user = JSON.parse(raw);
 
-    if (user.role === "DOCTOR") {
-      if (user.status === "APPROVED") {
-        navigate("/doctordashboard", { replace: true });
-        return;
-      }
+      if (user.role === "DOCTOR") {
+        if (user.status === "APPROVED") {
+          navigate("/doctordashboard", { replace: true });
+          return;
+        }
 
-      if (user.status === "PENDING") {
-        navigate("/approvalstatuspage", { replace: true });
-        return;
+        if (user.status === "PENDING") {
+          navigate("/approvalstatuspage", { replace: true });
+          return;
+        }
       }
     }
-  }
-
-}, []);
+  }, []);
 
   const inputCls = (field) =>
     `w-full px-4 py-2.5 rounded-lg text-sm text-gray-800 outline-none border transition-colors duration-150 ${
@@ -164,7 +163,11 @@ useEffect(() => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0086C3] transition-colors duration-150"
                 >
-                  {showPassword ? <FaEyeSlash size={15} /> : <FaEye size={15} />}
+                  {showPassword ? (
+                    <FaEyeSlash size={15} />
+                  ) : (
+                    <FaEye size={15} />
+                  )}
                 </button>
               </div>
               {errors.password && (
@@ -212,9 +215,9 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => {
-                  sessionStorage.removeItem("tempToken");
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("loggedInUser");
+                  localStorage.clear();
+                  sessionStorage.clear();
+
                   navigate("/doctorregistration");
                 }}
                 className="flex-1 text-[#0086C3] cursor-pointer border border-[#0086C3]/40 hover:bg-[#0086C3]/5 font-semibold text-sm py-2.5 rounded-lg transition-colors duration-150"

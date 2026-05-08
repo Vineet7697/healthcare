@@ -42,7 +42,6 @@ const AppHeader = () => {
   return (
     <>
       <nav className="fixed top-0 left-0 w-full bg-white shadow-md px-6 py-3 flex items-center justify-between z-50">
-        
         <div className="flex items-center gap-3">
           <div className="md:hidden mr-2">
             {menuOpen ? (
@@ -99,9 +98,11 @@ const AppHeader = () => {
             <FaGlobe size={18} className="text-gray-700" />
           </button>
 
-          <button className="px-5 py-2 rounded-full bg-[#00b3ff] text-white hover:bg-[#009ee0] transition">
-            {lang[language].download}
-          </button>
+          <a href="/yodoctor.apk" download>
+            <button className="px-5 py-2 rounded-full bg-[#00b3ff] text-white hover:bg-[#009ee0] transition">
+              {lang[language].download}
+            </button>
+          </a>
         </div>
       </nav>
 

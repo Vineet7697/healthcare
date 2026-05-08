@@ -6,20 +6,32 @@ import FamilyService from "../../../services/FamilyService";
 
 const ConfirmModal = ({ text, onYes, onNo }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center">
-    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onNo} />
+    <div
+      className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      onClick={onNo}
+    />
     <div
       className="relative bg-white rounded-2xl w-full max-w-sm mx-4 p-6 z-10 animate-[scaleIn_0.25s_cubic-bezier(0.34,1.56,0.64,1)_both]"
-      style={{ boxShadow: "0 20px 60px rgba(12,30,58,0.2)", border: "1px solid rgba(12,30,58,0.08)" }}
+      style={{
+        boxShadow: "0 20px 60px rgba(12,30,58,0.2)",
+        border: "1px solid rgba(12,30,58,0.08)",
+      }}
     >
       <h3 className="font-[family-name:var(--font-playfair)] text-[17px] font-bold text-[#0c1e3a] mb-2">
         Confirm Action
       </h3>
-      <p className="font-[family-name:var(--font-dm)] text-[14px] text-[#64748b] mb-6">{text}</p>
+      <p className="font-[family-name:var(--font-dm)] text-[14px] text-[#64748b] mb-6">
+        {text}
+      </p>
       <div className="flex justify-end gap-3">
         <button
           onClick={onNo}
           className="font-[family-name:var(--font-dm)] font-semibold text-[13px] px-5 py-2 rounded-xl cursor-pointer transition-all duration-200 hover:bg-[#f0f4f8]"
-          style={{ color: "#64748b", background: "#f8fafc", border: "1px solid rgba(12,30,58,0.1)" }}
+          style={{
+            color: "#64748b",
+            background: "#f8fafc",
+            border: "1px solid rgba(12,30,58,0.1)",
+          }}
         >
           Cancel
         </button>
@@ -44,8 +56,13 @@ const AddFamilyPage = () => {
   const isEdit = Boolean(id);
 
   const [familyMember, setFamilyMember] = useState({
-    fullName: "", gender: "", dob: "", heightCm: "",
-    weightKg: "", bloodGroup: "", relation: "",
+    fullName: "",
+    gender: "",
+    dob: "",
+    heightCm: "",
+    weightKg: "",
+    bloodGroup: "",
+    relation: "",
   });
 
   const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
@@ -57,7 +74,10 @@ const AddFamilyPage = () => {
     const fetchMember = async () => {
       try {
         const data = await FamilyService.getById(id);
-        setFamilyMember({ ...data, dob: data.dob ? data.dob.split("T")[0] : "" });
+        setFamilyMember({
+          ...data,
+          dob: data.dob ? data.dob.split("T")[0] : "",
+        });
       } catch {
         notify.error("Failed to load family member");
       }
@@ -78,8 +98,10 @@ const AddFamilyPage = () => {
     if (!familyMember.dob) newErrors.dob = "Required";
     if (!familyMember.relation) newErrors.relation = "Required";
     if (!familyMember.bloodGroup) newErrors.bloodGroup = "Required";
-    if (!familyMember.heightCm || Number(familyMember.heightCm) <= 0) newErrors.heightCm = "Valid height required";
-    if (!familyMember.weightKg || Number(familyMember.weightKg) <= 0) newErrors.weightKg = "Valid weight required";
+    if (!familyMember.heightCm || Number(familyMember.heightCm) <= 0)
+      newErrors.heightCm = "Valid height required";
+    if (!familyMember.weightKg || Number(familyMember.weightKg) <= 0)
+      newErrors.weightKg = "Valid weight required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -87,7 +109,10 @@ const AddFamilyPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    if (isEdit) { setShowUpdateConfirm(true); return; }
+    if (isEdit) {
+      setShowUpdateConfirm(true);
+      return;
+    }
     try {
       setLoading(true);
       await FamilyService.create(familyMember);
@@ -121,12 +146,15 @@ const AddFamilyPage = () => {
         : "border border-[rgba(12,30,58,0.12)] bg-white focus:border-[#0086C3] focus:border-2"
     }`;
 
-  const labelCls = "font-[family-name:var(--font-dm)] text-[12px] font-semibold uppercase tracking-wider text-[#94a3b8] block";
+  const labelCls =
+    "font-[family-name:var(--font-dm)] text-[12px] font-semibold uppercase tracking-wider text-[#94a3b8] block";
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 lg:px-8 py-8 flex justify-center" style={{ background: "#f0f4f8" }}>
+    <div
+      className="min-h-screen px-4 sm:px-6 lg:px-8 py-8 flex justify-center"
+      style={{ background: "#f0f4f8" }}
+    >
       <div className="w-full max-w-2xl animate-[fadeUp_0.5s_cubic-bezier(0.22,1,0.36,1)_both]">
-
         <button
           onClick={() => navigate(-1)}
           className="font-[family-name:var(--font-dm)] text-[13px] font-semibold mb-5 flex items-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-x-1"
@@ -137,17 +165,22 @@ const AddFamilyPage = () => {
 
         <div
           className="bg-white rounded-2xl overflow-hidden"
-          style={{ boxShadow: "0 4px 32px rgba(12,30,58,0.1)", border: "1px solid rgba(12,30,58,0.06)" }}
+          style={{
+            boxShadow: "0 4px 32px rgba(12,30,58,0.1)",
+            border: "1px solid rgba(12,30,58,0.06)",
+          }}
         >
-
           <div
             className="px-7 py-5 relative overflow-hidden"
-            style={{ background: "linear-gradient(135deg,#0086C3,#00b4d8,#2ecc71)" }}
+            style={{
+              background: "linear-gradient(135deg,#0086C3,#00b4d8,#2ecc71)",
+            }}
           >
             <div
               className="absolute inset-0 opacity-10 pointer-events-none"
               style={{
-                backgroundImage: "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
+                backgroundImage:
+                  "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
                 backgroundSize: "22px 22px",
               }}
             />
@@ -163,16 +196,22 @@ const AddFamilyPage = () => {
                   {isEdit ? "Update Member" : "Add Family Member"}
                 </h1>
                 <p className="font-[family-name:var(--font-dm)] text-[13px] text-white/70 mt-0.5">
-                  {isEdit ? "Edit the details below" : "Fill in the details to add a new member"}
+                  {isEdit
+                    ? "Edit the details below"
+                    : "Fill in the details to add a new member"}
                 </p>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-7 py-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-
+          <form
+            onSubmit={handleSubmit}
+            className="px-7 py-6 grid grid-cols-1 sm:grid-cols-2 gap-5"
+          >
             <div className="sm:col-span-1">
-              <label className={labelCls}>Full Name <span className="text-red-400">*</span></label>
+              <label className={labelCls}>
+                Full Name <span className="text-red-400">*</span>
+              </label>
               <input
                 name="fullName"
                 value={familyMember.fullName}
@@ -180,84 +219,179 @@ const AddFamilyPage = () => {
                 placeholder="Enter full name"
                 className={inputCls("fullName")}
               />
-              {errors.fullName && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.fullName}</p>}
-
+              {errors.fullName && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.fullName}
+                </p>
+              )}
             </div>
 
             <div>
-              <label className={labelCls}>Gender <span className="text-red-400">*</span></label>
-              <select name="gender" value={familyMember.gender} onChange={handleChange} className={inputCls("gender")}>
+              <label className={labelCls}>
+                Gender <span className="text-red-400">*</span>
+              </label>
+              <select
+                name="gender"
+                value={familyMember.gender}
+                onChange={handleChange}
+                className={inputCls("gender")}
+              >
                 <option value="">Select Gender</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHER">Other</option>
               </select>
-              {errors.gender && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.gender}</p>}
+              {errors.gender && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.gender}
+                </p>
+              )}
             </div>
 
             <div>
-              <label className={labelCls}>Relation <span className="text-red-400">*</span></label>
-              <select name="relation" value={familyMember.relation} onChange={handleChange} className={inputCls("relation")}>
+              <label className={labelCls}>
+                Relation <span className="text-red-400">*</span>
+              </label>
+              <select
+                name="relation"
+                value={familyMember.relation}
+                onChange={handleChange}
+                className={inputCls("relation")}
+              >
                 <option value="">Select Relation</option>
-                {["FATHER","MOTHER","SPOUSE","SON","DAUGHTER","BROTHER","SISTER","OTHER"].map(r => (
-                  <option key={r} value={r}>{r.charAt(0) + r.slice(1).toLowerCase()}</option>
+                {[
+                  "FATHER",
+                  "MOTHER",
+                  "SPOUSE",
+                  "SON",
+                  "DAUGHTER",
+                  "BROTHER",
+                  "SISTER",
+                  "OTHER",
+                ].map((r) => (
+                  <option key={r} value={r}>
+                    {r.charAt(0) + r.slice(1).toLowerCase()}
+                  </option>
                 ))}
               </select>
-              {errors.relation && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.relation}</p>}
+              {errors.relation && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.relation}
+                </p>
+              )}
             </div>
 
-         
             <div>
-              <label className={labelCls}>Blood Group <span className="text-red-400">*</span></label>
-              <select name="bloodGroup" value={familyMember.bloodGroup} onChange={handleChange} className={inputCls("bloodGroup")}>
+              <label className={labelCls}>
+                Blood Group <span className="text-red-400">*</span>
+              </label>
+              <select
+                name="bloodGroup"
+                value={familyMember.bloodGroup}
+                onChange={handleChange}
+                className={inputCls("bloodGroup")}
+              >
                 <option value="">Select</option>
-                {["A+","A-","B+","B-","O+","O-","AB+","AB-"].map(bg => (
-                  <option key={bg} value={bg}>{bg}</option>
-                ))}
+                {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(
+                  (bg) => (
+                    <option key={bg} value={bg}>
+                      {bg}
+                    </option>
+                  ),
+                )}
               </select>
-              {errors.bloodGroup && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.bloodGroup}</p>}
+              {errors.bloodGroup && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.bloodGroup}
+                </p>
+              )}
             </div>
 
-            
             <div>
-              <label className={labelCls}>Height (cm) <span className="text-red-400">*</span></label>
+              <label className={labelCls}>
+                Height (cm) <span className="text-red-400">*</span>
+              </label>
               <input
-                type="number" name="heightCm" value={familyMember.heightCm}
-                onChange={handleChange} placeholder="e.g. 170"
+                type="number"
+                name="heightCm"
+                value={familyMember.heightCm}
+                onChange={handleChange}
+                placeholder="e.g. 170"
                 className={inputCls("heightCm")}
               />
-              {errors.heightCm && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.heightCm}</p>}
+              {errors.heightCm && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.heightCm}
+                </p>
+              )}
             </div>
 
-            
             <div>
-              <label className={labelCls}>Weight (kg) <span className="text-red-400">*</span></label>
+              <label className={labelCls}>
+                Weight (kg) <span className="text-red-400">*</span>
+              </label>
               <input
-                type="number" name="weightKg" value={familyMember.weightKg}
-                onChange={handleChange} placeholder="e.g. 65"
+                type="number"
+                name="weightKg"
+                value={familyMember.weightKg}
+                onChange={handleChange}
+                placeholder="e.g. 65"
                 className={inputCls("weightKg")}
               />
-              {errors.weightKg && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.weightKg}</p>}
+              {errors.weightKg && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.weightKg}
+                </p>
+              )}
             </div>
 
-            
-           
             <div>
-              <label className={labelCls}>Date of Birth <span className="text-red-400">*</span></label>
-              <input type="date" name="dob" value={familyMember.dob} onChange={handleChange} className={inputCls("dob")} />
-              {errors.dob && <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">{errors.dob}</p>}
+              <label className={labelCls}>
+                Date of Birth <span className="text-red-400">*</span>
+              </label>
+              <input
+                type={familyMember.dob ? "date" : "text"}
+                placeholder="Date of Birth"
+                name="dob"
+                value={familyMember.dob || ""}
+                onMouseDown={(e) => {
+                  e.target.type = "date";
+                  setTimeout(() => e.target.showPicker?.(), 0);
+                }}
+                onTouchStart={(e) => {
+                  e.target.type = "date";
+                  setTimeout(() => e.target.showPicker?.(), 0);
+                }}
+                onBlur={(e) => {
+                  if (!familyMember.dob) e.target.type = "text";
+                }}
+                onChange={handleChange}
+                className={inputCls("dob")}
+                style={{ colorScheme: "light" }}
+                max={new Date().toISOString().split("T")[0]}
+              />
+              {errors.dob && (
+                <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
+                  {errors.dob}
+                </p>
+              )}
             </div>
 
-            
-            <div className="sm:col-span-2 h-px" style={{ background: "rgba(12,30,58,0.07)" }} />
+            <div
+              className="sm:col-span-2 h-px"
+              style={{ background: "rgba(12,30,58,0.07)" }}
+            />
 
-            
             <div className="sm:col-span-2 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
                 className="font-[family-name:var(--font-dm)] font-semibold text-[14px] px-6 py-2.5 rounded-xl cursor-pointer transition-all duration-200 hover:bg-[#f0f4f8]"
-                style={{ color: "#64748b", background: "#f8fafc", border: "1px solid rgba(12,30,58,0.1)" }}
+                style={{
+                  color: "#64748b",
+                  background: "#f8fafc",
+                  border: "1px solid rgba(12,30,58,0.1)",
+                }}
               >
                 Cancel
               </button>
@@ -269,18 +403,28 @@ const AddFamilyPage = () => {
                   background: "linear-gradient(135deg,#0086C3,#00b4d8)",
                   boxShadow: "0 4px 14px rgba(0,134,195,0.35)",
                 }}
-                onMouseEnter={e => !loading && (e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,134,195,0.5)")}
-                onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 14px rgba(0,134,195,0.35)")}
+                onMouseEnter={(e) =>
+                  !loading &&
+                  (e.currentTarget.style.boxShadow =
+                    "0 6px 20px rgba(0,134,195,0.5)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.boxShadow =
+                    "0 4px 14px rgba(0,134,195,0.35)")
+                }
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Saving...
                   </span>
-                ) : isEdit ? "Update Member" : "Save Member"}
+                ) : isEdit ? (
+                  "Update Member"
+                ) : (
+                  "Save Member"
+                )}
               </button>
             </div>
-
           </form>
         </div>
       </div>

@@ -170,27 +170,33 @@ const ClientRegisterPage = () => {
                 </p>
               )}
             </div>
-
-           
             <div>
+              {" "}
               <div className="relative">
-                <CalendarDays className={iconCls} size={16} color="#94a3b8" />
+                {" "}
+                <CalendarDays
+                  className={iconCls}
+                  size={16}
+                  color="#94a3b8"
+                />{" "}
                 <input
                   type="date"
                   name="dob"
-                  value={formData.dob}
+                  value={formData.dob || "Date of Birth"}
                   onChange={handleChange}
+                  style={{ colorScheme: "light" }}
                   className={inputCls("dob")}
-                />
-              </div>
+                  max={new Date().toISOString().split("T")[0]}
+                />{" "}
+              </div>{" "}
               {errors.dob && (
                 <p className="text-red-400 text-[11px] mt-1 font-[family-name:var(--font-dm)]">
-                  {errors.dob}
+                  {" "}
+                  {errors.dob}{" "}
                 </p>
-              )}
+              )}{" "}
             </div>
 
-            
             <div>
               <div className="relative">
                 <Lock className={iconCls} size={16} color="#94a3b8" />
@@ -220,7 +226,6 @@ const ClientRegisterPage = () => {
               )}
             </div>
 
-         
             <div>
               <div className="relative">
                 <Lock className={iconCls} size={16} color="#94a3b8" />
@@ -250,7 +255,6 @@ const ClientRegisterPage = () => {
               )}
             </div>
 
-           
             <button
               type="submit"
               className="w-full font-[family-name:var(--font-dm)] font-bold text-[15px] text-white py-3 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 mt-1"
@@ -277,12 +281,10 @@ const ClientRegisterPage = () => {
           </p>
         </div>
 
-       
         <div
           className="hidden md:flex w-1/2 items-center justify-center rounded-r-3xl relative overflow-hidden"
           style={{ background: "linear-gradient(135deg,#e8f4fd,#d0eaff)" }}
         >
-     
           <div
             className="absolute inset-0 pointer-events-none opacity-40"
             style={{
@@ -291,7 +293,7 @@ const ClientRegisterPage = () => {
               backgroundSize: "24px 24px",
             }}
           />
-        
+
           <div
             className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none opacity-20"
             style={{

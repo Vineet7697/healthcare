@@ -135,6 +135,8 @@ export default function AdminHomeCareBookings() {
                   "S.No",
                   "Patient",
                   "Contact",
+                  "Address",
+                  "Health Issue",
                   "Service",
                   "Date",
                   "Days",
@@ -177,6 +179,14 @@ export default function AdminHomeCareBookings() {
                     {/* Contact */}
                     <td className="px-4 py-3 text-gray-700">
                       {b.contact_number}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {b.address}
+                    </td>
+
+                    {/* Health Issue */}
+                    <td className="px-4 py-3 text-gray-700">
+                      {b.medical_condition || "N/A"}
                     </td>
 
                     {/* Service */}
