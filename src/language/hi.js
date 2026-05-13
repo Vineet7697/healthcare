@@ -187,7 +187,7 @@ ambulance_desc:
   onlineAppointment: "ऑनलाइन अपॉइंटमेंट बुक करें",
   bloodDonor: "रक्तदाता खोजें",
   manualbooking: " मैनुअल बुकिंग",
-Qrcode: "क्यूआर कोड से बुकिंग",
+Qrcode: "क्यूआर स्कैन करें और अपॉइंटमेंट टोकन प्राप्त करें",
 onlinebooking: "ऑनलाइन अपॉइंटमेंट",
 Certificate: "चिकित्सा प्रमाणपत्र के लिए आवेदन"
 

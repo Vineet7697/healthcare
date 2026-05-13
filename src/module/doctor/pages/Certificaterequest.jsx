@@ -237,8 +237,8 @@ function AllRequests({ requests, onReview }) {
     });
   }, [search, statusFilter, typeFilter, requests]);
 
-  const pendingCount = requests.filter(
-    (r) => r.status === "pending" || r.status === "warning",
+  const pendingCount = requests.filter((r) =>
+    ["pending", "verification", "payment_verified"].includes(r.status),
   ).length;
 
   return (
@@ -332,7 +332,9 @@ function AllRequests({ requests, onReview }) {
                 <Badge status={r.status} text={r.statusText} />
               </td>
               <td className="px-5 py-4">
-                {r.status === "pending" || r.status === "warning" ? (
+                {["pending", "verification", "payment_verified"].includes(
+                  r.status,
+                ) ? (
                   <button
                     onClick={() => onReview(r.id)}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
@@ -456,9 +458,12 @@ function ReviewPatient({
   }
 
   const infoRows = [
-    ["DOB", selectedRequest?.dob
-  ? new Date(selectedRequest.dob).toLocaleDateString("en-IN")
-  : "N/A"],
+    [
+      "DOB",
+      selectedRequest?.dob
+        ? new Date(selectedRequest.dob).toLocaleDateString("en-IN")
+        : "N/A",
+    ],
     ["Gender", selectedRequest?.gender || "N/A"],
     ["Blood Group", selectedRequest?.blood_group || "N/A"],
     ["Height", selectedRequest?.height || "N/A"],
@@ -533,13 +538,17 @@ function ReviewPatient({
                       </svg>
                     </div>
                     <p className="text-sm text-gray-600 font-medium flex-1 truncate">
-                      {doc.file_url.split("/").pop()}
+                      {doc.file_url ? doc.file_url.split("/").pop() : "No File"}
                     </p>
                     <a
-                      href={`${import.meta.env.VITE_API_URL}/${doc.file_url}`}
+                      href={
+                        doc.file_url
+                          ? `${import.meta.env.VITE_API_URL}/${doc.file_url}`
+                          : "#"
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                      className="text-xs font-medium text-teal-600"
                     >
                       View →
                     </a>
@@ -1016,8 +1025,8 @@ export default function Certificaterequest() {
   };
 
   return (
-    <div 
-       className="font-dm min-h-screen bg-[#f5f3ef] "
+    <div
+      className="font-dm min-h-screen bg-[#f5f3ef] "
       style={{
         backgroundImage:
           "radial-gradient(ellipse at 10% 5%, rgba(14,116,144,0.05) 0%, transparent 50%)",

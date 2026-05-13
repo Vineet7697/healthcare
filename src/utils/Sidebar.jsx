@@ -31,13 +31,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
     { key: "appointment", label: "Appointments", icon: <FaCalendarAlt /> },
     { key: "manualbooking", label: "Manual Booking", icon: <FaEdit /> },
-    { key: "Certificaterequest", label: "Certificate Requests", icon: <FaFileMedical /> }
+    { key: "Certificaterequest", label: "Certificate Requests", icon: <FaFileMedical /> },
+    { key: "mysubscription", label: "My Subscription", icon: <FaUsers /> }
   ];
 
   const patientNav = [
     { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
     { key: "family", label: "Family Members", icon: <FaUsers /> },
-    { key: "myappointment", label: "My Appointments", icon: <FaCalendarCheck /> },
+    { key: "myappointment", label: "Appointments History", icon: <FaCalendarCheck /> },
     { key: "mycertificate", label: "My Certificates", icon: <FaFileMedical /> },
   ];
 

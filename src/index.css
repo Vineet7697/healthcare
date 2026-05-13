@@ -47,3 +47,14 @@
   border-color: #000 !important;
   box-shadow: none !important;
 }
+
+
+/* Hide Scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -296,6 +296,10 @@ import VerifyCertificate from "../utils/VerifyCertificate";
 import PatientBookHomeService from "../landingpage/PatientBookHomeService";
 import AdminHomeCareBookings from "../admin/AdminHomeCareBookings";
 import RazorpayPaymentPage from "../pages/RazorpayPaymentPage";
+import PaymentPage from "../pages/PaymentPage";
+import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentFailed from "../pages/PaymentFailed";
+import MySubscription from "../pages/MySubscription";
 
 const Router = () => {
   return (
@@ -305,6 +309,11 @@ const Router = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
           <Route path="payment" element={<RazorpayPaymentPage />} />
+          <Route path="subscription" element={<PaymentPage/>} />
+         
+          
+          <Route path="payment-success" element={<PaymentSuccess />} />
+          <Route path="payment-failed" element={<PaymentFailed />} />
 
           <Route path="clientloginpage" element={<ClientLoginPage />} />
           <Route path="clientregisterpage" element={<ClientRegisterPage />} />
@@ -383,6 +392,7 @@ const Router = () => {
           <Route path="appointment" element={<AppointmentHistory />} />
           <Route path="prescription/:id" element={<AddPrescription />} />
           <Route path="certificaterequest" element={<Certificaterequest />} />
+           <Route path="mysubscription" element={<MySubscription />} />
 
           <Route path="reviews" element={<DoctorReviews />} />
         </Route>

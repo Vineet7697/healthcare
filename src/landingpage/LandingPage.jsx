@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import SEO from "../components/SEO";
 import landingImage from "../assets/images/landingimg.webp";
 import labTesting from "../assets/images/lab-test.png";
@@ -14,6 +18,35 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const { language, lang } = useLanguage();
   const t = lang[language];
+
+  const doctors = [
+  {
+    name: "Dr. Praveen Singh",
+    specialty: "Cardiologist",
+    experience: "12 Years",
+    rating: "4.9",
+    image:
+      "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d",
+  },
+
+  {
+    name: "Dr. Pooja Sharma",
+    specialty: "Dermatologist",
+    experience: "8 Years",
+    rating: "4.8",
+    image:
+      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2",
+  },
+
+  {
+    name: "Dr. Neha Verma",
+    specialty: "Pediatrician",
+    experience: "10 Years",
+    rating: "4.9",
+    image:
+      "https://images.unsplash.com/photo-1594824476967-48c8b964273f",
+  },
+];
 
   useEffect(() => {
     const token =
@@ -181,23 +214,59 @@ const LandingPage = () => {
           </div>
 
           {/* RIGHT — doctor image */}
-          <div className="hidden md:flex relative flex-shrink-0 w-[460px] h-[540px] animate-[fadeUp_1s_0.15s_cubic-bezier(0.22,1,0.36,1)_both] items-end justify-center">
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[380px] h-[380px] rounded-full pointer-events-none" />
+              <div className="hidden md:flex relative w-[700px] h-[400px] mt-10">
+      <Swiper
+        modules={[Autoplay, Pagination]}
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+        }}
+        pagination={{ clickable: true }}
+        loop={true}
+        className="w-full h-full"
+      >
+        {doctors.map((doctor) => (
+          <SwiperSlide key={doctor._id}>
             <div
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[340px] h-[60px] rounded-[50%] pointer-events-none"
+              className="relative w-full h-full rounded-[32px] overflow-hidden border"
               style={{
-                background:
-                  "radial-gradient(ellipse, rgba(0,212,255,0.18) 0%, transparent 70%)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.03)",
+                backdropFilter: "blur(20px)",
               }}
-            />
-            <img
-              src={landingImage}
-              loading="eager"
-              fetchPriority="high"
-              alt="Doctor"
-              className="relative z-10 w-full h-full object-contain object-bottom"
-            />
-          </div>
+            >
+              <img
+                src={doctor.image}
+                alt={doctor.name}
+                className="w-full h-[60%] object-cover"
+              />
+
+              <div className="p-5 text-white">
+                <h2 className="text-2xl font-bold">
+                  {doctor.name}
+                </h2>
+
+                <p className="text-cyan-300 mt-1">
+                  {doctor.specialty}
+                </p>
+
+                <div className="flex justify-between mt-4 text-sm">
+                  <span>⭐ {doctor.rating}</span>
+
+                  <span>
+                    {doctor.experience} Years Exp.
+                  </span>
+                </div>
+
+                <div className="mt-4 inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-300 text-xs font-semibold">
+                  Doctor Of The Month 🏆
+                </div>
+              </div>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
         </div>
 
         {/* ── SERVICES SECTION ── */}
@@ -217,7 +286,7 @@ const LandingPage = () => {
                       {card.label}
                     </h2>
                     {card.sub && (
-                      <p className="text-white/80 text-[11px] sm:text-[14px]">
+                      <p className="text-white/80 text-[18px] sm:text-[14px] md:text-[18px]">
                         {card.sub}
                       </p>
                     )}

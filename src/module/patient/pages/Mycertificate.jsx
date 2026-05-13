@@ -12,10 +12,26 @@ import {
 // Config & Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 const statusConfig = {
+  Pending: {
+    bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500"
+  },
+
+ verification: {
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    dot: "bg-blue-500",
+  },
+
+  payment_verified: {
+    bg: "bg-purple-50",
+    text: "text-purple-700",
+    dot: "bg-purple-500",
+  },
+
+
   Approved: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-500" },
-  Pending:  { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
-  Expired:  { bg: "bg-red-50",   text: "text-red-700",   dot: "bg-red-500"   },
-  Rejected: { bg: "bg-red-50",   text: "text-red-700",   dot: "bg-red-500"   },
+
+  Rejected: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500" },
 };
 
 // Normalize status string → "Approved" / "Pending" / etc.
@@ -50,19 +66,15 @@ function CertCard({ rawCert, onView, onDownload, onTrack }) {
   const [hovered, setHovered] = useState(false);
 
   // Derive display values from raw DB row
-  const status     = normalizeStatus(rawCert.status);
-  const certType   = rawCert.certificate_type  || "Certificate";
-  const doctorName = rawCert.doctor_name        || "Assigned Doctor";
-  const createdAt  = fmtDate(rawCert.created_at);
-  const expiryText = rawCert.expiry_date
-    ? `Expires ${fmtDate(rawCert.expiry_date)}`
-    : "No expiry set";
-  const progress   = rawCert.status?.toLowerCase() === "approved" ? 100 : 50;
+  const status = normalizeStatus(rawCert.status);
+  const certType = rawCert.certificate_type || "Certificate";
+  const doctorName = rawCert.doctor_name || "Assigned Doctor";
+  const createdAt = fmtDate(rawCert.created_at);
 
   return (
     <div
-      className={`bg-white border border-[#ece9e1] rounded-2xl p-[18px] flex flex-col gap-3.5 transition-all duration-200 cursor-default ${
-        hovered ? "shadow-lg -translate-y-0.5" : "shadow-none"
+      className={`bg-white border border-[#E2E8F0] rounded-2xl p-[18px] flex flex-col gap-3.5 transition-all duration-200 cursor-default ${
+        hovered ? "shadow-[0_8px_24px_rgba(37,99,235,0.10)] -translate-y-0.5" : "shadow-none"
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -88,19 +100,6 @@ function CertCard({ rawCert, onView, onDownload, onTrack }) {
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div>
-        <div className="h-1 rounded-full bg-[#f0ede6] overflow-hidden mt-0.5">
-          <div
-            className="h-full rounded-full transition-all duration-[600ms] ease-in-out"
-            style={{ background: "#16a34a", width: `${progress}%` }}
-          />
-        </div>
-        <div className="text-[11px] text-[#aaa] mt-1.5 tabular-nums">
-          {expiryText}
-        </div>
-      </div>
-
       {/* Footer */}
       <div className="flex items-center justify-between">
         <StatusBadge status={status} />
@@ -117,13 +116,15 @@ function CertCard({ rawCert, onView, onDownload, onTrack }) {
           {/* Download → only enabled when Approved */}
           <button
             className={`text-[12px] px-3 py-1.5 rounded-lg border-none text-white transition-colors ${
-              status === "Approved"
-                ? "bg-[#111] cursor-pointer hover:bg-[#333]"
+             status.toLowerCase() === "approved"
+                ? "bg-[#2563EB] cursor-pointer hover:bg-[#333]"
                 : "bg-[#ccc] cursor-not-allowed"
             }`}
-            onClick={() => status === "Approved" && onDownload(rawCert)}
-            disabled={status !== "Approved"}
-            title={status !== "Approved" ? "Download available after approval" : ""}
+            onClick={() => status.toLowerCase() === "approved" && onDownload(rawCert)}
+            disabled={status.toLowerCase() !== "approved"}
+            title={
+              status !== "approved" ? "Download available after approval" : ""
+            }
           >
             Download
           </button>
@@ -137,13 +138,13 @@ function CertCard({ rawCert, onView, onDownload, onTrack }) {
 // WalletTab
 // ─────────────────────────────────────────────────────────────────────────────
 function WalletTab({ certificates, showSuccess, onView, onDownload, onTrack }) {
-  const [search, setSearch]             = useState("");
-  const [typeFilter, setTypeFilter]     = useState("");
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
   // Filter against raw DB fields
   const visible = (cert) => {
-    const q      = search.toLowerCase();
+    const q = search.toLowerCase();
     const matchQ =
       !q ||
       cert.certificate_type?.toLowerCase().includes(q) ||
@@ -215,7 +216,7 @@ function WalletTab({ certificates, showSuccess, onView, onDownload, onTrack }) {
           {filtered.map((cert) => (
             <CertCard
               key={cert.id}
-              rawCert={cert}          // ← raw DB row, no pre-mapping
+              rawCert={cert} // ← raw DB row, no pre-mapping
               onView={onView}
               onDownload={onDownload}
               onTrack={onTrack}
@@ -231,11 +232,63 @@ function WalletTab({ certificates, showSuccess, onView, onDownload, onTrack }) {
 // TrackTab
 // ─────────────────────────────────────────────────────────────────────────────
 function TrackTab({ requestId }) {
-  const [hoverUpload, setHoverUpload]           = useState(false);
-  const [timeline, setTimeline]                 = useState([]);
-  const [selectedRequest, setSelectedRequest]   = useState(null);
-  const [loading, setLoading]                   = useState(false);
-  const [error, setError]                       = useState(null);
+  const [hoverUpload, setHoverUpload] = useState(false);
+  const [timeline, setTimeline] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const buildTimeline = (status) => {
+const steps = [
+  "Pending",
+  "verification",
+  "payment_verified",
+  "approved",
+];
+
+const labels = {
+  Pending: "Request Submitted",
+  verification: "Under Verification",
+  payment_verified: "Payment Verified",
+  approved: "Approved",
+};
+
+    // REJECTED CASE
+    if (status === "rejected") {
+      return [
+        {
+          label: "Request Submitted",
+          state: "done",
+        },
+
+        {
+          label: "Under Verification",
+          state: "done",
+        },
+
+        {
+          label: "Rejected",
+          state: "done",
+          note: "Your certificate request has been rejected.",
+        },
+      ];
+    }
+
+    const currentIndex = steps.indexOf(status);
+
+    return steps.map((step, index) => ({
+      label: labels[step],
+
+      state:
+        index < currentIndex
+          ? "done"
+          : index === currentIndex
+            ? "active"
+            : "waiting",
+
+      created_at: new Date(),
+    }));
+  };
 
   useEffect(() => {
     if (!requestId) return;
@@ -249,7 +302,7 @@ function TrackTab({ requestId }) {
         const res = await getRequestById(requestId);
         // Backend returns: { request: {...}, timeline: [...] }
         setSelectedRequest(res.data.request);
-        setTimeline(res.data.timeline || []);
+        setTimeline(buildTimeline(res.data.request.status));
       } catch (err) {
         console.error("Error fetching request details:", err);
         setError("Failed to load request details. Please try again.");
@@ -262,7 +315,7 @@ function TrackTab({ requestId }) {
   }, [requestId]);
 
   const tlDotCls = (state) => {
-    if (state === "done")   return "border-green-500 bg-green-500";
+    if (state === "done") return "border-green-500 bg-green-500";
     if (state === "active") return "border-amber-500 bg-transparent";
     return "border-[#ddd] bg-transparent";
   };
@@ -284,21 +337,21 @@ function TrackTab({ requestId }) {
 
       {/* No request selected */}
       {!requestId && (
-        <div className="bg-white border border-[#ece9e1] rounded-2xl p-10 text-center">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-10 text-center">
           <div className="text-3xl mb-3">🗂️</div>
           <div className="text-[14px] font-semibold text-[#333] mb-1">
             No request selected
           </div>
           <div className="text-[13px] text-[#aaa]">
-            Go to <strong>Wallet</strong>, click the{" "}
-            <strong>Track</strong> button on any certificate to monitor its progress.
+            Go to <strong>Wallet</strong>, click the <strong>Track</strong>{" "}
+            button on any certificate to monitor its progress.
           </div>
         </div>
       )}
 
       {/* Loading */}
       {requestId && loading && (
-        <div className="bg-white border border-[#ece9e1] rounded-2xl p-10 text-center text-[#aaa] text-[13px]">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-10 text-center text-[#aaa] text-[13px]">
           Loading request details…
         </div>
       )}
@@ -312,14 +365,15 @@ function TrackTab({ requestId }) {
 
       {/* Request card */}
       {requestId && !loading && !error && selectedRequest && (
-        <div className="bg-white border border-[#ece9e1] rounded-2xl p-5 mb-4">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 mb-4">
           {/* Card header */}
           <div className="flex flex-wrap justify-between items-start gap-2 mb-5">
             <div className="text-[15px] font-semibold text-[#111]">
               {selectedRequest.certificate_type || "Certificate"}
             </div>
             <div className="text-[12px] text-[#aaa] font-mono">
-              #{selectedRequest.id} · Submitted {fmtDate(selectedRequest.created_at)}
+              #{selectedRequest.id} · Submitted{" "}
+              {fmtDate(selectedRequest.created_at)}
             </div>
             <StatusBadge status={normalizeStatus(selectedRequest.status)} />
           </div>
@@ -330,13 +384,15 @@ function TrackTab({ requestId }) {
               {timeline.map((step, i) => (
                 <div key={step.id ?? i} className="flex gap-3.5 relative">
                   {i < timeline.length - 1 && (
-                    <div className="absolute left-[7px] top-5 bottom-[-4px] w-px bg-[#ece9e1]" />
+                    <div className="absolute left-[7px] top-5 bottom-[-4px] w-px bg-[#E2E8F0]" />
                   )}
                   <div
                     className={`w-[15px] h-[15px] rounded-full flex-shrink-0 mt-0.5 border-2 ${tlDotCls(step.state)}`}
                   />
                   <div className="pb-5">
-                    <div className={`text-[13px] font-semibold ${tlLabelCls(step.state)}`}>
+                    <div
+                      className={`text-[13px] font-semibold ${tlLabelCls(step.state)}`}
+                    >
                       {step.label}
                     </div>
                     <div className="text-[11px] text-[#bbb] font-mono mt-0.5">
@@ -366,44 +422,43 @@ function TrackTab({ requestId }) {
 // Root Component — MyCertificate
 // ─────────────────────────────────────────────────────────────────────────────
 const MyCertificate = () => {
-  const [activeTab, setActiveTab]                 = useState("wallet");
-  const [showSuccess, setShowSuccess]             = useState(false);
-  const [modalCert, setModalCert]                 = useState(null);
-  const [certificates, setCertificates]           = useState([]);
+  const [activeTab, setActiveTab] = useState("wallet");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [modalCert, setModalCert] = useState(null);
+  const [certificates, setCertificates] = useState([]);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
-  const [loadingList, setLoadingList]             = useState(true);
+  const [loadingList, setLoadingList] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-  if (location.state?.success) {
-    setShowSuccess(true);
+    if (location.state?.success) {
+      setShowSuccess(true);
 
-    // Remove state after showing message
-    window.history.replaceState({}, document.title);
-  }
-}, [location.state]);
+      // Remove state after showing message
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // ── Fetch certificate list on mount ──────────────────────────────────────
- useEffect(() => {
-  const fetchCertificates = async () => {
-    try {
-      const res = await getMyRequests();
-      console.log("📦 API Response:", res.data);
-      setCertificates(Array.isArray(res.data) ? res.data : []);
-    } catch (error) {
-      console.error("❌ Error fetching certificates:", error);
-      setCertificates([]);
-    } finally {
-      setLoadingList(false);
-    }
-  };
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      try {
+        const res = await getMyRequests();
+        console.log("📦 API Response:", res.data);
+        setCertificates(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        console.error("❌ Error fetching certificates:", error);
+        setCertificates([]);
+      } finally {
+        setLoadingList(false);
+      }
+    };
 
-  fetchCertificates();
-}, []);
+    fetchCertificates();
+  }, []);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-
 
   // Switches to Track tab and sets the requestId to load
   const handleTrack = (id) => {
@@ -411,57 +466,56 @@ const MyCertificate = () => {
     setActiveTab("track");
   };
 
-const handleConfirmDownload = async (id) => {
-  try {
-    const res = await downloadCertificate(id);
+  const handleConfirmDownload = async (id) => {
+    try {
+      const res = await downloadCertificate(id);
 
-    const blob = new Blob([res.data], {
-      type: "application/pdf",
-    });
+      const blob = new Blob([res.data], {
+        type: "application/pdf",
+      });
 
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, "_blank");
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `certificate-${id}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `certificate-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
-    window.URL.revokeObjectURL(url);
-    setModalCert(null); // Close modal after download
-  } catch (error) {
-    console.error("Download error:", error);
-    alert("Failed to open certificate PDF");
-  }
-};
+      window.URL.revokeObjectURL(url);
+      setModalCert(null); // Close modal after download
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Failed to open certificate PDF");
+    }
+  };
 
   // Downloads PDF
-const handleDownload = (rawCert) => {
-  setModalCert({
-      id:        rawCert.id,
+  const handleDownload = (rawCert) => {
+    setModalCert({
+      id: rawCert.id,
       certificate_id: rawCert.certificate_id,
-      type:      rawCert.certificate_type,
-      status:    normalizeStatus(rawCert.status),
-      patient:   rawCert.full_name    || "N/A",
-      doctor:    rawCert.doctor_name  || "Assigned Doctor",
-      issued:    fmtDate(rawCert.issued_at),
-      expires:   fmtDate(rawCert.expiry_date),
-      purpose:   rawCert.purpose      || "General Medical Use",
+      type: rawCert.certificate_type,
+      status: normalizeStatus(rawCert.status),
+      patient: rawCert.full_name || "N/A",
+      doctor: rawCert.doctor_name || "Assigned Doctor",
+      issued: fmtDate(rawCert.issued_at),
+      expires: fmtDate(rawCert.expiry_date),
+      purpose: rawCert.purpose || "General Medical Use",
       onDownload: handleConfirmDownload,
     });
-};
+  };
 
   const tabCls = (active) =>
     active
-      ? "px-5 py-2 rounded-full border-none bg-[#111] text-white text-[13px] font-medium cursor-pointer tracking-[.01em] transition-all duration-[180ms]"
-      : "px-5 py-2 rounded-full border border-[#e2e0d8] bg-white text-[#666] text-[13px] font-medium cursor-pointer tracking-[.01em] transition-all duration-[180ms] hover:bg-gray-50";
+      ? "px-5 py-2 rounded-full border-none bg-[#2563EB] text-white text-[13px] font-medium cursor-pointer tracking-[.01em] transition-all duration-[180ms]"
+      : "px-5 py-2 rounded-full border border-[#e2e0d8] bg-white text-[#64748B] text-[13px] font-medium cursor-pointer tracking-[.01em] transition-all duration-[180ms] hover:bg-gray-50";
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pt-7 px-5 pb-12">
+    <div className="min-h-screen bg-[#F8FAFC] pt-7 px-5 pb-12">
       <div className="max-w-7xl mx-auto">
-
         {/* Top bar */}
         <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
           <div className="flex gap-1.5">
@@ -480,11 +534,17 @@ const handleDownload = (rawCert) => {
           </div>
 
           <button
-            className="flex items-center gap-[7px] px-[18px] py-[9px] rounded-[10px] border-none bg-[#0072BC] text-white text-[13px] font-semibold cursor-pointer shadow-[0_2px_8px_rgba(37,99,235,0.18)] transition-all duration-150 hover:bg-[#005fa3] hover:-translate-y-px"
+            className="flex items-center gap-[7px] px-[18px] py-[9px] rounded-[10px] border-none bg-[#2563EB] text-white text-[13px] font-semibold cursor-pointer shadow-[0_2px_8px_rgba(37,99,235,0.18)] transition-all duration-150 hover:bg-[#1D4ED8] hover:-translate-y-px"
             onClick={() => navigate("/client/apply-certificate")}
           >
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <circle cx="7.5" cy="7.5" r="6.5" stroke="white" strokeWidth="1.3" />
+              <circle
+                cx="7.5"
+                cy="7.5"
+                r="6.5"
+                stroke="white"
+                strokeWidth="1.3"
+              />
               <path
                 d="M7.5 4.5v6M4.5 7.5h6"
                 stroke="white"

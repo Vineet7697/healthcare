@@ -183,7 +183,7 @@ talk_doctor_desc2:
       onlineAppointment: "Online Book Appointment",
       bloodDonor: "Find Blood Doner",
       manualbooking:" Manual Booking Appointment",
-      Qrcode:"Scan Qr & get Token",
+      Qrcode:"Scan Qr & get Appointment Token",
       onlinebooking:"Online Booking Appointment",
       Certificate:"Apply for Medical Certificate",
   

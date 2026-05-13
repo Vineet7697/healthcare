@@ -8,6 +8,7 @@ import {
   getDoctorById,
   getFamilyMembers,
   qrBookVisit,
+  getCurrentToken,
 } from "../../../services/patientService";
 
 const getLocalDate = (offsetDays = 0) => {
@@ -33,9 +34,38 @@ const BookAppointmentPage = () => {
   const [customDate, setCustomDate] = useState("");
   const [selectedSession, setSelectedSession] = useState("");
   const [booking, setBooking] = useState(false);
+  const [currentToken, setCurrentToken] = useState(0);
 
   const [searchParams] = useSearchParams();
   const isQR = searchParams.get("fromQR") === "true";
+
+useEffect(() => {
+  const fetchCurrentToken = async () => {
+    try {
+      if (!selectedSession) return;
+
+      const appointmentDate =
+        selectedDateType === "today"
+          ? getLocalDate(0)
+          : selectedDateType === "tomorrow"
+            ? getLocalDate(1)
+            : customDate;
+
+      const res = await getCurrentToken({
+        doctorId,
+        appointmentDate,
+        appointmentSlot: selectedSession,
+      });
+
+      setCurrentToken(res.data.currentToken || 0);
+      console.log("API Response:", res.data);
+    } catch (err) {
+      console.error("Current token fetch failed:", err);
+    }
+  };
+
+  fetchCurrentToken();
+}, [doctorId, selectedDateType, customDate, selectedSession]);
 
   useEffect(() => {
     const loadFamilyMembers = async () => {
@@ -106,12 +136,12 @@ const BookAppointmentPage = () => {
 
     const payload = {
       doctorId: Number(doctorId),
-      appointmentType: "CLINIC", // 🔥 FIX
-      bookingFor: patientType, // ✅ rehne do (frontend ke liye useful)
+      appointmentType: "CLINIC",
+      bookingFor: patientType,
       appointmentDate,
       slot: selectedSession,
       familyMemberIds:
-        patientType === "OTHER" ? [Number(selectedFamilyId)] : [], // 🔥 FIX
+        patientType === "OTHER" ? [Number(selectedFamilyId)] : [],
     };
 
     setBooking(true);
@@ -154,7 +184,7 @@ const BookAppointmentPage = () => {
     return (
       <div
         className="flex items-center justify-center min-h-screen"
-        style={{ background: "#f0f4f8" }}
+        style={{ background: "#F8FAFC" }}
       >
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-[#0086C3] border-t-transparent rounded-full animate-spin" />
@@ -189,6 +219,15 @@ const BookAppointmentPage = () => {
 
   const isTodaySelected = selectedDateType === "today";
 
+  const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const formattedDays = doctor?.availableDays
+    ? (Array.isArray(doctor.availableDays)
+        ? doctor.availableDays
+        : JSON.parse(doctor.availableDays)
+      ).sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+    : [];
+
   return (
     <div
       className="min-h-screen px-4 py-10 flex items-center justify-center"
@@ -204,7 +243,7 @@ const BookAppointmentPage = () => {
         <div
           className="px-7 py-5 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg,#0086C3,#00b4d8,#2ecc71)",
+            background: "linear-gradient(135deg,#2563EB,#14B8A6)",
           }}
         >
           <div
@@ -222,13 +261,13 @@ const BookAppointmentPage = () => {
           >
             ← Back
           </button>
-          <h1 className="font-[family-name:var(--font-playfair)] text-[20px] font-extrabold text-white leading-tight">
+          <h1 className=" text-[24px] font-semibold text-white leading-tight">
             Book Appointment
           </h1>
-          <p className="font-[family-name:var(--font-dm)] text-[13px] text-white/70 mt-0.5">
+          <p className="  text-white/80 mt-0.5">
             with{" "}
             <span
-              className="text-white font-semibold cursor-pointer hover:underline"
+              className="text-white font-bold cursor-pointer hover:underline"
               onClick={() =>
                 navigate(
                   `/client/doctor-profile/${doctor.doctorId}${
@@ -241,13 +280,19 @@ const BookAppointmentPage = () => {
             </span>
             {doctor.specialization && ` • ${doctor.specialization}`}
           </p>
+
+          <div className="absolute top-5 right-5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+            <p className="text-white text-[16px] font-semibold">
+              Total Bookings: {currentToken}
+            </p>
+          </div>
         </div>
 
         <div className="px-7 py-6 flex flex-col gap-6">
           <div>
             <p
-              className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
-              style={{ color: "#94a3b8" }}
+              className=" text-[12px] font-bold uppercase tracking-widest mb-3"
+              style={{ color: "" }}
             >
               Step 1 — Who is this for?
             </p>
@@ -261,9 +306,9 @@ const BookAppointmentPage = () => {
                 style={
                   patientType === "SELF"
                     ? {
-                        background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+                        background: "linear-gradient(135deg,#2563EB,#14B8A6)",
                         borderColor: "transparent",
-                        boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                        boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
                       }
                     : { borderColor: "rgba(12,30,58,0.12)" }
                 }
@@ -284,10 +329,10 @@ const BookAppointmentPage = () => {
                   style={
                     patientType === "OTHER" && selectedFamilyId
                       ? {
-                          background: "linear-gradient(135deg,#0086C3,#00b4d8)",
+                          background: "linear-gradient(135deg,#2563EB,#14B8A6)",
                           borderColor: "transparent",
                           color: "#fff",
-                          boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                          boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
                         }
                       : { borderColor: "rgba(12,30,58,0.12)" }
                   }
@@ -315,13 +360,30 @@ const BookAppointmentPage = () => {
             </div>
           </div>
 
+          <div className="mt-4">
+            <p className="text-[12px] font-semibold text-gray-500 mb-2">
+              📅 Available Days
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {formattedDays.map((day, index) => (
+                <div
+                  key={index}
+                  className="px-3 py-1.5 rounded-full bg-[#DBEAFE] text-[#2563EB] text-[12px] font-semibold border border-[#93C5FD]"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="h-px" style={{ background: "rgba(12,30,58,0.07)" }} />
           {!isQR && (
             <>
               <div>
                 <p
                   className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
-                  style={{ color: "#94a3b8" }}
+                  style={{ color: "#64748B" }}
                 >
                   Step 2 — Select Date
                 </p>
@@ -335,9 +397,9 @@ const BookAppointmentPage = () => {
                         selectedDateType === d
                           ? {
                               background:
-                                "linear-gradient(135deg,#0086C3,#00b4d8)",
+                                "linear-gradient(135deg,#2563EB,#14B8A6)",
                               borderColor: "transparent",
-                              boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
                             }
                           : { borderColor: "rgba(12,30,58,0.12)" }
                       }
@@ -360,10 +422,10 @@ const BookAppointmentPage = () => {
                       selectedDateType === "custom"
                         ? {
                             background:
-                              "linear-gradient(135deg,#0086C3,#00b4d8)",
+                              "linear-gradient(135deg,#2563EB,#14B8A6)",
                             borderColor: "transparent",
                             color: "#fff",
-                            boxShadow: "0 4px 12px rgba(0,134,195,0.3)",
+                            boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
                           }
                         : { borderColor: "rgba(12,30,58,0.12)" }
                     }
@@ -403,12 +465,12 @@ const BookAppointmentPage = () => {
                           selectedSession === s.key
                             ? {
                                 background:
-                                  "linear-gradient(135deg,#0086C3,#00b4d8)",
+                                  "linear-gradient(135deg,#2563EB,#14B8A6)",
                                 border: "1.5px solid transparent",
-                                boxShadow: "0 4px 16px rgba(0,134,195,0.35)",
+                                boxShadow: "0 4px 16px rgba(37, 99, 235, 0.35)",
                               }
                             : {
-                                background: "#f8fafc",
+                                background: "#FFFFFF",
                                 border: "1.5px solid rgba(12,30,58,0.1)",
                               }
                         }
@@ -445,17 +507,17 @@ const BookAppointmentPage = () => {
             disabled={booking || (!isQR && !selectedSession)}
             className="w-full py-3.5 rounded-xl font-[family-name:var(--font-dm)] font-bold text-[15px] text-white cursor-pointer transition-all duration-250 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
-              background: "linear-gradient(135deg,#0086C3,#00b4d8)",
-              boxShadow: "0 4px 18px rgba(0,134,195,0.4)",
+              background: "linear-gradient(135deg,#2563EB,#14B8A6)",
+              boxShadow: "0 4px 20px rgba(37,99,235,0.25)",
             }}
             onMouseEnter={(e) =>
               !booking &&
               (e.currentTarget.style.boxShadow =
-                "0 6px 24px rgba(0,134,195,0.55)")
+                "0 6px 24px rgba(37,99,235,0.55)")
             }
             onMouseLeave={(e) =>
               (e.currentTarget.style.boxShadow =
-                "0 4px 18px rgba(0,134,195,0.4)")
+                "0 4px 18px rgba(37,99,235,0.25)")
             }
           >
             {booking ? (

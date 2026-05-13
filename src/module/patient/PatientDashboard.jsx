@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { notify } from "../../utils/notify";
+// import { notify } from "../../utils/notify";
 import {
   getPatientDashboard,
   getTokenStatus,
+  cancelAppointment,
 } from "../../services/patientService";
 import { Plus, Users, Calendar, Clock } from "lucide-react";
+import { notify } from "../../utils/notify";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -44,6 +46,10 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [upcomingCount, setUpcomingCount] = useState(0);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
+  const [cancelAppointmentId, setCancelAppointmentId] = useState(null);
 
   const isMyTurn =
     tokenStatus?.yourToken === tokenStatus?.nowServing &&
@@ -69,6 +75,14 @@ export default function PatientDashboard() {
               relation: appt.relation,
               isFamily: !!appt.family_member_id,
               img: getImageUrl(appt.profile_image),
+              experience: appt.experience,
+              qualification: appt.qualification,
+              consultationFee: appt.consultationFee,
+              clinic: appt.clinic_name,
+              address: appt.address,
+              city: appt.city,
+              languages: appt.languages,
+              rating: appt.rating,
             })),
           );
         }
@@ -87,6 +101,37 @@ export default function PatientDashboard() {
       setTokenStatus(res.data);
     } catch (err) {
       console.error("Token status error:", err);
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    try {
+      const res = await cancelAppointment(cancelAppointmentId);
+
+      if (res.data.success) {
+        notify.success("Appointment cancelled successfully");
+
+        setAppointments((prev) =>
+          prev.map((appt) =>
+            appt.id === cancelAppointmentId
+              ? { ...appt, status: "CANCELLED" }
+              : appt,
+          ),
+        );
+
+        setSelectedAppointment((prev) => ({
+          ...prev,
+          status: "CANCELLED",
+        }));
+
+        setShowCancelPopup(false);
+      }
+    } catch (err) {
+      console.log(err);
+
+      notify.error(
+        err?.response?.data?.message || "Failed to cancel appointment",
+      );
     }
   };
 
@@ -320,7 +365,7 @@ export default function PatientDashboard() {
               return (
                 <div
                   key={appt.id}
-                  className="bg-white rounded-2xl p-5 transition-all duration-250 hover:-translate-y-1"
+                  className="bg-white rounded-2xl p-5 transition-all duration-250 hover:-translate-y-1 cursor-pointer"
                   style={{
                     boxShadow: "0 2px 12px rgba(12,30,58,0.07)",
                     border: "1px solid rgba(12,30,58,0.06)",
@@ -334,6 +379,10 @@ export default function PatientDashboard() {
                     (e.currentTarget.style.boxShadow =
                       "0 2px 12px rgba(12,30,58,0.07)")
                   }
+                  onClick={() => {
+                    setSelectedAppointment(appt);
+                    setShowDetails(true);
+                  }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -418,6 +467,362 @@ export default function PatientDashboard() {
           </div>
         )}
       </div>
+
+      {/* Appointment Details Modal */}
+      {showDetails && selectedAppointment && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          onClick={() => setShowDetails(false)}
+        >
+          <div
+            className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl max-h-[92vh] overflow-y-auto scrollbar-hide"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* ── Header ── */}
+            <div className="flex items-start justify-between px-5 pt-5 pb-4">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Appointment Details
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowDetails(false)}
+                className="text-gray-400 hover:text-gray-700 text-2xl font-light leading-none"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="px-5 pb-6 space-y-4">
+              {/* ── Doctor Row ── */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={selectedAppointment.img}
+                    alt="doctor"
+                    className="w-16 h-16 rounded-2xl object-cover"
+                  />
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900">
+                      {selectedAppointment.doctor}
+                    </h3>
+                    <p className="text-sm font-semibold text-blue-500">
+                      {selectedAppointment.specialization}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {selectedAppointment.rating} ⭐
+                    </p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-500 text-xs font-bold tracking-wide">
+                  {selectedAppointment.status}
+                </span>
+              </div>
+
+              {/* ── Appointment Info Card ── */}
+              <div className="border border-gray-100 rounded-2xl p-4 grid grid-cols-2 gap-y-4 gap-x-3">
+                <div>
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <svg
+                      className="w-3.5 h-3.5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span className="text-xs text-gray-400">Patient</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedAppointment.isFamily
+                      ? selectedAppointment.familyName
+                      : "Self"}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <svg
+                      className="w-3.5 h-3.5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span className="text-xs text-gray-400">Date</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {new Date(selectedAppointment.date).toDateString()}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <svg
+                      className="w-3.5 h-3.5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span className="text-xs text-gray-400">Time</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedAppointment.slot}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <svg
+                      className="w-3.5 h-3.5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="4" y1="9" x2="20" y2="9" />
+                      <line x1="4" y1="15" x2="20" y2="15" />
+                      <line x1="10" y1="3" x2="8" y2="21" />
+                      <line x1="16" y1="3" x2="14" y2="21" />
+                    </svg>
+                    <span className="text-xs text-gray-400">Token Number</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedAppointment.token}
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Doctor & Clinic Info ── */}
+              <h3 className="text-base font-bold text-gray-900">
+                Doctor &amp; Clinic Information
+              </h3>
+
+              <div className="border border-gray-100 rounded-2xl p-5 grid grid-cols-2 gap-5">
+                {/* Experience */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">Experience</span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800 break-words">
+                    {selectedAppointment.experience} Years
+                  </p>
+                </div>
+
+                {/* Qualification */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">Qualification</span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800 break-words">
+                    {selectedAppointment.qualification}
+                  </p>
+                </div>
+
+                {/* Clinic */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">Clinic</span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800 break-words">
+                    {selectedAppointment.clinic}
+                  </p>
+                </div>
+
+                {/* Fee */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">
+                      Consultation Fee
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800">
+                    ₹{selectedAppointment.consultationFee}
+                  </p>
+                </div>
+
+                {/* Languages */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">Languages</span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800 break-words">
+                    {selectedAppointment.languages}
+                  </p>
+                </div>
+
+                {/* City */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">City</span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800 break-words">
+                    {selectedAppointment.city}
+                  </p>
+                </div>
+
+                {/* Address */}
+                <div className="col-span-2 space-y-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400">Address</span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-800 break-words">
+                    {selectedAppointment.address}
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Actions ── */}
+              <h3 className="text-base font-bold text-gray-900">Actions</h3>
+
+              <div className="grid grid-cols-3 gap-3">
+                {/* Reschedule */}
+                {/* <button className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl bg-blue-50 border border-blue-100 text-blue-500 hover:bg-blue-100 transition">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  <span className="text-xs font-semibold">Reschedule</span>
+                </button> */}
+
+                {/* Cancel */}
+                <button
+                  onClick={() => {
+                    setCancelAppointmentId(selectedAppointment.id);
+                    setShowCancelPopup(true);
+                  }}
+                  disabled={
+                    selectedAppointment.status === "CANCELLED" ||
+                    selectedAppointment.status === "COMPLETED"
+                  }
+                  className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border transition ${
+                    selectedAppointment.status === "CANCELLED" ||
+                    selectedAppointment.status === "COMPLETED"
+                      ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-red-50 border-red-100 text-red-400 hover:bg-red-100"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                  </svg>
+                  <span className="text-xs font-semibold text-center leading-tight">
+                    {selectedAppointment.status === "CANCELLED"
+                      ? "Appointment Cancelled"
+                      : selectedAppointment.status === "COMPLETED"
+                        ? "Appointment Completed"
+                        : "Cancel Appointment"}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* CANCEL CONFIRM POPUP */}
+
+{showCancelPopup && (
+  <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+
+    <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-[fadeUp_0.2s_ease]">
+
+      {/* ICON */}
+
+      <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-5">
+        <svg
+          className="w-8 h-8 text-red-500"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        </svg>
+      </div>
+
+      {/* TEXT */}
+
+      <h2 className="text-2xl font-bold text-center text-gray-900 mb-3">
+        Cancel Appointment?
+      </h2>
+
+      <p className="text-sm text-gray-500 text-center leading-relaxed mb-8">
+        Are you sure you want to cancel this appointment?
+        This action cannot be undone.
+      </p>
+
+      {/* BUTTONS */}
+
+      <div className="grid grid-cols-2 gap-3">
+
+        <button
+          onClick={() => setShowCancelPopup(false)}
+          className="py-3 rounded-2xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition"
+        >
+          Keep Appointment
+        </button>
+
+        <button
+          onClick={handleCancelAppointment}
+          className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-semibold transition shadow-lg shadow-red-200"
+        >
+          Yes, Cancel
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
