@@ -71,7 +71,7 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
   const [expanded, setExpanded] = useState(false);
   return (
     <div
-      className="flex flex-col bg-white rounded-2xl overflow-hidden"
+      className="flex flex-col w-60 h-80 bg-white rounded-2xl overflow-hidden"
       style={{
         boxShadow: hovered
           ? "0 20px 48px rgba(0,114,188,0.16)"
@@ -83,7 +83,7 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
       onMouseLeave={() => setHovered(false)}
     >
       {/* IMAGE HEIGHT RESPONSIVE */}
-      <div className="relative overflow-hidden h-[120px] sm:h-[195px]">
+      <div className="relative overflow-hidden h-[100px] sm:h-[120px]">
         <img
           src={img}
           alt={title}
@@ -118,7 +118,7 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
       {/* CONTENT */}
       <div className="flex flex-col flex-1 p-3 sm:p-5 gap-2">
         <h3
-          className="font-bold text-sm leading-snug"
+          className="font-bold text-lg leading-snug"
           style={{
             color: hovered ? "#0072BC" : "#1a2e44",
             transition: "color 0.2s",
@@ -135,7 +135,7 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
             transition: "width 0.3s",
           }}
         />
-        <p className="text-gray-400 text-xs leading-relaxed flex-1">
+        <p className="text-gray-700 leading-relaxed flex-1">
           {expanded ? desc : desc.slice(0, 60) + "..."}
         </p>
         <button
@@ -242,12 +242,12 @@ const Service = () => {
       desc: t.online_booking_desc,
       iconKey: "calendar",
     },
-    {
-      img: VideoconsultationImg,
-      title: t.video_consult_title,
-      desc: t.video_consult_desc,
-      iconKey: "video",
-    },
+    // {
+    //   img: VideoconsultationImg,
+    //   title: t.video_consult_title,
+    //   desc: t.video_consult_desc,
+    //   iconKey: "video",
+    // },
     {
       img: inclinicConsultationImg,
       title: t.clinic_consult_title,
@@ -284,12 +284,12 @@ const Service = () => {
       desc: t.prescription_desc,
       iconKey: "doc",
     },
-    {
-      img: healthpackageImg,
-      title: t.health_package_title,
-      desc: t.health_package_desc,
-      iconKey: "check",
-    },
+    // {
+    //   img: healthpackageImg,
+    //   title: t.health_package_title,
+    //   desc: t.health_package_desc,
+    //   iconKey: "check",
+    // },
     {
       img: homecareserviceImg,
       title: t.home_care_title,
@@ -392,7 +392,7 @@ const Service = () => {
             />
           </div>
           <p
-            className="mt-5 text-sm max-w-sm"
+            className="mt-5 text-lg max-w-sm"
             style={{ color: "rgba(180,210,255,0.75)", lineHeight: 1.7 }}
           >
             Comprehensive healthcare solutions designed for your convenience and
@@ -432,7 +432,7 @@ const Service = () => {
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="text-center mb-14">
             <p
-              className="text-xs font-extrabold uppercase tracking-widest mb-2"
+              className=" font-extrabold uppercase tracking-widest mb-2"
               style={{ color: "#0072BC" }}
             >
               How It Works
@@ -441,7 +441,7 @@ const Service = () => {
               Our Simple{" "}
               <span style={{ color: "#0072BC" }}>Healthcare Process</span>
             </h2>
-            <p className="mt-3 text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
+            <p className="mt-3 text-gray-700  max-w-xl mx-auto leading-relaxed">
               Getting quality healthcare has never been easier. Follow these
               four steps to connect with the right doctor.
             </p>
@@ -474,8 +474,8 @@ const Service = () => {
                   style={{
                     fontSize: "2.2rem",
                     color: step.dark
-                      ? "rgba(255,255,255,0.15)"
-                      : "rgba(0,114,188,0.12)",
+                      ? "rgba(255,255,255,0.2)"
+                      : "rgba(0,0,0,0.12)",
                     letterSpacing: "-0.02em",
                   }}
                 >
@@ -487,8 +487,8 @@ const Service = () => {
                     width: 48,
                     height: 48,
                     background: step.dark
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,114,188,0.08)",
+                      ? "rgba(255,255,255,0.2)"
+                      : "rgba(0,114,200,0.08)",
                   }}
                 >
                   <Icon
@@ -498,7 +498,7 @@ const Service = () => {
                   />
                 </div>
                 <h3
-                  className="font-bold text-base mb-2"
+                  className="font-bold text-lg mb-2"
                   style={{ color: step.dark ? "#fff" : "#1a2e44" }}
                 >
                   {step.title}
@@ -513,9 +513,9 @@ const Service = () => {
                   }}
                 />
                 <p
-                  className="text-xs leading-relaxed"
+                  className="  leading-relaxed"
                   style={{
-                    color: step.dark ? "rgba(200,220,255,0.7)" : "#9ca3af",
+                    color: step.dark ? "rgba(200,220,255,0.7)" : "#1a2e44",
                   }}
                 >
                   {step.desc}
@@ -552,7 +552,7 @@ const Service = () => {
           {/* Heading */}
           <div className="text-center mb-14">
             <p
-              className="text-xs font-extrabold uppercase tracking-widest mb-2"
+              className=" font-extrabold uppercase tracking-widest mb-2"
               style={{ color: "#0072BC" }}
             >
               Our Strengths
@@ -560,7 +560,7 @@ const Service = () => {
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
               Why Choose <span style={{ color: "#0072BC" }}>Yo Doctor?</span>
             </h2>
-            <p className="mt-3 text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
+            <p className="mt-3 text-gray-700  max-w-xl mx-auto leading-relaxed">
               We combine technology and compassion to deliver healthcare that
               puts patients first.
             </p>
@@ -617,7 +617,7 @@ const WhyCard = ({ iconKey, title, desc }) => {
         />
       </div>
       <h3
-        className="font-bold text-base"
+        className="font-bold text-lg leading-snug"
         style={{
           color: hovered ? "#ffffff" : "#1a2e44",
           transition: "color 0.2s",
@@ -626,9 +626,9 @@ const WhyCard = ({ iconKey, title, desc }) => {
         {title}
       </h3>
       <p
-        className="text-xs leading-relaxed"
+        className="text-sm leading-relaxed"
         style={{
-          color: hovered ? "rgba(220,235,255,0.85)" : "#9ca3af",
+          color: hovered ? "rgba(220,235,255,0.85)" : "#1a2e44",
           transition: "color 0.2s",
         }}
       >

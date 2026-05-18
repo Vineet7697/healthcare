@@ -7,63 +7,98 @@ const BILLING_HISTORY = [
   { id: "INV-2024-011", date: "1 Feb 2025", amount: "₹999",   status: "Paid", plan: "Basic"   },
 ];
 
-/* ─── 3-color palette ───────────────────────────────────────────
-   #0F172A  (slate-900)  → primary text / dark backgrounds
-   #0D9488  (teal-600)   → brand accent
-   #F8FAFC  (slate-50)   → page background / light surfaces
-──────────────────────────────────────────────────────────────── */
-
 const MySubscription = () => {
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [page, setPage] = useState("subscription");
 
-  /* ── SUCCESS PAGE ── */
+  /* ── SUCCESS PAGE ────────────────────────────────────────────── */
   if (page === "success") {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-5 font-sans">
-        <div className="w-full max-w-2xl bg-white rounded-3xl p-12 text-center shadow-xl">
-
-          {/* icon */}
-          <div className="w-24 h-24 rounded-full bg-teal-100 mx-auto mb-8 flex items-center justify-center text-5xl text-teal-600">
+      <div
+        className="min-h-screen flex items-center justify-center p-5 font-sans"
+        style={{ background: "#F8FAFC" }}
+      >
+        <div
+          className="w-full max-w-2xl bg-white rounded-3xl p-12 text-center"
+          style={{
+            border: "1px solid #E2E8F0",
+            boxShadow: "0 8px 40px rgba(15,23,42,0.10)",
+          }}
+        >
+          {/* Icon */}
+          <div
+            className="w-24 h-24 rounded-full mx-auto mb-8 flex items-center justify-center text-5xl font-bold"
+            style={{ background: "#f0fdf4", color: "#22C55E" }}
+          >
             ✓
           </div>
 
-          <h1 className="text-4xl font-extrabold text-slate-900 mb-4">
+          <h1
+            className="text-4xl font-extrabold mb-4"
+            style={{ color: "#0F172A" }}
+          >
             Subscription Activated!
           </h1>
-          <p className="text-lg text-slate-500 leading-relaxed mb-10">
+          <p className="text-lg leading-relaxed mb-10" style={{ color: "#64748B" }}>
             Welcome to MediCare Pro Premium. Your healthcare platform is ready.
           </p>
 
-          {/* info grid */}
+          {/* Info grid */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             {[
-              { label: "PLAN",            value: "Premium"        },
-              { label: "STATUS",          value: "● Active",  chip: true },
-              { label: "SUBSCRIPTION ID", value: "SUB-8U6HNB5D"  },
-              { label: "NEXT BILLING",    value: "13 Jun 2026"    },
+              { label: "PLAN",            value: "Premium"       },
+              { label: "STATUS",          value: "● Active", chip: true },
+              { label: "SUBSCRIPTION ID", value: "SUB-8U6HNB5D" },
+              { label: "NEXT BILLING",    value: "13 Jun 2026"   },
             ].map(({ label, value, chip }) => (
-              <div key={label} className="border border-slate-200 rounded-2xl p-5 text-left">
-                <p className="text-xs font-bold text-slate-400 mb-2 tracking-widest">{label}</p>
-                {chip
-                  ? <span className="bg-teal-100 text-teal-700 px-4 py-1.5 rounded-full text-sm font-bold">{value}</span>
-                  : <p className="text-xl font-extrabold text-slate-900">{value}</p>
-                }
+              <div
+                key={label}
+                className="rounded-2xl p-5 text-left"
+                style={{ border: "1px solid #E2E8F0" }}
+              >
+                <p
+                  className="text-xs font-bold mb-2 tracking-widest"
+                  style={{ color: "#94A3B8" }}
+                >
+                  {label}
+                </p>
+                {chip ? (
+                  <span
+                    className="px-4 py-1.5 rounded-full text-sm font-bold"
+                    style={{ background: "#f0fdf4", color: "#22C55E" }}
+                  >
+                    {value}
+                  </span>
+                ) : (
+                  <p className="text-xl font-extrabold" style={{ color: "#0F172A" }}>
+                    {value}
+                  </p>
+                )}
               </div>
             ))}
           </div>
 
-          {/* action buttons */}
+          {/* Action buttons */}
           <div className="flex gap-4">
             <button
               onClick={() => setPage("subscription")}
-              className="flex-1 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-4 text-lg font-bold transition-colors"
+              className="flex-1 text-white rounded-2xl py-4 text-lg font-bold transition-colors"
+              style={{ background: "#2563EB" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}
             >
               Go to Dashboard
             </button>
             <button
               onClick={() => setPage("subscription")}
-              className="flex-1 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl py-4 text-lg font-bold transition-colors"
+              className="flex-1 rounded-2xl py-4 text-lg font-bold transition-colors"
+              style={{
+                background: "#fff",
+                color: "#0F172A",
+                border: "1px solid #E2E8F0",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
             >
               Manage Subscription
             </button>
@@ -73,24 +108,45 @@ const MySubscription = () => {
     );
   }
 
-  /* ── FAILED PAGE ── */
+  /* ── FAILED PAGE ─────────────────────────────────────────────── */
   if (page === "failed") {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-5 font-sans">
-        <div className="w-full max-w-md bg-white rounded-3xl p-10 text-center shadow-xl">
-
-          <div className="w-20 h-20 rounded-full bg-red-100 mx-auto mb-7 flex items-center justify-center text-4xl text-red-500">
+      <div
+        className="min-h-screen flex items-center justify-center p-5 font-sans"
+        style={{ background: "#F8FAFC" }}
+      >
+        <div
+          className="w-full max-w-md bg-white rounded-3xl p-10 text-center"
+          style={{
+            border: "1px solid #E2E8F0",
+            boxShadow: "0 8px 40px rgba(15,23,42,0.10)",
+          }}
+        >
+          <div
+            className="w-20 h-20 rounded-full mx-auto mb-7 flex items-center justify-center text-4xl font-bold"
+            style={{ background: "#fff1f1", color: "#EF4444" }}
+          >
             ✕
           </div>
 
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-3">Payment Failed</h1>
-          <p className="text-base text-slate-500 leading-relaxed mb-7">
+          <h1 className="text-3xl font-extrabold mb-3" style={{ color: "#0F172A" }}>
+            Payment Failed
+          </h1>
+          <p className="text-base leading-relaxed mb-7" style={{ color: "#64748B" }}>
             We couldn't process your payment. Your card was declined or there was a network issue.
           </p>
 
-          <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-left mb-7">
-            <p className="text-sm font-bold text-red-800 mb-2">Error Details</p>
-            <p className="text-sm text-red-700 leading-relaxed">
+          <div
+            className="rounded-xl p-5 text-left mb-7"
+            style={{
+              background: "#fff1f1",
+              border: "1px solid #fecaca",
+            }}
+          >
+            <p className="text-sm font-bold mb-2" style={{ color: "#991b1b" }}>
+              Error Details
+            </p>
+            <p className="text-sm leading-relaxed" style={{ color: "#EF4444" }}>
               Transaction declined by issuing bank. Error code: PAYMENT_DECLINED_003
             </p>
           </div>
@@ -98,97 +154,186 @@ const MySubscription = () => {
           <div className="flex gap-3 mb-5">
             <button
               onClick={() => setPage("subscription")}
-              className="flex-1 bg-teal-600 hover:bg-teal-700 text-white rounded-xl py-4 text-base font-bold transition-colors"
+              className="flex-1 text-white rounded-xl py-4 text-base font-bold transition-colors"
+              style={{ background: "#2563EB" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}
             >
               Retry Payment
             </button>
             <button
               onClick={() => setPage("subscription")}
-              className="flex-1 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl py-4 text-base font-bold transition-colors"
+              className="flex-1 rounded-xl py-4 text-base font-bold transition-colors"
+              style={{
+                background: "#fff",
+                color: "#0F172A",
+                border: "1px solid #E2E8F0",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
             >
               Go Back
             </button>
           </div>
 
-          <p className="text-sm text-slate-400">
+          <p className="text-sm" style={{ color: "#94A3B8" }}>
             Need help?{" "}
-            <span className="text-teal-600 font-bold">support@medicare.pro</span>
+            <span className="font-bold" style={{ color: "#2563EB" }}>
+              support@medicare.pro
+            </span>
           </p>
         </div>
       </div>
     );
   }
 
-  /* ── MAIN PAGE ── */
+  /* ── MAIN PAGE ───────────────────────────────────────────────── */
   return (
-    <div className="max-w-5xl mx-auto px-5 py-10 pb-20 font-sans bg-slate-50 min-h-screen">
-
+    <div
+      className="max-w-5xl mx-auto px-5 py-10 pb-20 font-sans min-h-screen"
+      style={{ background: "#F8FAFC" }}
+    >
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-slate-900 mb-2">My Subscription</h1>
-        <p className="text-sm text-slate-500">Manage your plan, billing, and payment details.</p>
+        <h1 className="text-4xl font-extrabold mb-2" style={{ color: "#0F172A" }}>
+          My Subscription
+        </h1>
+        <p className="text-sm" style={{ color: "#64748B" }}>
+          Manage your plan, billing, and payment details.
+        </p>
       </div>
 
       {/* Plan Banner */}
-      <div className="bg-slate-900 rounded-2xl p-7 text-white relative overflow-hidden mb-6">
-        {/* decorative circles */}
-        <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-teal-600 opacity-20 pointer-events-none" />
-        <div className="absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-teal-400 opacity-10 pointer-events-none" />
+<div
+  className="rounded-2xl p-7 text-white relative overflow-hidden mb-6"
+  style={{
+    background: "linear-gradient(135deg, #2563EB 0%, #14B8A6 100%)",
+  }}
+>
+  {/* decorative circles */}
+  <div
+    className="absolute -top-10 -right-10 w-52 h-52 rounded-full pointer-events-none"
+    style={{ background: "rgba(255,255,255,0.08)" }}
+  />
+  <div
+    className="absolute -bottom-12 -left-8 w-44 h-44 rounded-full pointer-events-none"
+    style={{ background: "rgba(255,255,255,0.06)" }}
+  />
 
-        <div className="relative flex justify-between items-start">
-          <div>
-            <p className="text-xs font-bold tracking-widest text-teal-400 mb-2">CURRENT PLAN</p>
-            <h2 className="text-5xl font-extrabold mb-2">Premium ⚕️</h2>
-            <p className="text-base text-slate-300">Annual billing · ₹1,999/month</p>
-          </div>
-          <span className="bg-teal-600 bg-opacity-30 border border-teal-500 text-teal-300 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap">
-            ● Active
-          </span>
-        </div>
-      </div>
+  <div className="relative flex justify-between items-start flex-wrap gap-4">
+    <div>
+      <p
+        className="text-xs font-bold tracking-widest mb-2"
+        style={{ color: "rgba(255,255,255,0.75)" }}
+      >
+        CURRENT PLAN
+      </p>
+      <h2 className="text-5xl font-extrabold mb-2 text-white">
+        Premium ⚕️
+      </h2>
+      <p className="text-base" style={{ color: "rgba(255,255,255,0.75)" }}>
+        Annual billing · ₹7,999/month
+      </p>
+    </div>
+    <span
+      className="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap text-white"
+      style={{
+        background: "rgba(255,255,255,0.18)",
+        border: "1px solid rgba(255,255,255,0.35)",
+      }}
+    >
+      ● Active
+    </span>
+  </div>
+</div>
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3 mb-8">
-        <button className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors">
+        {/* Upgrade */}
+        <button
+          className="text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+          style={{ background: "#2563EB" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}
+        >
           ⬆ Upgrade to Enterprise
         </button>
-        <button className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-200 rounded-xl px-6 py-3.5 text-sm font-bold transition-colors">
+
+        {/* Update Payment */}
+        <button
+          className="rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+          style={{
+            background: "#fff",
+            color: "#0F172A",
+            border: "1px solid #E2E8F0",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+        >
           ✏️ Update Payment
         </button>
 
+        {/* Cancel */}
         {!cancelConfirm ? (
           <button
             onClick={() => setCancelConfirm(true)}
-            className="bg-red-50 hover:bg-red-100 text-red-500 rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+            className="rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+            style={{
+              background: "#fff1f1",
+              color: "#EF4444",
+              border: "1px solid #fecaca",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe4e4")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#fff1f1")}
           >
             Cancel Subscription
           </button>
         ) : (
           <button
             onClick={() => setCancelConfirm(false)}
-            className="bg-red-500 hover:bg-red-600 text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+            className="text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+            style={{ background: "#EF4444" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#DC2626")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#EF4444")}
           >
             Confirm Cancel?
           </button>
         )}
 
+        {/* Demo: Payment Success */}
         <button
           onClick={() => setPage("success")}
-          className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+          className="text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+          style={{ background: "#14B8A6" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#0F766E")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#14B8A6")}
         >
           ✅ Payment Success
         </button>
+
+        {/* Demo: Payment Failed */}
         <button
           onClick={() => setPage("failed")}
-          className="bg-red-500 hover:bg-red-600 text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+          className="text-white rounded-xl px-6 py-3.5 text-sm font-bold transition-colors"
+          style={{ background: "#EF4444" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#DC2626")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#EF4444")}
         >
           ❌ Payment Failed
         </button>
       </div>
 
       {/* Billing Table */}
-      <div className="bg-white rounded-2xl p-7 border border-slate-200 overflow-x-auto shadow-sm">
-        <h2 className="text-2xl font-extrabold text-slate-900 mb-6">Billing History</h2>
+      <div
+        className="bg-white rounded-2xl p-7 overflow-x-auto"
+        style={{
+          border: "1px solid #E2E8F0",
+          boxShadow: "0 2px 12px rgba(15,23,42,0.06)",
+        }}
+      >
+        <h2 className="text-2xl font-extrabold mb-6" style={{ color: "#0F172A" }}>
+          Billing History
+        </h2>
 
         <table className="w-full border-collapse">
           <thead>
@@ -196,7 +341,11 @@ const MySubscription = () => {
               {["INVOICE ID", "DATE", "PLAN", "AMOUNT", "STATUS"].map((head) => (
                 <th
                   key={head}
-                  className="text-left px-3 py-4 text-xs font-bold text-slate-400 tracking-widest border-b border-slate-200"
+                  className="text-left px-3 py-4 text-xs font-bold tracking-widest"
+                  style={{
+                    color: "#94A3B8",
+                    borderBottom: "1px solid #E2E8F0",
+                  }}
                 >
                   {head}
                 </th>
@@ -205,21 +354,44 @@ const MySubscription = () => {
           </thead>
           <tbody>
             {BILLING_HISTORY.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-3 py-4 font-bold text-slate-900 font-mono text-sm border-b border-slate-100">
+              <tr
+                key={row.id}
+                className="transition-colors"
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <td
+                  className="px-3 py-4 font-bold font-mono text-sm"
+                  style={{
+                    color: "#0F172A",
+                    borderBottom: "1px solid #F1F5F9",
+                  }}
+                >
                   {row.id}
                 </td>
-                <td className="px-3 py-4 text-sm text-slate-700 border-b border-slate-100">
+                <td
+                  className="px-3 py-4 text-sm"
+                  style={{ color: "#64748B", borderBottom: "1px solid #F1F5F9" }}
+                >
                   {row.date}
                 </td>
-                <td className="px-3 py-4 text-sm text-slate-700 border-b border-slate-100">
+                <td
+                  className="px-3 py-4 text-sm"
+                  style={{ color: "#64748B", borderBottom: "1px solid #F1F5F9" }}
+                >
                   {row.plan}
                 </td>
-                <td className="px-3 py-4 text-sm font-bold text-slate-900 border-b border-slate-100">
+                <td
+                  className="px-3 py-4 text-sm font-bold"
+                  style={{ color: "#0F172A", borderBottom: "1px solid #F1F5F9" }}
+                >
                   {row.amount}
                 </td>
-                <td className="px-3 py-4 border-b border-slate-100">
-                  <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold">
+                <td className="px-3 py-4" style={{ borderBottom: "1px solid #F1F5F9" }}>
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-bold"
+                    style={{ background: "#f0fdf4", color: "#22C55E" }}
+                  >
                     ● {row.status}
                   </span>
                 </td>

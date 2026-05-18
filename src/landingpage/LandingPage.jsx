@@ -195,14 +195,14 @@ const LandingPage = () => {
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <button
                 onClick={() => navigate("/clientloginpage")}
-                className="px-9 py-3.5 rounded-full font-[family-name:var(--font-dm)] font-bold text-[15px] text-white bg-green-600 cursor-pointer transition-all duration-300 hover:-translate-y-1"
+                className="px-9 py-3.5 rounded-full font-[family-name:var(--font-dm)] font-bold text-[16px] text-white bg-green-600 cursor-pointer transition-all duration-300 hover:-translate-y-1"
               >
                 {t.forPatient}
               </button>
 
               <button
                 onClick={() => navigate("/doctorloginpage")}
-                className="px-9 py-3.5 rounded-full font-[family-name:var(--font-dm)] font-bold text-[15px] text-white cursor-pointer transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm"
+                className="px-9 py-3.5 rounded-full font-[family-name:var(--font-dm)] font-bold text-[16px] text-white cursor-pointer transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm"
                 style={{
                   background: "transparent",
                   border: "1.5px solid rgba(93,216,245,0.45)",
@@ -214,7 +214,7 @@ const LandingPage = () => {
           </div>
 
           {/* RIGHT — doctor image */}
-              <div className="hidden md:flex relative w-[700px] h-[400px] mt-10">
+     <div className="hidden md:flex relative w-[700px] h-[400px] mt-10">
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{

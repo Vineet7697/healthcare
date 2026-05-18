@@ -95,7 +95,7 @@ function Avatar({ name = "", size = "sm" }) {
 function Badge({ status, text }) {
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${BADGE_STYLES[status] || BADGE_STYLES.pending}`}
     >
       {text}
     </span>
@@ -104,7 +104,7 @@ function Badge({ status, text }) {
 
 function FieldError({ msg }) {
   return msg ? (
-    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+    <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
       <span>⚠</span>
       {msg}
     </p>
@@ -129,7 +129,7 @@ function SectionCard({ title, children, className = "" }) {
 function MetricCard({ label, value, accent = false, warn = false }) {
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
-      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className="text-md text-gray-600 mb-1">{label}</p>
       <p
         className={`text-2xl font-semibold ${warn ? "text-amber-600" : accent ? "text-teal-600" : "text-gray-800"}`}
       >
@@ -195,13 +195,13 @@ function TableShell({ headers, children, minWidth = "600px" }) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" style={{ minWidth }}>
+        <table className="w-full text-md" style={{ minWidth }}>
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
               {headers.map((h) => (
                 <th
                   key={h}
-                  className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-widest"
+                  className="text-left px-5 py-3.5 text-sm font-semibold uppercase tracking-widest"
                 >
                   {h}
                 </th>
@@ -246,10 +246,10 @@ function AllRequests({ requests, onReview }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
             Certificate Requests
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-md text-gray-700 mt-1">
             Review and manage patient certificate requests
           </p>
         </div>
@@ -267,7 +267,7 @@ function AllRequests({ requests, onReview }) {
             placeholder="Search by name or ID…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
+            className="w-full pl-9 pr-4 py-2.5 text-md border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
           />
         </div>
         {[
@@ -278,7 +278,7 @@ function AllRequests({ requests, onReview }) {
             key={i}
             value={val}
             onChange={(e) => set(e.target.value)}
-            className="w-full sm:w-auto border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
+            className="w-full sm:w-auto border border-gray-200 rounded-xl px-3 py-2.5 text-md bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
           >
             {opts.map((o) => (
               <option key={o}>{o}</option>
@@ -320,24 +320,24 @@ function AllRequests({ requests, onReview }) {
               </td>
               <td className="px-5 py-4">
                 <span
-                  className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[r.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}
+                  className={`inline-flex items-center text-md font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[r.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}
                 >
                   {r.type}
                 </span>
               </td>
-              <td className="px-5 py-4 text-sm text-gray-400 whitespace-nowrap">
+              <td className="px-5 py-4 text-md text-gray-400 whitespace-nowrap">
                 {r.date}
               </td>
               <td className="px-5 py-4">
                 <Badge status={r.status} text={r.statusText} />
               </td>
-              <td className="px-5 py-4">
+              <td className="px-5 py-4 ">
                 {["pending", "verification", "payment_verified"].includes(
                   r.status,
                 ) ? (
                   <button
                     onClick={() => onReview(r.id)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
                   >
                     Review
                     <svg
@@ -354,7 +354,7 @@ function AllRequests({ requests, onReview }) {
                     </svg>
                   </button>
                 ) : (
-                  <button className="px-3.5 py-1.5 border border-gray-200 text-gray-500 text-xs font-medium rounded-xl hover:bg-gray-50 transition-colors">
+                  <button className="px-3.5 py-1.5 border border-gray-200 text-gray-500 text-md font-medium rounded-xl hover:bg-gray-50 transition-colors">
                     View
                   </button>
                 )}
@@ -366,7 +366,7 @@ function AllRequests({ requests, onReview }) {
 
       {/* Footer count */}
       {filtered.length > 0 && (
-        <p className="text-xs text-gray-400 mt-3 px-1">
+        <p className="text-md text-gray-400 mt-3 px-1">
           Showing {filtered.length} of {requests.length} requests
         </p>
       )}
@@ -404,6 +404,7 @@ function ReviewPatient({
   };
 
   const handleApproveClick = async () => {
+    console.log("approve clicked",handleApproveClick);
     if (loading) return;
     const e = validate();
     if (Object.keys(e).length > 0) {
@@ -415,6 +416,7 @@ function ReviewPatient({
   };
 
   const handleRejectClick = async () => {
+    console.log("reject clicked");
     if (!form.notes.trim()) {
       setErrors({ notes: "Please add a reason for rejection." });
       return;
@@ -422,40 +424,40 @@ function ReviewPatient({
     await onReject();
   };
 
-  if (submitted) {
-    return (
-      <div className="p-6 flex flex-col items-center justify-center min-h-72 gap-5">
-        <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#0f766e"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <div className="text-center">
-          <p className="text-base font-semibold text-gray-800 mb-1">
-            Certificate Approved!
-          </p>
-          <p className="text-sm text-gray-400">
-            The certificate has been digitally signed and issued.
-          </p>
-        </div>
-        <button
-          onClick={onBack}
-          className="mt-1 px-6 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
-        >
-          Back to Requests
-        </button>
-      </div>
-    );
-  }
+  // if (submitted) {
+  //   return (
+  //     <div className="p-6 flex flex-col items-center justify-center min-h-72 gap-5">
+  //       <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center">
+  //         <svg
+  //           width="28"
+  //           height="28"
+  //           viewBox="0 0 24 24"
+  //           fill="none"
+  //           stroke="#0f766e"
+  //           strokeWidth="2.5"
+  //           strokeLinecap="round"
+  //           strokeLinejoin="round"
+  //         >
+  //           <path d="M5 13l4 4L19 7" />
+  //         </svg>
+  //       </div>
+  //       <div className="text-center">
+  //         <p className="text-base font-semibold text-gray-800 mb-1">
+  //           Certificate Approved!
+  //         </p>
+  //         <p className="text-sm text-gray-400">
+  //           The certificate has been digitally signed and issued.
+  //         </p>
+  //       </div>
+  //       <button
+  //         onClick={onBack}
+  //         className="mt-1 px-6 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
+  //       >
+  //         Back to Requests
+  //       </button>
+  //     </div>
+  //   );
+  // }
 
   const infoRows = [
     [
@@ -476,9 +478,7 @@ function ReviewPatient({
         <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
           Review Request
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          REQ-{selectedRequest?.id} · {selectedRequest?.certificate_type}
-        </p>
+       
       </div>
 
       <div
@@ -492,10 +492,10 @@ function ReviewPatient({
             <div className="flex items-center gap-3 mb-5">
               <Avatar name={selectedRequest?.full_name || ""} size="lg" />
               <div>
-                <p className="font-semibold text-gray-800 text-sm">
+                <p className="font-semibold text-gray-800 text-md">
                   Name: {selectedRequest?.full_name || "--"}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-md text-gray-600 mt-0.5">
                   Medical Conditions:{" "}
                   {selectedRequest?.medical_conditions || "No known conditions"}
                 </p>
@@ -505,7 +505,7 @@ function ReviewPatient({
               {infoRows.map(([label, val]) => (
                 <div key={label} className="bg-gray-50 rounded-xl px-3.5 py-3">
                   <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-                  <p className="text-sm font-semibold text-gray-700">{val}</p>
+                  <p className="text-md font-semibold text-gray-700">{val}</p>
                 </div>
               ))}
             </div>
@@ -514,7 +514,7 @@ function ReviewPatient({
           {/* Documents */}
           <SectionCard title="Uploaded Documents">
             {documents.length === 0 ? (
-              <p className="text-sm text-gray-400">No documents uploaded.</p>
+              <p className="text-md text-gray-400">No documents uploaded.</p>
             ) : (
               <div className="flex flex-col gap-2">
                 {documents.map((doc) => (
@@ -565,7 +565,7 @@ function ReviewPatient({
           <SectionCard title="Certificate Details">
             {/* Certificate Type */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-md font-medium text-gray-400 mb-1.5 block">
                 Certificate Type
               </label>
               <div className="w-full border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 text-gray-500 cursor-not-allowed">
@@ -575,7 +575,7 @@ function ReviewPatient({
 
             {/* Patient Notes */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-md font-medium text-gray-400 mb-1.5 block">
                 Patient's Request Notes
               </label>
               <div className="bg-gray-50 border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm text-gray-600 min-h-[60px]">
@@ -585,7 +585,7 @@ function ReviewPatient({
 
             {/* Validity */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-md font-medium text-gray-400 mb-1.5 block">
                 Validity Period
               </label>
               <select
@@ -601,7 +601,7 @@ function ReviewPatient({
 
             {/* Fitness Status */}
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-md font-medium text-gray-400 mb-1.5 block">
                 Fitness Status <span className="text-red-400">*</span>
               </label>
               <select
@@ -622,7 +622,7 @@ function ReviewPatient({
 
             {/* Clinical Notes */}
             <div>
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-md font-medium text-gray-400 mb-1.5 block">
                 Doctor's Clinical Notes <span className="text-red-400">*</span>
               </label>
               <textarea
@@ -642,9 +642,10 @@ function ReviewPatient({
           <SectionCard title="Take Action">
             <div className="flex flex-col sm:flex-row gap-2.5 mb-3">
               <button
+                type="button"
                 onClick={handleApproveClick}
                 disabled={loading}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white text-md font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
               >
                 <svg
                   width="15"
@@ -662,9 +663,10 @@ function ReviewPatient({
               </button>
 
               <button
+                type="button"
                 onClick={handleRejectClick}
                 disabled={loading}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-sm font-medium rounded-xl hover:bg-red-100 active:scale-95 transition-all"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-md font-medium rounded-xl hover:bg-red-100 active:scale-95 transition-all"
               >
                 <svg
                   width="14"
@@ -681,7 +683,7 @@ function ReviewPatient({
                 Reject
               </button>
             </div>
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <p className="text-md text-gray-400 leading-relaxed">
               Fields marked <span className="text-red-400">*</span> are
               required. Approval digitally signs the certificate with
               registration number{" "}
@@ -768,7 +770,7 @@ function IssuedCerts({ onViewPdf }) {
           <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
             Issued Certificates
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-md text-gray-700 mt-1">
             Certificates you have approved and generated
           </p>
         </div>
@@ -798,7 +800,7 @@ function IssuedCerts({ onViewPdf }) {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="w-full sm:w-auto border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
+          className="w-full sm:w-auto border border-gray-200 rounded-xl px-3.5 py-2.5 text-md bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 transition"
         >
           <option value="">All types</option>
           <option>Fitness</option>
@@ -832,7 +834,7 @@ function IssuedCerts({ onViewPdf }) {
               className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
             >
               <td className="px-5 py-4">
-                <span className="font-mono text-xs  bg-gray-100 px-2.5 py-1 rounded-lg">
+                <span className="font-mono text-sm  bg-gray-100 px-2.5 py-1 rounded-lg">
                   {c.id}
                 </span>
               </td>
@@ -843,26 +845,26 @@ function IssuedCerts({ onViewPdf }) {
               </td>
               <td className="px-5 py-4">
                 <span
-                  className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[c.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}
+                  className={`inline-flex items-center text-md font-medium px-2.5 py-1 rounded-full ${TYPE_BADGE[c.type] || "bg-gray-100 text-gray-600 ring-1 ring-gray-200"}`}
                 >
                   {c.type}
                 </span>
               </td>
-              <td className="px-5 py-4 text-sm ">{c.issued}</td>
+              <td className="px-5 py-4 text-md ">{c.issued}</td>
               <td className="px-5 py-4">
                 {c.expiringSoon ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
+                  <span className="inline-flex items-center gap-1.5 text-md font-medium text-amber-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
                     {c.expires}
                   </span>
                 ) : (
-                  <span className="text-sm ">{c.expires}</span>
+                  <span className="text-md ">{c.expires}</span>
                 )}
               </td>
               <td className="px-5 py-4">
                 <button
                   onClick={() => onViewPdf(c)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium border bg-green-600 text-white cursor-pointer border-gray-200 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 active:scale-95 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium border bg-green-600 text-white cursor-pointer border-gray-200 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 active:scale-95 transition-all"
                 >
                   <svg
                     width="12"
@@ -887,7 +889,7 @@ function IssuedCerts({ onViewPdf }) {
       </TableShell>
 
       {filtered.length > 0 && (
-        <p className="text-xs text-gray-400 mt-3 px-1">
+        <p className="text-md text-gray-400 mt-3 px-1">
           Showing {filtered.length} of {issuedCertificates.length} certificates
         </p>
       )}
@@ -1036,7 +1038,7 @@ export default function Certificaterequest() {
         <button
           key={t.id}
           onClick={() => setActiveTab(t.id)}
-          className={`py-4 px-5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px ${
+          className={`py-4 px-5 text-md font-medium transition-colors whitespace-nowrap border-b-2 -mb-px ${
             activeTab === t.id
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-gray-400 hover:text-gray-700"

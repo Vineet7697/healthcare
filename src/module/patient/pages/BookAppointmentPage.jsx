@@ -292,7 +292,7 @@ useEffect(() => {
           <div>
             <p
               className=" text-[12px] font-bold uppercase tracking-widest mb-3"
-              style={{ color: "" }}
+              
             >
               Step 1 — Who is this for?
             </p>
@@ -361,7 +361,7 @@ useEffect(() => {
           </div>
 
           <div className="mt-4">
-            <p className="text-[12px] font-semibold text-gray-500 mb-2">
+            <p className="text-[12px] font-bold  mb-2">
               📅 Available Days
             </p>
 
@@ -382,8 +382,7 @@ useEffect(() => {
             <>
               <div>
                 <p
-                  className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
-                  style={{ color: "#64748B" }}
+                  className=" text-[12px] font-bold uppercase tracking-widest mb-3"
                 >
                   Step 2 — Select Date
                 </p>
@@ -440,8 +439,7 @@ useEffect(() => {
 
               <div>
                 <p
-                  className="font-[family-name:var(--font-dm)] text-[11px] font-bold uppercase tracking-widest mb-3"
-                  style={{ color: "#94a3b8" }}
+                  className="text-[12px] font-bold uppercase tracking-widest mb-3"
                 >
                   Step 3 — Select Session
                 </p>

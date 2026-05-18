@@ -61,7 +61,7 @@ return (
             Find Your Doctor
           </h1>
           {doctors.length > 0 && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full text-[#0086C3] bg-blue-50">
+            <span className="text-sm font-semibold px-3 py-1 rounded-full text-[#0086C3] bg-blue-50">
               {doctors.length} available
             </span>
           )}
@@ -101,7 +101,7 @@ return (
                           state: { doctor },
                         })
                       }
-                      className="text-[11px] font-bold px-3 py-1 rounded-full text-[#0086C3] border border-blue-200 hover:border-[#0086C3] hover:bg-blue-50 transition-all duration-200 whitespace-nowrap"
+                      className="text-[12px] font-bold px-3 py-1 rounded-full text-[#0086C3] border border-blue-200 hover:border-[#0086C3] hover:bg-blue-50 transition-all duration-200 whitespace-nowrap"
                     >
                       View Profile
                     </button>
@@ -110,38 +110,38 @@ return (
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <h2 className="text-sm sm:text-base font-bold text-[#0c1e3a] truncate max-w-[180px] sm:max-w-xs">
+                      <h2 className="text-sm sm:text-lg font-bold text-[#0c1e3a] truncate max-w-[180px] sm:max-w-xs">
                         {doctor.doctorName}
                       </h2>
                       {doctor.rating && (
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full text-amber-700 bg-amber-100 flex-shrink-0">
+                        <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full text-amber-700 bg-amber-100 flex-shrink-0">
                           ⭐ {doctor.rating}
                         </span>
                       )}
                     </div>
 
-                    <p className="text-[13px] font-semibold text-[#0086C3] mb-2">
+                    <p className="text-[15px] font-semibold text-[#0086C3] mb-2">
                       {doctor.specialization}
                     </p>
 
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {doctor.clinicName && (
-                        <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full text-slate-500 bg-[#f0f4f8]">
+                        <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full text-slate-500 bg-[#f0f4f8]">
                           🏥 {doctor.clinicName}
                         </span>
                       )}
-                      <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full text-slate-500 bg-[#f0f4f8]">
+                      <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full text-slate-500 bg-[#f0f4f8]">
                         📍 {doctor.city}
                       </span>
                       {doctor.experience && (
-                        <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full text-slate-500 bg-[#f0f4f8]">
+                        <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full text-slate-500 bg-[#f0f4f8]">
                           🩺 {doctor.experience} yrs
                         </span>
                       )}
                     </div>
 
                     {doctor.consultationFee && (
-                      <p className="text-xs text-slate-400">
+                      <p className="text-sm text-slate-600">
                         Consultation Fee —{" "}
                         <strong className="text-[#0c1e3a] font-bold">
                           ₹{doctor.consultationFee}
@@ -159,7 +159,7 @@ return (
                           { state: { doctor } }
                         )
                       }
-                      className="flex-1 sm:flex-none text-xs sm:text-[13px] font-bold text-white px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-[#0086C3] to-[#00b4d8] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center"
+                      className="flex-1 sm:flex-none text-md sm:text-[15px] font-bold text-white px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-[#0086C3] to-[#00b4d8] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center"
                     >
                       📅 Book Appointment
                     </button>
@@ -172,7 +172,7 @@ return (
                           notify("Doctor's phone number is not available");
                         }
                       }}
-                      className="flex-1 sm:flex-none text-xs sm:text-[13px] font-bold text-white px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-[#2ecc71] to-[#1aab5a] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center"
+                      className="flex-1 sm:flex-none text-md sm:text-[15px] font-bold text-white px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-[#2ecc71] to-[#1aab5a] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center"
                     >
                       📞 Call Doctor
                     </button>

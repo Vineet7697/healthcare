@@ -182,7 +182,7 @@ const handleSubmit = async (e) => {
               <div style={{ width: 48, height: 2, background: "#0072BC", borderRadius: 2 }} />
 
             </div>
-            <p className="text-sm mb-8" style={{ color: "rgba(180,210,255,0.72)", lineHeight: 1.85, maxWidth: 360 }}>
+            <p className="text-base mb-8" style={{ color: "rgba(180,210,255,0.72)", lineHeight: 1.85, maxWidth: 360 }}>
               Have a question, need an appointment, or just want to reach out? We're always here for you.
             </p>
 
@@ -223,10 +223,10 @@ const handleSubmit = async (e) => {
 
           {/* Section label */}
           <div className="text-center mb-10">
-            <span className="text-xs font-extrabold uppercase tracking-widest inline-block mb-2"
+            <span className="text-base font-extrabold uppercase tracking-widest inline-block mb-2"
               style={{ color: "#0072BC", letterSpacing: "0.3em" }}>Support Request</span>
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">{t.contact_form_title}</h2>
-            <p className="text-sm text-gray-400 mt-2">Fill in the details below — we'll get back within 24 hours</p>
+            <p className="text-base text-gray-400 mt-2">Fill in the details below — we'll get back within 24 hours</p>
           </div>
 
           {/* Card */}
@@ -324,10 +324,10 @@ const handleSubmit = async (e) => {
 
           {/* Top text */}
           <div className="text-center mb-14">
-            <span className="text-xs font-extrabold uppercase tracking-widest inline-block mb-2"
+            <span className="text-base font-extrabold uppercase tracking-widest inline-block mb-2"
               style={{ color: "#0072BC", letterSpacing: "0.3em" }}>We Care</span>
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3">{t.wellbeing_title}</h2>
-            <p className="text-sm text-gray-400 max-w-xl mx-auto leading-relaxed">{t.wellbeing_desc}</p>
+            <p className="text-base text-gray-400 max-w-xl mx-auto leading-relaxed">{t.wellbeing_desc}</p>
           </div>
 
 
@@ -413,8 +413,8 @@ const handleSubmit = async (e) => {
                 {t.talk_doctor_title}{" "}
                 <span style={{ color: "#0072BC" }}>Yo</span><span style={{ color: "#16a34a" }}>Doctor</span>
               </h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{t.talk_doctor_desc1}</p>
-              <p className="text-sm text-gray-500 leading-relaxed">{t.talk_doctor_desc2}</p>
+              <p className="text-base text-gray-600 leading-relaxed">{t.talk_doctor_desc1}</p>
+              <p className="text-base text-gray-600 leading-relaxed">{t.talk_doctor_desc2}</p>
 
               {/* CTA row */}
               <div className="flex flex-wrap gap-3 mt-1">

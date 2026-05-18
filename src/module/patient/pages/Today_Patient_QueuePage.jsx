@@ -86,7 +86,7 @@ const PatientQueuePage = () => {
         <div className="flex justify-center text-3xl text-blue-500">
           <FaClock />
         </div>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-lg">
           Appointment for <span className="font-semibold">{patientName}</span>
         </p>
 
@@ -95,7 +95,7 @@ const PatientQueuePage = () => {
           <span className="font-semibold">{nowServing ?? "-"}</span>
         </p>
 
-        <p className="text-3xl font-bold text-black">Token #{token}</p>
+        <p className="text-3xl font-bold text-[#0F172A]">Token #{token}</p>
 
         <p className="text-gray-500">
           Estimated Wait Time: {estimatedWaitTime}
@@ -103,7 +103,7 @@ const PatientQueuePage = () => {
 
         <button
           onClick={() => navigate("/client/dashboard")}
-          className="mt-4 w-full py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600"
+          className="mt-4 w-full py-2 rounded-xl bg-[#2563EB] text-white font-semibold hover:bg-blue-600"
         >
           Back to Dashboard
         </button>

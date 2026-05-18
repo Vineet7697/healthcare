@@ -45,7 +45,7 @@ const StatCard = ({ icon, label, value, tag, tagColor, iconColor }) => (
         {icon}
       </div>
       <span
-        className={`text-[11px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full ${tagColor}`}
+        className={`text-[13px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full ${tagColor}`}
       >
         {tag}
       </span>
@@ -53,7 +53,7 @@ const StatCard = ({ icon, label, value, tag, tagColor, iconColor }) => (
     <p className=" text-[30px] font-semibold text-[#1c2b33] leading-none mb-1">
       {value}
     </p>
-    <p className="font-dm text-[13px] text-[#6b7f8a]">{label}</p>
+    <p className="font-dm text-[15px] text-[#6b7f8a]">{label}</p>
   </div>
 );
 
@@ -80,13 +80,13 @@ const ActionCard = ({ icon, title, subtitle, onClick, accent = false }) => (
     </div>
     <div>
       <p
-        className={`font-dm font-semibold text-[15px] ${accent ? "text-white" : "text-[#1c2b33]"}`}
+        className={`font-dm font-semibold text-[16px] ${accent ? "text-white" : "text-[#1c2b33]"}`}
       >
         {title}
       </p>
       {subtitle && (
         <p
-          className={`font-dm text-[12px] mt-0.5 leading-relaxed ${accent ? "text-white/70" : "text-[#6b7f8a]"}`}
+          className={`font-dm text-[15px] mt-0.5 leading-relaxed ${accent ? "text-white/70" : "text-[#6b7f8a]"}`}
         >
           {subtitle}
         </p>
@@ -275,21 +275,21 @@ const downloadQR = async () => {
               />
             </div>
             <div className="min-w-0">
-              <span className="inline-block text-[10px] font-semibold tracking-widest uppercase text-[#0e7490] bg-[#ecfeff] border border-[rgba(14,116,144,0.15)] px-2.5 py-0.5 rounded-full mb-1.5">
+              <span className="inline-block text-[11px] font-semibold tracking-widest uppercase text-[#0e7490] bg-[#ecfeff] border border-[rgba(14,116,144,0.15)] px-2.5 py-0.5 rounded-full mb-1.5">
                 Verified Specialist
               </span>
-              <h2 className="font-playfair text-[17px] font-bold text-[#1c2b33] m-0 truncate">
+              <h2 className="font-playfair text-[18px] font-bold text-[#1c2b33] m-0 truncate">
                 {doctorName}
               </h2>
-              <p className="font-dm text-[12px] text-[#6b7f8a] mt-0.5 truncate">
+              <p className="font-dm text-[14px] text-[#6b7f8a] mt-0.5 truncate">
                 {profile.specialization}
               </p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-[11px] text-[#9fb0b8]">
+                <span className="text-[13px] text-[#9fb0b8]">
                   {profile.experience_years} yrs exp
                 </span>
                 <span className="w-1 h-1 bg-[#d1dde3] rounded-full" />
-                <span className="text-[11px] text-[#9fb0b8]">
+                <span className="text-[13px] text-[#9fb0b8]">
                   {profile.rating ? Number(profile.rating).toFixed(1) : "N/A"}{" "}
                   ⭐
                 </span>
@@ -351,10 +351,10 @@ const downloadQR = async () => {
               <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-xl mb-3">
                 <FaQrcode />
               </div>
-              <p className="font-playfair text-[18px] font-bold leading-snug">
+              <p className="font-playfair text-[19px] font-bold leading-snug">
                 Patient Direct Booking
               </p>
-              <p className="font-dm text-[12px] text-white/70 mt-1.5 leading-relaxed">
+              <p className="font-dm text-[15px] text-white/70 mt-1.5 leading-relaxed">
                 Share QR code with patients for easy walk-in appointments and
                 digital registration.
               </p>
@@ -479,13 +479,13 @@ const downloadQR = async () => {
             <h2 className="font-playfair text-[22px] font-bold text-[#1c2b33] text-center m-0 mb-2">
               Emergency Cancellation
             </h2>
-            <p className="font-dm text-[12px] text-red-500 text-center mb-6 leading-relaxed">
+            <p className="font-dm text-[16px] text-red-500 text-center mb-6 leading-relaxed">
               ⚠️ All remaining appointments for this slot will be cancelled and
               patients will be notified.
             </p>
 
             <div className="mb-4">
-              <label className="block font-dm text-[10px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] mb-1.5">
+              <label className="block font-dm text-[14px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] mb-1.5">
                 Select Slot
               </label>
               <div className="flex items-center gap-2.5 px-3.5 py-[11px] rounded-[10px] border border-black/[0.08] bg-[#f8f9fb] focus-within:border-[#0e7490] focus-within:ring-2 focus-within:ring-[rgba(14,116,144,0.12)] focus-within:bg-white transition-all">
@@ -501,7 +501,7 @@ const downloadQR = async () => {
             </div>
 
             <div className="mb-6">
-              <label className="block font-dm text-[10px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] mb-1.5">
+              <label className="block font-dm text-[14px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] mb-1.5">
                 Reason
               </label>
               <div className="px-3.5 py-[11px] rounded-[10px] border border-black/[0.08] bg-[#f8f9fb] focus-within:border-[#0e7490] focus-within:ring-2 focus-within:ring-[rgba(14,116,144,0.12)] focus-within:bg-white transition-all">
@@ -522,14 +522,14 @@ const downloadQR = async () => {
                   setReason("");
                   setSlot("MORNING");
                 }}
-                className="font-dm px-6 py-2.5 rounded-full text-[13px] font-medium text-[#6b7f8a] bg-[#f3f4f6] border-none cursor-pointer hover:bg-[#e8eaed] transition"
+                className="font-dm px-6 py-2.5 rounded-full text-[14px] font-medium text-[#6b7f8a] bg-[#f3f4f6] border-none cursor-pointer hover:bg-[#e8eaed] transition"
               >
                 Close
               </button>
               <button
                 onClick={handleEmergencyCancel}
                 disabled={cancelLoading}
-                className="font-dm px-6 py-2.5 rounded-full text-[13px] font-semibold text-white bg-red-500 border-none cursor-pointer hover:bg-red-600 disabled:opacity-50 transition"
+                className="font-dm px-6 py-2.5 rounded-full text-[14px] font-semibold text-white bg-red-500 border-none cursor-pointer hover:bg-red-600 disabled:opacity-50 transition"
                 style={{ boxShadow: "0 4px 14px rgba(239,68,68,0.25)" }}
               >
                 {cancelLoading ? "Cancelling…" : "Cancel Appointments"}

@@ -132,7 +132,7 @@ const AppFeatureCard = ({ item }) => (
         loading="lazy"
       />
     </div>
-    <span className="text-xs font-semibold text-gray-700 leading-snug">{item.text}</span>
+    <span className="text-md font-semibold text-gray-700 leading-snug">{item.text}</span>
   </div>
 );
 
@@ -196,7 +196,7 @@ const About = () => {
             <div className="w-2 h-2 rounded-full bg-[#0072BC]" />
             <div className="w-10 sm:w-14 h-0.5 bg-[#0072BC] rounded" />
           </div>
-          <p className="text-xs sm:text-sm leading-relaxed text-blue-200/70 max-w-xs sm:max-w-xl mx-auto px-2 sm:px-0">
+          <p className="text-lg leading-relaxed text-blue-200/70 max-w-xs sm:max-w-xl mx-auto px-2 sm:px-0">
             India's trusted digital healthcare platform — connecting patients with verified doctors, labs, and home care services.
           </p>
         </div>
@@ -228,7 +228,7 @@ const About = () => {
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 sm:mb-5 leading-tight">
                   {t.about_title}
                 </h2>
-                <p className="text-gray-500 leading-relaxed text-sm md:text-base mb-5 sm:mb-7">
+                <p className="text-gray-700 leading-relaxed  md:text-base mb-5 sm:mb-7">
                   {t.about_desc}
                 </p>
                 {checkItems.map((item, i) => (
@@ -237,7 +237,7 @@ const About = () => {
                                      w-6 h-6 sm:w-7 sm:h-7 bg-[#0072BC]/10">
                       <Icon d={ICONS.check} size={12} color="#0072BC" sw={2.5} />
                     </span>
-                    <span className="text-xs sm:text-sm text-gray-600 font-semibold">{item}</span>
+                    <span className="text-xs sm:text-sm text-gray-700 font-semibold">{item}</span>
                   </div>
                 ))}
               </div>
@@ -261,7 +261,7 @@ const About = () => {
         <div className="relative z-10 max-w-6xl mx-auto">
           <FadeIn>
             <div className="text-center mb-8 sm:mb-10 md:mb-12">
-              <span className="text-xs font-extrabold uppercase tracking-[0.3em] text-yellow-400 inline-block mb-2 sm:mb-3">
+              <span className=" font-extrabold uppercase tracking-[0.3em] text-yellow-400 inline-block mb-2 sm:mb-3">
                 Our Impact
               </span>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white">{t.stats_title}</h2>
@@ -287,9 +287,10 @@ const About = () => {
             <FadeIn direction="left">
               <div>
                 <SectionLabel text="The App" />
-                <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-2">
+                <p className="text-gray-600 text-md leading-relaxed mb-2">
                   {t.belief_para}
-                  <span className="font-bold text-[#0072BC]"> YoDoctor App</span>
+                  <span className="font-bold text-[#0072BC]"> Yo</span>
+                  <span className="font-bold text-[#00bc42]"> Doctor </span>App
                 </p>
                 <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold text-gray-900 mb-5 sm:mb-8 leading-snug">
                   {t.with_app}
@@ -330,7 +331,7 @@ const About = () => {
                 <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 sm:mb-5 leading-tight">
                   {t.tech_title}
                 </h3>
-                <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-5 sm:mb-7">
+                <p className="text-gray-600 text-base  leading-relaxed mb-5 sm:mb-7">
                   {t.tech_desc}
                 </p>
                 <div className="flex items-center gap-2">
@@ -388,7 +389,7 @@ const About = () => {
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 sm:mb-5 leading-tight">
                   {t.team_title}
                 </h2>
-                <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-6 sm:mb-8">
+                <p className="text-gray-600 text-base leading-relaxed mb-6 sm:mb-8">
                   {t.team_desc}
                 </p>
                 <Link

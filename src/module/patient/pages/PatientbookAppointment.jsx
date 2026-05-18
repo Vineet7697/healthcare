@@ -228,7 +228,7 @@ const PatientbookAppointment = () => {
       <section className="relative z-0 w-full min-h-screen flex flex-col items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-12 bg-gradient-to-b from-[#cfeeff] to-[#e9f8ff]">
         <div
           className="absolute inset-0 w-full bg-cover bg-center z-[-1]"
-          style={{ backgroundImage: "url(/images/hero.webp)" }}
+          style={{ backgroundImage: "url(/images/hero.png)" }}
         />
 
         <div className="text-center space-y-6 w-full max-w-4xl">
@@ -403,7 +403,7 @@ const PatientbookAppointment = () => {
             )}
           </div>
 
-          <div className="flex flex-wrap justify-center items-center gap-4 text-white text-sm md:text-base mt-4">
+          <div className="flex flex-wrap justify-center items-center gap-4 text-white text-sm md:text-lg mt-4">
             <span className="font-semibold text-gray-200">
               Trending Specialities:
             </span>

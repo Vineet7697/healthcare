@@ -84,7 +84,7 @@ export default function ManualVisitBooking() {
           <h1 className="font-playfair text-[clamp(24px,3.5vw,34px)] font-bold text-[#1c2b33] leading-tight m-0">
             Manual Booking
           </h1>
-          <p className="font-dm text-[13px] text-[#6b7f8a] mt-1">
+          <p className="font-dm text-[15px] text-[#6b7f8a] mt-1">
             Register a walk-in patient appointment manually.
           </p>
         </div>
@@ -161,7 +161,7 @@ export default function ManualVisitBooking() {
 
 const Field = ({ label, icon, children, required, optional }) => (
   <div className="flex flex-col gap-[5px]">
-    <label className="font-dm text-[10px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] flex items-center gap-1">
+    <label className="font-dm text-[13px] font-semibold tracking-[0.08em] uppercase text-[#6b7f8a] flex items-center gap-1">
       {label}
       {required && <span className="text-red-400">*</span>}
       {optional && (

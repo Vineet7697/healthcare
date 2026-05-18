@@ -64,7 +64,7 @@ const AppHeader = () => {
           </Link>
         </div>
 
-        <div className="hidden md:flex gap-8 font-medium">
+        <div className="hidden md:flex gap-8 font-medium text-[18px]">
           {[
             { name: lang[language].home, path: "/" },
             { name: lang[language].services, path: "/service" },
@@ -95,11 +95,11 @@ const AppHeader = () => {
             title={language === "en" ? "Switch to Hindi" : "Switch to English"}
             className="p-2 rounded-full hover:bg-gray-100 transition"
           >
-            <FaGlobe size={18} className="text-gray-700" />
+            <FaGlobe size={24} className="text-gray-700" />
           </button>
 
           <a href="/yodoctor.apk" download>
-            <button className="px-5 py-2 rounded-full bg-[#00b3ff] text-white hover:bg-[#009ee0] transition">
+            <button className="px-5 py-2 text-[18px] rounded-full bg-[#00b3ff] text-white hover:bg-[#009ee0] transition">
               {lang[language].download}
             </button>
           </a>

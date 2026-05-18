@@ -97,7 +97,6 @@ const AddFamilyPage = () => {
     if (!familyMember.gender) newErrors.gender = "Required";
     if (!familyMember.dob) newErrors.dob = "Required";
     if (!familyMember.relation) newErrors.relation = "Required";
-    if (!familyMember.bloodGroup) newErrors.bloodGroup = "Required";
     if (!familyMember.heightCm || Number(familyMember.heightCm) <= 0)
       newErrors.heightCm = "Valid height required";
     if (!familyMember.weightKg || Number(familyMember.weightKg) <= 0)
@@ -147,7 +146,7 @@ const AddFamilyPage = () => {
     }`;
 
   const labelCls =
-    "font-[family-name:var(--font-dm)] text-[12px] font-semibold uppercase tracking-wider text-[#94a3b8] block";
+    "text-[12px] font-semibold uppercase tracking-wider  block";
 
   return (
     <div
@@ -173,7 +172,7 @@ const AddFamilyPage = () => {
           <div
             className="px-7 py-5 relative overflow-hidden"
             style={{
-              background: "linear-gradient(135deg,#0086C3,#00b4d8,#2ecc71)",
+              background: "linear-gradient(135deg,#2563EB,#14B8A6)",
             }}
           >
             <div
@@ -192,10 +191,10 @@ const AddFamilyPage = () => {
                 <UserPlus size={18} color="white" />
               </div>
               <div>
-                <h1 className="font-[family-name:var(--font-playfair)] text-[20px] font-extrabold text-white leading-tight">
+                <h1 className="text-[20px] font-bold text-white leading-tight">
                   {isEdit ? "Update Member" : "Add Family Member"}
                 </h1>
-                <p className="font-[family-name:var(--font-dm)] text-[13px] text-white/70 mt-0.5">
+                <p className="text-[14px] text-white/90 mt-0.5">
                   {isEdit
                     ? "Edit the details below"
                     : "Fill in the details to add a new member"}
@@ -283,7 +282,7 @@ const AddFamilyPage = () => {
 
             <div>
               <label className={labelCls}>
-                Blood Group <span className="text-red-400">*</span>
+                Blood Group (optional) <span className="text-red-400">*</span>
               </label>
               <select
                 name="bloodGroup"

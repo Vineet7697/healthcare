@@ -66,14 +66,14 @@ const PatientAvatar = ({ image, name }) => {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => (
-  <span className={`text-[11px] font-semibold tracking-wide px-3 py-1 rounded-full border whitespace-nowrap ${STATUS_STYLE[status] ?? "bg-slate-50 text-slate-500 border-slate-200"}`}>
+  <span className={`text-[13px] font-semibold tracking-wide px-3 py-1 rounded-full border whitespace-nowrap ${STATUS_STYLE[status] ?? "bg-slate-50 text-slate-500 border-slate-200"}`}>
     {status}
   </span>
 );
 
 // ─── Token Badge ──────────────────────────────────────────────────────────────
 const TokenBadge = ({ token }) => (
-  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#ecfeff] text-[#0e7490] border border-[rgba(14,116,144,0.15)]">
+  <span className="text-[13px] font-bold px-2.5 py-1 rounded-full bg-[#ecfeff] text-[#0e7490] border border-[rgba(14,116,144,0.15)]">
     #{token}
   </span>
 );
@@ -84,7 +84,7 @@ const ActionBtn = ({ appointment, onClick }) => {
   return (
     <button
       onClick={() => onClick(appointment.id)}
-      className="text-[11px] font-bold text-white bg-[#0e7490] hover:bg-[#0c5f75] active:scale-95 px-3 py-1.5 rounded-full border-none cursor-pointer transition-all duration-150 shadow-[0_2px_8px_rgba(14,116,144,0.22)] whitespace-nowrap"
+      className="text-[13px] font-bold text-white bg-[#0e7490] hover:bg-[#0c5f75] active:scale-95 px-3 py-1.5 rounded-full border-none cursor-pointer transition-all duration-150 shadow-[0_2px_8px_rgba(14,116,144,0.22)] whitespace-nowrap"
     >
       {appointment.hasPrescription ? "Update Rx" : "+ Prescription"}
     </button>
@@ -98,14 +98,14 @@ const TableRow = ({ a, onAction }) => (
       <div className="flex items-center gap-3">
         <PatientAvatar image={a.image} name={a.patientName} />
         <div>
-          <p className="font-semibold text-[13px] text-[#1c2b33] leading-tight">{a.patientName}</p>
-          <p className="text-[11px] text-[#9fb0b8] mt-0.5">{a.slot}</p>
+          <p className="font-semibold text-[16px] text-[#1c2b33] leading-tight">{a.patientName}</p>
+          <p className="text-[13px] text-[#6b7f8a] mt-0.5">{a.slot}</p>
         </div>
       </div>
     </td>
-    <td className="px-5 py-4 text-[12px] text-[#6b7f8a]">{a.type}</td>
+    <td className="px-5 py-4 text-[15px] text-[#6b7f8a]">{a.type}</td>
     <td className="px-5 py-4"><TokenBadge token={a.token} /></td>
-    <td className="px-5 py-4 text-[12px] text-[#6b7f8a] whitespace-nowrap">
+    <td className="px-5 py-4 text-[14px] text-[#6b7f8a] whitespace-nowrap">
       {new Date(a.date).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
     </td>
     <td className="px-5 py-4"><StatusBadge status={a.status} /></td>
@@ -117,12 +117,12 @@ const TableRow = ({ a, onAction }) => (
 const AppointmentCard = ({ a, onAction }) => (
   <div className="bg-white border border-black/[0.07] rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
     {/* Top row: avatar + name + status */}
-    <div className="flex items-center justify-between gap-3 mb-4">
-      <div className="flex items-center gap-3 min-w-0">
+    <div className="flex items-center justify-between gap-3 mb-4 ">
+      <div className="flex items-center gap-3 min-w-0 ">
         <PatientAvatar image={a.image} name={a.patientName} />
         <div className="min-w-0">
-          <p className="font-semibold text-[14px] text-[#1c2b33] truncate">{a.patientName}</p>
-          <p className="text-[11px] text-[#9fb0b8]">{a.type}</p>
+          <p className="font-semibold text-[16px] text-[#1c2b33] truncate">{a.patientName}</p>
+          <p className="text-[13px] text-[#050809]">{a.type}</p>
         </div>
       </div>
       <StatusBadge status={a.status} />
@@ -131,19 +131,19 @@ const AppointmentCard = ({ a, onAction }) => (
     <div className="h-px bg-black/[0.05] mb-4" />
 
     {/* Info grid */}
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4 text-[12px] mb-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4 text-[14px] mb-4">
       <div>
-        <p className="text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-1">Token</p>
+        <p className="text-[12px] uppercase tracking-widest text-[#9fb0b8] mb-1">Token</p>
         <TokenBadge token={a.token} />
       </div>
       <div>
-        <p className="text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-1">Date</p>
+        <p className="text-[13px] uppercase tracking-widest text-[#9fb0b8] mb-1">Date</p>
         <p className="text-[#1c2b33] font-medium">
           {new Date(a.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
         </p>
       </div>
       <div>
-        <p className="text-[9px] uppercase tracking-widest text-[#9fb0b8] mb-1">Slot</p>
+        <p className="text-[13px] uppercase tracking-widest text-[#9fb0b8] mb-1">Slot</p>
         <p className="text-[#1c2b33] font-medium">{a.slot}</p>
       </div>
     </div>
@@ -224,7 +224,7 @@ const AppointmentHistory = () => {
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}
-                className={`text-[13px] font-semibold px-4 py-2 border-none cursor-pointer transition-all duration-150 whitespace-nowrap
+                className={`text-[15px] font-semibold px-4 py-2 border-none cursor-pointer transition-all duration-150 whitespace-nowrap
                   ${i < FILTERS.length - 1 ? "border-r border-black/[0.07]" : ""}
                   ${filter === f.key
                     ? "bg-[#0e7490] text-white"
@@ -245,7 +245,7 @@ const AppointmentHistory = () => {
               placeholder="Search patient…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 text-[13px] border border-black/[0.07] rounded-xl bg-white text-[#1c2b33] placeholder-[#9fb0b8] outline-none focus:border-[#0e7490]/40 focus:ring-2 focus:ring-[#0e7490]/10 transition"
+              className="w-full pl-8 pr-3 py-2 text-[15px] border border-black/[0.07] rounded-xl bg-white text-[#1c2b33] placeholder-[#9fb0b8] outline-none focus:border-[#0e7490]/40 focus:ring-2 focus:ring-[#0e7490]/10 transition"
             />
           </div>
         </div>
@@ -254,7 +254,7 @@ const AppointmentHistory = () => {
         {loading && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="w-9 h-9 border-4 border-[rgba(14,116,144,0.2)] border-t-[#0e7490] rounded-full animate-spin" />
-            <p className="text-[13px] text-[#6b7f8a]">Loading history…</p>
+            <p className="text-[15px] text-[#6b7f8a]">Loading history…</p>
           </div>
         )}
 
@@ -280,7 +280,7 @@ const AppointmentHistory = () => {
                   <thead>
                     <tr className="border-b border-black/[0.06]">
                       {["Patient", "Type", "Token", "Date & Time", "Status", "Action"].map((h) => (
-                        <th key={h} className="text-[10px] font-bold tracking-widest uppercase text-[#6b7f8a] px-5 py-4 whitespace-nowrap">
+                        <th key={h} className="text-[14px] font-bold tracking-widest uppercase text-[#6b7f8a] px-5 py-4 whitespace-nowrap">
                           {h}
                         </th>
                       ))}

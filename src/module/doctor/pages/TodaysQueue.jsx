@@ -91,7 +91,7 @@ const ActionBtn = ({
       style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
     >
       <div className="text-xl sm:text-2xl">{icon}</div>
-      <p className="font-dm text-[11px] sm:text-[12px] font-semibold text-center leading-tight">
+      <p className="font-dm text-[14px] sm:text-[15px] font-semibold text-center leading-tight">
         {label}
       </p>
     </div>
@@ -284,7 +284,7 @@ const TodaysQueue = () => {
       <div className="max-w-6xl mx-auto">
         <div className="animate-fade-up flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6 sm:mb-8">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#0e7490] mb-1">
+            <p className="text-[14px] font-semibold tracking-[0.12em] uppercase text-[#0e7490] mb-1">
               Clinic Management
             </p>
             <h1 className="font-playfair text-[clamp(22px,3.5vw,36px)] font-bold text-[#1c2b33] leading-tight m-0">
@@ -389,7 +389,7 @@ const TodaysQueue = () => {
             }}
           >
             <div>
-              <p className="font-dm text-[10px] font-semibold tracking-[0.12em] uppercase text-white/70 mb-2">
+              <p className="font-dm text-[13px] font-semibold tracking-[0.12em] uppercase text-white/70 mb-2">
                 Current Patient
               </p>
               {currentPatient ? (
@@ -428,7 +428,7 @@ const TodaysQueue = () => {
                   </div>
                 </div>
               ) : (
-                <p className="font-dm text-[13px] text-white/60 mb-3">
+                <p className="font-dm text-[14px] text-white/60 mb-3">
                   No patient in consultation
                 </p>
               )}
@@ -470,7 +470,7 @@ const TodaysQueue = () => {
             }}
           >
             <div>
-              <p className="font-dm text-[10px] font-semibold tracking-[0.12em] uppercase text-white/70 mb-2">
+              <p className="font-dm text-[13px] font-semibold tracking-[0.12em] uppercase text-white/70 mb-2">
                 Next Patient
               </p>
 
@@ -511,7 +511,7 @@ const TodaysQueue = () => {
                   </div>
                 </div>
               ) : (
-                <p className="font-dm text-[13px] text-white/60 mb-3">
+                <p className="font-dm text-[14px] text-white/60 mb-3">
                   No patient in queue
                 </p>
               )}
@@ -612,13 +612,13 @@ const TodaysQueue = () => {
         "Walk-in"}
     </p>
 
-    <p className="font-dm text-[11px] sm:text-[12px] text-[#6b7f8a]">
+    <p className="font-dm text-[14px] sm:text-[15px] text-[#6b7f8a]">
       {p.reason || "Consultation"}
     </p>
   </div>
 
   <div className="text-center ml-auto sm:ml-0">
-    <p className="font-dm text-[9px] font-semibold tracking-widest uppercase text-[#9fb0b8]">
+    <p className="font-dm text-[14px] sm:text-[15px] font-semibold tracking-widest uppercase text-[#9fb0b8]">
       TOKEN
     </p>
 
@@ -631,7 +631,7 @@ const TodaysQueue = () => {
                     {/* Right — status + actions */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className={`font-dm text-[10px] sm:text-[11px] font-semibold tracking-widest uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border ${st.bg} ${st.text} ${st.border}`}
+                        className={`font-dm text-[10px] sm:text-[13px] font-semibold tracking-widest uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border ${st.bg} ${st.text} ${st.border}`}
                       >
                         {st.label}
                       </span>
@@ -641,7 +641,7 @@ const TodaysQueue = () => {
                           onClick={() =>
                             navigate(`/doctordashboard/prescription/${p.id}`)
                           }
-                          className="font-dm text-[11px] sm:text-[12px] font-semibold text-white bg-[#0e7490] hover:bg-[#0c5f75] px-3 sm:px-4 py-1.5 rounded-full border-none cursor-pointer transition"
+                          className="font-dm text-[14px] sm:text-[15px] font-semibold text-white bg-[#0e7490] hover:bg-[#0c5f75] px-3 sm:px-4 py-1.5 rounded-full border-none cursor-pointer transition"
                           style={{
                             boxShadow: "0 2px 8px rgba(14,116,144,0.2)",
                           }}
@@ -654,7 +654,7 @@ const TodaysQueue = () => {
                         <button
                           disabled={isRecalling}
                           onClick={() => handleRecall(p.id)}
-                          className="font-dm text-[11px] sm:text-[12px] font-semibold text-[#0e7490] bg-[#ecfeff] hover:bg-cyan-100 px-3 sm:px-4 py-1.5 rounded-full border border-[rgba(14,116,144,0.18)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition"
+                          className="font-dm text-[14px] sm:text-[15px] font-semibold text-[#0e7490] bg-[#ecfeff] hover:bg-cyan-100 px-3 sm:px-4 py-1.5 rounded-full border border-[rgba(14,116,144,0.18)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition"
                         >
                           {isRecalling ? "…" : "Recall"}
                         </button>

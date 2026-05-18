@@ -78,14 +78,17 @@ const DoctorDetailPage = () => {
       </div>
     );
   }
+const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const formattedDays = doctor?.availableDays
   ? Array.isArray(doctor.availableDays)
-    ? doctor.availableDays.join(", ")
+    ? doctor.availableDays
+        .sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+        .join(", ")
     : doctor.availableDays
   : "Not Available";
 
-  const infoItems = [
+  const infoItems = [ 
     { label: "Clinic Name", value: doctor.clinicName, icon: "🏥" },
     { label: "City", value: doctor.city, icon: "📍" },
     { label: "Address", value: doctor.address, icon: "🗺️" },
@@ -218,13 +221,13 @@ const formattedDays = doctor?.availableDays
                     }}
                   >
                     <p
-                      className="font-[family-name:var(--font-dm)] text-[11px] font-semibold uppercase tracking-wider mb-1"
+                      className=" text-[11px] font-bold uppercase tracking-wider mb-1"
                       style={{ color: "#94a3b8" }}
                     >
                       {item.icon} {item.label}
                     </p>
                     <p
-                      className={`font-[family-name:var(--font-dm)] text-[14px] font-semibold ${
+                      className={` text-[14px] font-bold ${
                         item.highlight ? "text-[#0086C3]" : "text-[#0c1e3a]"
                       }`}
                     >
@@ -244,7 +247,7 @@ const formattedDays = doctor?.availableDays
                 border: "1px solid rgba(12,30,58,0.06)",
               }}
             >
-              <h4 className="font-[family-name:var(--font-playfair)] text-[16px] font-bold text-[#0c1e3a] text-center mb-4">
+              <h4 className=" text-[16px] font-bold text-[#0c1e3a] text-center mb-4">
                 Take Action
               </h4>
 
@@ -257,13 +260,13 @@ const formattedDays = doctor?.availableDays
                   }}
                 >
                   <p
-                    className="font-[family-name:var(--font-dm)] text-[11px] font-semibold uppercase tracking-wider mb-0.5"
+                    className=" text-[11px] font-bold uppercase tracking-wider mb-0.5"
                     style={{ color: "#94a3b8" }}
                   >
                     Consultation Fee
                   </p>
                   <p
-                    className="font-[family-name:var(--font-playfair)] text-[24px] font-extrabold"
+                    className="text-[24px] font-semibold"
                     style={{ color: "#0086C3" }}
                   >
                     ₹{doctor.consultationFee}
@@ -280,7 +283,7 @@ const formattedDays = doctor?.availableDays
                     { state: { doctor } },
                   )
                 }
-                className="w-full font-[family-name:var(--font-dm)] font-bold text-[14px] text-white py-3 rounded-xl cursor-pointer transition-all duration-250 hover:-translate-y-0.5 mb-2"
+                className="w-full  font-bold text-[15px] text-white py-3 rounded-xl cursor-pointer transition-all duration-250 hover:-translate-y-0.5 mb-2"
                 style={{
                   background: "linear-gradient(135deg,#0086C3,#00b4d8)",
                   boxShadow: "0 4px 14px rgba(0,134,195,0.35)",
@@ -298,7 +301,7 @@ const formattedDays = doctor?.availableDays
               </button>
               <button
                 onClick={() => navigate(`/client/apply-certificate?doctorId=${doctor.doctorId}`, { state: { doctor } })}
-                className="w-full font-[family-name:var(--font-dm)] font-bold text-[14px] text-white py-3 rounded-xl cursor-pointer transition-all duration-250 hover:-translate-y-0.5 mb-2"
+                className="w-full  font-bold text-[15px] text-white py-3 rounded-xl cursor-pointer transition-all duration-250 hover:-translate-y-0.5 mb-2"
                 style={{
                   background: "linear-gradient(135deg,#0086C3,#00b4d8)",
                   boxShadow: "0 4px 14px rgba(0,134,195,0.35)",
@@ -321,11 +324,11 @@ const formattedDays = doctor?.availableDays
                     className="h-px w-full my-4"
                     style={{ background: "rgba(12,30,58,0.07)" }}
                   />
-                  <h4 className="font-[family-name:var(--font-playfair)] text-[15px] font-bold text-[#0c1e3a] mb-2">
+                  <h4 className=" text-[15px] font-bold text-[#0c1e3a] mb-2">
                     About Doctor
                   </h4>
                   <p
-                    className="font-[family-name:var(--font-dm)] text-[13px] leading-relaxed"
+                    className=" text-[14px] font-semibold leading-relaxed"
                     style={{ color: "#64748b" }}
                   >
                     {doctor.description}

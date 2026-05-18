@@ -52,7 +52,7 @@ const ClientRegisterPage = () => {
   };
 
   const inputCls = (field) =>
-    `w-full pl-10 pr-4 py-2.5 rounded-xl font-[family-name:var(--font-dm)] text-[14px] text-[#0c1e3a] outline-none transition-all duration-200 ${
+    `w-full pl-10 pr-4 py-2.5 rounded-xl font-[family-name:var(--font-dm)] text-[16px] text-[#0c1e3a] outline-none transition-all duration-200 ${
       errors[field]
         ? "border-2 border-red-400 bg-red-50"
         : "border border-[rgba(12,30,58,0.15)] bg-white focus:border-2 focus:border-[#0086C3]"
@@ -83,7 +83,7 @@ const ClientRegisterPage = () => {
             Create Patient Account
           </h2>
           <p
-            className="font-[family-name:var(--font-dm)] text-[14px] mb-7"
+            className="font-[family-name:var(--font-dm)] text-[15px] mb-7"
             style={{ color: "#64748b" }}
           >
             Join us to manage your health with ease.
@@ -267,7 +267,7 @@ const ClientRegisterPage = () => {
           </form>
 
           <p
-            className="mt-6 text-center font-[family-name:var(--font-dm)] text-[13px]"
+            className="mt-6 text-center font-[family-name:var(--font-dm)] text-[15px]"
             style={{ color: "#64748b" }}
           >
             Already have an account?{" "}
