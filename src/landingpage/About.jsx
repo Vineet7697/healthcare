@@ -41,25 +41,26 @@ const ICONS = {
   team:   "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
 };
 
-const FALLBACK_STATS = { doctors: 5000, patients: 1000, labs: 50, clinics: 100 };
+const FALLBACK_STATS = { doctors: 100, patients: 100, labs: 10, clinics: 100 };
 
 const getStatsFromCache = () => {
   try {
     const raw = localStorage.getItem("yo_public_stats");
     if (!raw) return FALLBACK_STATS;
     const parsed = JSON.parse(raw);
-    if (parsed.labs > 100) parsed.labs = 50;
     return {
       doctors:  parsed.doctors  ?? FALLBACK_STATS.doctors,
+      // labs:     parsed.labs     ?? FALLBACK_STATS.labs,
       patients: parsed.patients ?? FALLBACK_STATS.patients,
-      labs:     parsed.labs     ?? FALLBACK_STATS.labs,
-      clinics:  parsed.doctors  ?? FALLBACK_STATS.clinics,
+      clinics:  parsed.doctors  ?? FALLBACK_STATS.doctors,
     };
   } catch {
     return FALLBACK_STATS;
   }
 };
 
+// FIX 3: Removed `overflow-hidden` from FadeIn wrapper — it was clipping
+// box shadows and the hover `-translate-y-1` effect on child cards.
 const FadeIn = ({ children, delay = 0, direction = "up" }) => {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -74,7 +75,7 @@ const FadeIn = ({ children, delay = 0, direction = "up" }) => {
   const startY = direction === "up" ? 32 : 0;
   const startX = direction === "left" ? -32 : direction === "right" ? 32 : 0;
   return (
-    <div ref={ref} className="w-full overflow-hidden" style={{
+    <div ref={ref} className="w-full" style={{
       opacity: visible ? 1 : 0,
       transform: visible ? "translate(0,0)" : `translate(${startX}px,${startY}px)`,
       transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
@@ -139,8 +140,9 @@ const AppFeatureCard = ({ item }) => (
 /* ═══════════════════════════════════════════════ */
 const About = () => {
   const { language, lang } = useLanguage();
-  const safeLang = lang[language] ? language : "en";
-  const t = lang[safeLang];
+  // FIX 4: Guard against lang being undefined before accessing keys.
+  const safeLang = lang && lang[language] ? language : "en";
+  const t = (lang && lang[safeLang]) ?? {};
   const cachedStats = getStatsFromCache();
 
   const stats = [
@@ -217,7 +219,6 @@ const About = () => {
                   loading="lazy"
                   className="relative z-10 w-full h-auto rounded-2xl shadow-xl block"
                 />
-                
               </div>
             </FadeIn>
 
@@ -228,7 +229,7 @@ const About = () => {
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 sm:mb-5 leading-tight">
                   {t.about_title}
                 </h2>
-                <p className="text-gray-700 leading-relaxed  md:text-base mb-5 sm:mb-7">
+                <p className="text-gray-700 leading-relaxed md:text-base mb-5 sm:mb-7">
                   {t.about_desc}
                 </p>
                 {checkItems.map((item, i) => (
@@ -261,7 +262,7 @@ const About = () => {
         <div className="relative z-10 max-w-6xl mx-auto">
           <FadeIn>
             <div className="text-center mb-8 sm:mb-10 md:mb-12">
-              <span className=" font-extrabold uppercase tracking-[0.3em] text-yellow-400 inline-block mb-2 sm:mb-3">
+              <span className="font-extrabold uppercase tracking-[0.3em] text-yellow-400 inline-block mb-2 sm:mb-3">
                 Our Impact
               </span>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white">{t.stats_title}</h2>
@@ -331,7 +332,7 @@ const About = () => {
                 <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 sm:mb-5 leading-tight">
                   {t.tech_title}
                 </h3>
-                <p className="text-gray-600 text-base  leading-relaxed mb-5 sm:mb-7">
+                <p className="text-gray-600 text-base leading-relaxed mb-5 sm:mb-7">
                   {t.tech_desc}
                 </p>
                 <div className="flex items-center gap-2">

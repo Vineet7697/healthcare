@@ -47,7 +47,6 @@ const ICONS = {
   check:
     "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
   home: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-
   search: "M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z",
   appt: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
   consult:
@@ -66,12 +65,13 @@ const ICONS = {
     "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
 };
 
-const ServiceCard = ({ img, title, desc, iconKey }) => {
+/* ── Service Card ─────────────────────────────────────── */
+const ServiceCard = ({ img, title, desc, iconKey, expanded, onToggle }) => {
   const [hovered, setHovered] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+
   return (
     <div
-      className="flex flex-col w-60 h-80 bg-white rounded-2xl overflow-hidden"
+      className="flex flex-col w-full h-full bg-white rounded-2xl overflow-hidden"
       style={{
         boxShadow: hovered
           ? "0 20px 48px rgba(0,114,188,0.16)"
@@ -82,8 +82,8 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* IMAGE HEIGHT RESPONSIVE */}
-      <div className="relative overflow-hidden h-[100px] sm:h-[120px]">
+      {/* Image */}
+      <div className="relative overflow-hidden" style={{ height: 160 }}>
         <img
           src={img}
           alt={title}
@@ -94,31 +94,12 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
             transition: "transform 0.5s",
           }}
         />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(5,15,36,0.5) 0%, transparent 55%)",
-            opacity: hovered ? 1 : 0,
-            transition: "opacity 0.3s",
-          }}
-        />
-        <div
-          className="absolute top-3 left-3 flex items-center justify-center rounded-xl bg-white"
-          style={{
-            width: 38,
-            height: 38,
-            boxShadow: "0 2px 10px rgba(0,0,0,0.13)",
-          }}
-        >
-          <Icon d={ICONS[iconKey]} />
-        </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex flex-col flex-1 p-3 sm:p-5 gap-2">
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-4 gap-2 justify-between">
         <h3
-          className="font-bold text-lg leading-snug"
+          className="font-bold text-base leading-snug"
           style={{
             color: hovered ? "#0072BC" : "#1a2e44",
             transition: "color 0.2s",
@@ -126,77 +107,59 @@ const ServiceCard = ({ img, title, desc, iconKey }) => {
         >
           {title}
         </h3>
-        <div
+
+        <p
+          className="text-sm text-gray-600 leading-relaxed flex-1 overflow-hidden transition-all duration-300"
           style={{
-            width: hovered ? 36 : 20,
-            height: 2,
-            background: "#0072BC",
-            borderRadius: 2,
-            transition: "width 0.3s",
+            maxHeight: expanded ? "500px" : "96px",
           }}
-        />
-        <p className="text-gray-700 leading-relaxed flex-1">
-          {expanded ? desc : desc.slice(0, 60) + "..."}
-        </p>
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1 text-xs font-bold mt-1 w-fit"
-          style={{ color: "#0072BC" }}
         >
-          {expanded ? "Show Less" : "Read More"}
-          <svg
-            width="13"
-            height="13"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="#0072BC"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              transform: hovered ? "translateX(4px)" : "translateX(0)",
-              transition: "transform 0.2s",
-            }}
+          {desc}
+        </p>
+
+        {desc.length > 80 && (
+          <button
+            onClick={onToggle}
+            className="flex items-center gap-1 text-xs font-bold mt-1 w-fit"
+            style={{ color: "#0072BC" }}
           >
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+            {expanded ? "Show Less" : "Read More"}
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
+/* ── Process Steps ────────────────────────────────────── */
 const processSteps = [
   {
     num: "01",
     iconKey: "search",
     title: "Find a Doctor",
     desc: "Browse verified doctor profiles by speciality, location, or availability. Read reviews and choose the right doctor for your needs.",
-    dark: false,
   },
   {
     num: "02",
     iconKey: "appt",
     title: "Book Appointment",
     desc: "Schedule an in-clinic visit or video consultation instantly. Pick a time slot that suits you — no waiting in queues.",
-    dark: false,
   },
   {
     num: "03",
     iconKey: "consult",
     title: "Consult & Diagnose",
     desc: "Get professional medical advice, diagnosis, and prescriptions from certified doctors — from the comfort of your home or clinic.",
-    dark: false,
   },
   {
     num: "04",
     iconKey: "care",
-    title: "Prescribe",
+    title: "Follow-up Care",
     desc: "Access your lab reports, prescriptions, and health packages anytime. Avail home care services and stay on track with your health.",
-    dark: false,
   },
 ];
 
+/* ── Why Choose Data ──────────────────────────────────── */
 const whyChoose = [
   {
     iconKey: "verified",
@@ -230,10 +193,73 @@ const whyChoose = [
   },
 ];
 
-/* ═══════════════════════════════════════════════ */
+/* ── Why Card ─────────────────────────────────────────── */
+const WhyCard = ({ iconKey, title, desc }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="flex flex-col gap-3 p-5 rounded-2xl transition-all duration-300 cursor-default"
+      style={{
+        background: hovered ? "#0072BC" : "#f4f7fb",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        boxShadow: hovered ? "0 16px 40px rgba(0,114,188,0.2)" : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        style={{
+          width: "100%",
+          height: 3,
+          borderRadius: 2,
+          background: hovered ? "rgba(255,255,255,0.3)" : "#0072BC",
+          marginBottom: 4,
+        }}
+      />
+      <div
+        className="flex items-center justify-center rounded-xl"
+        style={{
+          width: 48,
+          height: 48,
+          background: hovered
+            ? "rgba(255,255,255,0.15)"
+            : "rgba(0,114,188,0.1)",
+          flexShrink: 0,
+        }}
+      >
+        <Icon
+          d={ICONS[iconKey]}
+          size={22}
+          color={hovered ? "#fff" : "#0072BC"}
+        />
+      </div>
+      <h3
+        className="font-bold text-base leading-snug"
+        style={{
+          color: hovered ? "#ffffff" : "#1a2e44",
+          transition: "color 0.2s",
+        }}
+      >
+        {title}
+      </h3>
+      <p
+        className="text-sm leading-relaxed"
+        style={{
+          color: hovered ? "rgba(220,235,255,0.9)" : "#4b5563",
+          transition: "color 0.2s",
+        }}
+      >
+        {desc}
+      </p>
+    </div>
+  );
+};
+
+/* ══════════════════════════════════════════════════════ */
 const Service = () => {
   const { language, lang } = useLanguage();
   const t = lang[language];
+  const [expandedCard, setExpandedCard] = useState(null);
 
   const services = [
     {
@@ -242,12 +268,6 @@ const Service = () => {
       desc: t.online_booking_desc,
       iconKey: "calendar",
     },
-    // {
-    //   img: VideoconsultationImg,
-    //   title: t.video_consult_title,
-    //   desc: t.video_consult_desc,
-    //   iconKey: "video",
-    // },
     {
       img: inclinicConsultationImg,
       title: t.clinic_consult_title,
@@ -284,12 +304,6 @@ const Service = () => {
       desc: t.prescription_desc,
       iconKey: "doc",
     },
-    // {
-    //   img: healthpackageImg,
-    //   title: t.health_package_title,
-    //   desc: t.health_package_desc,
-    //   iconKey: "check",
-    // },
     {
       img: homecareserviceImg,
       title: t.home_care_title,
@@ -307,9 +321,10 @@ const Service = () => {
         url="https://www.yodoctor.in/services"
       />
 
+      {/* ── Hero Banner ──────────────────────────────── */}
       <div
         className="relative w-full overflow-hidden"
-        style={{ minHeight: 240, background: "#050f24" }}
+        style={{ minHeight: 220, background: "#050f24" }}
       >
         {/* Dot-grid */}
         <svg
@@ -329,12 +344,13 @@ const Service = () => {
           </defs>
           <rect width="100%" height="100%" fill="url(#dots)" />
         </svg>
+
         {/* Glow orb */}
         <div
           className="absolute"
           style={{
-            width: 400,
-            height: 400,
+            width: 320,
+            height: 320,
             borderRadius: "50%",
             background:
               "radial-gradient(circle, rgba(0,114,188,0.25) 0%, transparent 70%)",
@@ -344,31 +360,32 @@ const Service = () => {
             pointerEvents: "none",
           }}
         />
-        {/* Center content */}
-        <div className="relative z-10 flex flex-col items-center justify-center py-16 px-4 text-center mt-10">
-          <div>
-            <span className=" font-extrabold uppercase tracking-widest mb-3 inline-block text-[#0072BC] text-lg">
+
+        <div className="relative z-10 flex flex-col items-center justify-center py-14 px-4 text-center mt-8 sm:mt-10">
+          <div className="flex items-center gap-1 mb-1">
+            <span className="font-extrabold uppercase tracking-widest text-base sm:text-lg text-[#0072BC]">
               Yo
-            </span>{" "}
-            <span className="text-lg font-extrabold uppercase tracking-widest mb-3 inline-block text-[#16a34a]">
-              {" "}
+            </span>
+            <span className="font-extrabold uppercase tracking-widest text-base sm:text-lg text-[#16a34a]">
               Doctor
             </span>
           </div>
+
           <h1
             className="font-black uppercase text-white"
             style={{
-              fontSize: "clamp(2.2rem, 6vw, 4rem)",
-              letterSpacing: "0.18em",
-              lineHeight: 1.1,
+              fontSize: "clamp(1.8rem, 6vw, 3.8rem)",
+              letterSpacing: "0.12em",
+              lineHeight: 1.15,
             }}
           >
             Our <span style={{ color: "#0072BC" }}>Services</span>
           </h1>
-          <div className="flex items-center gap-3 mt-4">
+
+          <div className="flex items-center gap-3 mt-3">
             <div
               style={{
-                width: 56,
+                width: 48,
                 height: 2,
                 background: "#0072BC",
                 borderRadius: 2,
@@ -384,15 +401,16 @@ const Service = () => {
             />
             <div
               style={{
-                width: 56,
+                width: 48,
                 height: 2,
                 background: "#0072BC",
                 borderRadius: 2,
               }}
             />
           </div>
+
           <p
-            className="mt-5 text-lg max-w-sm"
+            className="mt-4 text-sm sm:text-base max-w-xs sm:max-w-sm px-4"
             style={{ color: "rgba(180,210,255,0.75)", lineHeight: 1.7 }}
           >
             Comprehensive healthcare solutions designed for your convenience and
@@ -401,13 +419,19 @@ const Service = () => {
         </div>
       </div>
 
-      <section
-        id="services"
-        style={{ background: "#eef3fb", padding: "64px 0 88px" }}
-      >
-        <div className="max-w-7xl mx-auto px-10 sm:px-8 md:px-12">
-          <div className="flex items-stretch gap-4 mb-10">
-            <div style={{ width: 4, background: "#0072BC", borderRadius: 4 }} />
+      {/* ── Services Grid ────────────────────────────── */}
+      <section style={{ background: "#eef3fb", padding: "56px 0 72px" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-12">
+          {/* Section header */}
+          <div className="flex items-stretch gap-4 mb-8 sm:mb-10">
+            <div
+              style={{
+                width: 4,
+                background: "#0072BC",
+                borderRadius: 4,
+                flexShrink: 0,
+              }}
+            />
             <div>
               <p
                 className="text-xs font-extrabold uppercase tracking-widest mb-0.5"
@@ -415,67 +439,83 @@ const Service = () => {
               >
                 What We Offer
               </p>
-              <h2 className="text-2xl font-extrabold text-gray-900 leading-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight">
                 Explore Our Healthcare Services
               </h2>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+
+          {/*
+            Mobile  : 1 col
+            sm(640) : 2 cols
+            md(768) : 2 cols
+            lg(1024): 3 cols
+            xl(1280): 4 cols
+          */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch">
             {services.map((s, i) => (
-              <ServiceCard key={i} {...s} />
+              <ServiceCard
+                key={i}
+                {...s}
+                expanded={expandedCard === i}
+                onToggle={() => setExpandedCard(expandedCard === i ? null : i)}
+              />
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ background: "#f8faff", padding: "72px 0 80px" }}>
-        <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="text-center mb-14">
+      {/* ── How It Works ─────────────────────────────── */}
+      <section style={{ background: "#f8faff", padding: "64px 0 72px" }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 lg:px-12">
+          <div className="text-center mb-10 sm:mb-14">
             <p
-              className=" font-extrabold uppercase tracking-widest mb-2"
+              className="font-extrabold uppercase tracking-widest mb-2 text-sm"
               style={{ color: "#0072BC" }}
             >
               How It Works
             </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-              Our Simple{" "}
-              <span style={{ color: "#0072BC" }}>Healthcare Process</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900">
+              Our Simple Healthcare Process
             </h2>
-            <p className="mt-3 text-gray-700  max-w-xl mx-auto leading-relaxed">
+            <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-xl mx-auto leading-relaxed px-2">
               Getting quality healthcare has never been easier. Follow these
               four steps to connect with the right doctor.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          {/*
+            Mobile  : 1 col (stacked cards, no connector line)
+            md(768) : 2 cols
+            lg(1024): 4 cols (with connector line)
+          */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 relative">
+            {/* Horizontal connector line — desktop only */}
             <div
-              className="hidden lg:block absolute top-10 left-0 right-0 h-px"
+              className="hidden lg:block absolute h-px"
               style={{
                 background:
                   "linear-gradient(to right, transparent, #0072BC44, #0072BC44, transparent)",
-                margin: "0 10%",
+                top: 52,
+                left: "6%",
+                right: "6%",
               }}
             />
 
             {processSteps.map((step, i) => (
               <div
                 key={i}
-                className="relative flex flex-col rounded-2xl p-6 transition-all duration-300"
+                className="relative flex flex-col rounded-2xl p-5 sm:p-6"
                 style={{
-                  background: step.dark ? "#0a1a3c" : "#ffffff",
-                  color: step.dark ? "#fff" : "#1a2e44",
-                  boxShadow: step.dark
-                    ? "0 12px 40px rgba(0,114,188,0.25)"
-                    : "0 4px 20px rgba(0,0,0,0.07)",
+                  background: "#ffffff",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
                 }}
               >
                 <span
-                  className="font-black mb-4 leading-none select-none"
+                  className="font-black mb-3 leading-none select-none"
                   style={{
-                    fontSize: "2.2rem",
-                    color: step.dark
-                      ? "rgba(255,255,255,0.2)"
-                      : "rgba(0,0,0,0.12)",
+                    fontSize: "2rem",
+                    color: "rgba(0,0,0,0.1)",
                     letterSpacing: "-0.02em",
                   }}
                 >
@@ -486,87 +526,80 @@ const Service = () => {
                   style={{
                     width: 48,
                     height: 48,
-                    background: step.dark
-                      ? "rgba(255,255,255,0.2)"
-                      : "rgba(0,114,200,0.08)",
+                    background: "rgba(0,114,200,0.08)",
+                    flexShrink: 0,
                   }}
                 >
-                  <Icon
-                    d={ICONS[step.iconKey]}
-                    size={22}
-                    color={step.dark ? "#7ec8f8" : "#0072BC"}
-                  />
+                  <Icon d={ICONS[step.iconKey]} size={22} color="#0072BC" />
                 </div>
-                <h3
-                  className="font-bold text-lg mb-2"
-                  style={{ color: step.dark ? "#fff" : "#1a2e44" }}
-                >
+                <h3 className="font-bold text-base sm:text-lg mb-2 text-gray-900">
                   {step.title}
                 </h3>
                 <div
                   style={{
                     width: 28,
                     height: 2,
-                    background: step.dark ? "#f5c518" : "#0072BC",
+                    background: "#0072BC",
                     borderRadius: 2,
-                    marginBottom: 12,
+                    marginBottom: 10,
                   }}
                 />
-                <p
-                  className="  leading-relaxed"
-                  style={{
-                    color: step.dark ? "rgba(200,220,255,0.7)" : "#1a2e44",
-                  }}
-                >
+                <p className="text-sm leading-relaxed text-gray-600">
                   {step.desc}
                 </p>
 
-                <div
-                  className="hidden lg:flex absolute -right-3 top-10 w-6 h-6 rounded-full items-center justify-center z-10"
-                  style={{
-                    background: step.dark ? "#f5c518" : "#0072BC",
-                    display: i < processSteps.length - 1 ? undefined : "none",
-                  }}
-                >
-                  <svg
-                    width="10"
-                    height="10"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="#fff"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                {/* Arrow connector — desktop only, not last */}
+                {i < processSteps.length - 1 && (
+                  <div
+                    className="hidden lg:flex absolute -right-3 top-12 w-6 h-6 rounded-full items-center justify-center z-10"
+                    style={{ background: "#0072BC" }}
                   >
-                    <path d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
+                    <svg
+                      width="10"
+                      height="10"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="#fff"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ background: "#ffffff", padding: "72px 0 88px" }}>
-        <div className="max-w-6xl mx-auto px-6 md:px-12">
-          {/* Heading */}
-          <div className="text-center mb-14">
+      {/* ── Why Choose ───────────────────────────────── */}
+      <section style={{ background: "#ffffff", padding: "64px 0 80px" }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 lg:px-12">
+          <div className="text-center mb-10 sm:mb-14">
             <p
-              className=" font-extrabold uppercase tracking-widest mb-2"
+              className="font-extrabold uppercase tracking-widest mb-2 text-sm"
               style={{ color: "#0072BC" }}
             >
               Our Strengths
             </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-              Why Choose <span style={{ color: "#0072BC" }}>Yo Doctor?</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900">
+              Why Choose <span className="text-blue-500 ">Yo</span>{" "}
+              <span className="text-green-500"> Doctor</span> ?
             </h2>
-            <p className="mt-3 text-gray-700  max-w-xl mx-auto leading-relaxed">
+            <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-xl mx-auto leading-relaxed px-2">
               We combine technology and compassion to deliver healthcare that
               puts patients first.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/*
+            Mobile  : 1 col
+            sm(640) : 2 cols
+            lg(1024): 3 cols
+          */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-8">
             {whyChoose.map((item, i) => (
               <WhyCard key={i} {...item} />
             ))}
@@ -574,67 +607,6 @@ const Service = () => {
         </div>
       </section>
     </>
-  );
-};
-
-const WhyCard = ({ iconKey, title, desc }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <div
-      className="flex flex-col gap-3 p-6 rounded-2xl transition-all duration-300"
-      style={{
-        background: hovered ? "#0072BC" : "#f4f7fb",
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
-        boxShadow: hovered ? "0 16px 40px rgba(0,114,188,0.2)" : "none",
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div
-        style={{
-          width: "100%",
-          height: 3,
-          borderRadius: 2,
-          background: hovered ? "rgba(255,255,255,0.3)" : "#0072BC",
-          marginBottom: 4,
-        }}
-      />
-      {/* Icon */}
-      <div
-        className="flex items-center justify-center rounded-xl"
-        style={{
-          width: 48,
-          height: 48,
-          background: hovered
-            ? "rgba(255,255,255,0.15)"
-            : "rgba(0,114,188,0.1)",
-        }}
-      >
-        <Icon
-          d={ICONS[iconKey]}
-          size={22}
-          color={hovered ? "#fff" : "#0072BC"}
-        />
-      </div>
-      <h3
-        className="font-bold text-lg leading-snug"
-        style={{
-          color: hovered ? "#ffffff" : "#1a2e44",
-          transition: "color 0.2s",
-        }}
-      >
-        {title}
-      </h3>
-      <p
-        className="text-sm leading-relaxed"
-        style={{
-          color: hovered ? "rgba(220,235,255,0.85)" : "#1a2e44",
-          transition: "color 0.2s",
-        }}
-      >
-        {desc}
-      </p>
-    </div>
   );
 };
 

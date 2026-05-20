@@ -300,6 +300,8 @@ import PaymentPage from "../pages/PaymentPage";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentFailed from "../pages/PaymentFailed";
 import MySubscription from "../pages/MySubscription";
+import LabRegistration from "../views/lab/LabRegistration";
+import BookLabTest from "../views/lab/BookLabTest";
 
 const Router = () => {
   return (
@@ -330,15 +332,17 @@ const Router = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/home-service-booking" element={<PatientBookHomeService />} />
+           <Route path="labregister" element={<LabRegistration />} />
+            <Route path="book-labtest" element={<BookLabTest />} />
+
 
           <Route
             path="/verify/:certificateId"
             element={<VerifyCertificate />}
           />
         </Route>
-
+       
         {/* comming soon section */}
-        <Route path="/lab-test" element={<ComingSoon />} />
         <Route path="/medicine" element={<ComingSoon />} />
         <Route path="/blood-donor" element={<ComingSoon />} />
 

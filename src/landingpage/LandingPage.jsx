@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -13,40 +13,57 @@ import homecareservices from "../assets/images/home_care_services.png";
 import qrBooking from "../assets/images/qr-booking.png";
 import onlineBooking from "../assets/images/online-booking.png";
 import certificate from "../assets/images/certificate.png";
+// import { use } from "react";
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { language, lang } = useLanguage();
   const t = lang[language];
+  const [doctors, setDoctors] = useState([]);
 
-  const doctors = [
-  {
-    name: "Dr. Praveen Singh",
-    specialty: "Cardiologist",
-    experience: "12 Years",
-    rating: "4.9",
-    image:
-      "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d",
-  },
+  //   const doctors = [
+  //   {
+  //     name: "Dr. Praveen Singh",
+  //     specialty: "Cardiologist",
+  //     experience: "12 Years",
+  //     rating: "4.9",
+  //     image:
+  //       "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d",
+  //   },
 
-  {
-    name: "Dr. Pooja Sharma",
-    specialty: "Dermatologist",
-    experience: "8 Years",
-    rating: "4.8",
-    image:
-      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2",
-  },
+  //   {
+  //     name: "Dr. Pooja Sharma",
+  //     specialty: "Dermatologist",
+  //     experience: "8 Years",
+  //     rating: "4.8",
+  //     image:
+  //       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2",
+  //   },
 
-  {
-    name: "Dr. Neha Verma",
-    specialty: "Pediatrician",
-    experience: "10 Years",
-    rating: "4.9",
-    image:
-      "https://images.unsplash.com/photo-1594824476967-48c8b964273f",
-  },
-];
+  //   {
+  //     name: "Dr. Neha Verma",
+  //     specialty: "Pediatrician",
+  //     experience: "10 Years",
+  //     rating: "4.9",
+  //     image:
+  //       "https://images.unsplash.com/photo-1594824476967-48c8b964273f",
+  //   },
+  // ];
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+  const fetchDoctors = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/doctor/alldoctors`,
+      );
+      const data = await response.json();
+      setDoctors(data?.doctors || []);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
 
   useEffect(() => {
     const token =
@@ -83,7 +100,7 @@ const LandingPage = () => {
       img: labTesting,
       label: t.labTest || "Lab Tests",
       sub: "Sample Pickup at Your Door",
-      link: "/lab-test",
+      link: "/book-labtest",
       tagBg: "bg-sky-500",
       tag: "HOME",
       accentColor: "#0099ee",
@@ -214,59 +231,60 @@ const LandingPage = () => {
           </div>
 
           {/* RIGHT — doctor image */}
-     <div className="hidden md:flex relative w-[700px] h-[400px] mt-10">
-      <Swiper
-        modules={[Autoplay, Pagination]}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-        }}
-        pagination={{ clickable: true }}
-        loop={true}
-        className="w-full h-full"
-      >
-        {doctors.map((doctor) => (
-          <SwiperSlide key={doctor._id}>
-            <div
-              className="relative w-full h-full rounded-[32px] overflow-hidden border"
-              style={{
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(255,255,255,0.03)",
-                backdropFilter: "blur(20px)",
+          <div className="hidden md:flex relative w-[700px] h-[400px] mt-10">
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
               }}
+              pagination={{ clickable: true }}
+              loop={true}
+              className="w-full h-full"
             >
-              <img
-                src={doctor.image}
-                alt={doctor.name}
-                className="w-full h-[60%] object-cover"
-              />
+              {Array.isArray(doctors) &&
+                doctors.map((doctor) => (
+                  <SwiperSlide key={doctor._id}>
+                    <div
+                      className="relative w-full h-full rounded-[32px] overflow-hidden border"
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "rgba(255,255,255,0.03)",
+                        backdropFilter: "blur(20px)",
+                      }}
+                    >
+                      <img
+                        src={doctor.profile_image}
+                        alt={doctor.doctorName}
+                        className="w-full h-[60%] object-cover"
+                      />
 
-              <div className="p-5 text-white">
-                <h2 className="text-2xl font-bold">
-                  {doctor.name}
-                </h2>
+                      <div className="p-5 text-white">
+                        <h2 className="text-2xl font-bold">
+                          {doctor.doctorName}
+                        </h2>
 
-                <p className="text-cyan-300 mt-1">
-                  {doctor.specialty}
-                </p>
+                        <p className="text-cyan-300 mt-1">
+                          {doctor.specialization}
+                        </p>
 
-                <div className="flex justify-between mt-4 text-sm">
-                  <span>⭐ {doctor.rating}</span>
+                        <div className="flex justify-between mt-4 text-sm">
+                          <span>⭐ {doctor.rating}</span>
+                          <span> Doctor Of The Month 🏆</span>
+                        </div>
+                        <div className="flex justify-between mt-4 text-sm">
+                           <span>{doctor.experience_years} Years Exp.</span>
+                        </div>
 
-                  <span>
-                    {doctor.experience} Years Exp.
-                  </span>
-                </div>
-
-                <div className="mt-4 inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-300 text-xs font-semibold">
-                  Doctor Of The Month 🏆
-                </div>
-              </div>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
+                        <div className="mt-4 inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-300 text-xs font-semibold">
+                         
+                        </div>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+            </Swiper>
+          </div>
         </div>
 
         {/* ── SERVICES SECTION ── */}
