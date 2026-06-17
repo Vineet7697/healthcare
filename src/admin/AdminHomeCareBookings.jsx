@@ -141,6 +141,7 @@ export default function AdminHomeCareBookings() {
                   "Date",
                   "Days",
                   "Time",
+                  "Location",
                 ].map((col) => (
                   <th
                     key={col}
@@ -180,9 +181,7 @@ export default function AdminHomeCareBookings() {
                     <td className="px-4 py-3 text-gray-700">
                       {b.contact_number}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {b.address}
-                    </td>
+                    <td className="px-4 py-3 text-gray-700">{b.address}</td>
 
                     {/* Health Issue */}
                     <td className="px-4 py-3 text-gray-700">
@@ -214,6 +213,34 @@ export default function AdminHomeCareBookings() {
 
                     {/* Time */}
                     <td className="px-4 py-3 text-gray-700">{b.time_slot}</td>
+
+                    <td className="px-4 py-3">
+                      {b.patient_latitude && b.patient_longitude ? (
+                        <div className="flex flex-col gap-2">
+                          <a
+                            href={`https://www.google.com/maps?q=${b.patient_latitude},${b.patient_longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs text-center"
+                          >
+                            View Location
+                          </a>
+
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${b.patient_latitude},${b.patient_longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs text-center"
+                          >
+                            🚑 Navigate
+                          </a>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">
+                          No Location
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

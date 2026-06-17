@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 export default function PaymentFailed() {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [xDone, setXDone] = useState(false);
+
+  const location = useLocation();
+const amount = location.state?.amount;
 
   useEffect(() => {
     const t1 = setTimeout(() => setVisible(true), 100);
@@ -112,7 +115,7 @@ export default function PaymentFailed() {
               <span className="text-gray-700 font-semibold text-sm">Payment Cancelled</span>
             </DetailRow>
             <DetailRow label="Amount">
-              <span className="text-gray-800 font-bold text-sm tracking-wide">₹299</span>
+              <span className="text-gray-800 font-bold text-sm tracking-wide">₹{amount || "-"}</span>
             </DetailRow>
             <DetailRow label="Date" last>
               <span className="text-gray-500 text-sm">

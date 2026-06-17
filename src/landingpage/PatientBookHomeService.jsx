@@ -5,22 +5,34 @@ import { notify } from "../utils/notify";
 
 const SERVICES = [
   {
-    val: "Nurse",
-    name: "Nurse",
-    desc: "Professional nursing care",
+    val: "General Nursing",
+    name: "General Nursing",
+    desc: "Basic nursing care",
+    icon: "👩‍⚕️",
+  },
+  {
+    val: "Elderly Care",
+    name: "Elderly Care",
+    desc: "Senior citizen assistance",
+    icon: "🧓",
+  },
+  {
+    val: "Post Surgery Care",
+    name: "Post Surgery",
+    desc: "Recovery support",
+    icon: "🩹",
+  },
+  {
+    val: "ICU Trained Nurse",
+    name: "ICU Nurse",
+    desc: "Critical care specialist",
     icon: "🏥",
   },
   {
-    val: "Home Care",
-    name: "Home Care",
-    desc: "Daily living assistance",
-    icon: "🏠",
-  },
-  {
-    val: "Home Consultation",
-    name: "Consultation",
-    desc: "Doctor home visit",
-    icon: "🩺",
+    val: "Attendant",
+    name: "Attendant",
+    desc: "Daily patient support",
+    icon: "🤝",
   },
 ];
 
@@ -110,14 +122,24 @@ function ConfirmModal({ form, onConfirm, onCancel, loading }) {
           >
             {[
               { label: "Name", val: form.fullName },
+              { label: "Age", val: form.patientAge },
+              { label: "Gender", val: form.patientGender },
               { label: "Contact", val: form.contact },
               { label: "Service", val: form.service },
+              { label: "Medical Condition", val: form.condition },
+              { label: "Caregiver", val: form.genderPreference },
               {
-                label: "Duration",
-                val: `${form.durationType}${form.numDays && form.durationType !== "1 Day" ? ` · ${form.numDays} days` : ""}`,
+                label: "Emergency",
+                val: form.emergencyBooking ? "Yes" : "No",
               },
               { label: "Date", val: form.prefDate },
               { label: "Time", val: form.timeSlot },
+              {
+                label: "Location",
+                val: form.locationCaptured
+                  ? "Current Location Added"
+                  : "Not Added",
+              },
             ].map(({ label, val }) =>
               val ? (
                 <div
@@ -347,16 +369,33 @@ function Card({ children, className = "" }) {
 export default function PatientBookHomeService() {
   const [form, setForm] = useState({
     fullName: "",
+    patientAge: "",
+    patientGender: "",
+
+    patientLat: "",
+    patientLng: "",
+    locationCaptured: false,
+
+    genderPreference: "",
+    emergencyBooking: false,
+
     address: "",
     contact: "",
+
     service: "",
     condition: "",
+
     durationType: "",
     numDays: "",
+
     prefDate: "",
     timeSlot: "",
+
+    prescription: null,
+
     notes: "",
   });
+  const bookingId = "HC-" + Date.now().toString().slice(-6);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
@@ -373,6 +412,43 @@ export default function PatientBookHomeService() {
     else if (dur.val === "Multiple Days") set("numDays", "");
   };
 
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      notify.error("Geolocation not supported");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        set("patientLat", lat);
+        set("patientLng", lng);
+        set("locationCaptured", true);
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+          );
+
+          const data = await res.json();
+
+          if (data?.display_name) {
+            set("address", data.display_name);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+
+        notify.success("Location captured successfully");
+      },
+      () => {
+        notify.error("Unable to fetch location");
+      },
+    );
+  };
+
   const handleSubmitClick = () => {
     const errs = validateHomeCareForm(form);
     setErrors(errs);
@@ -385,16 +461,25 @@ export default function PatientBookHomeService() {
     try {
       const res = await api.post("/patient/bookhomecare", {
         full_name: form.fullName,
+
+        patient_latitude: form.patientLat,
+        patient_longitude: form.patientLng,
+
         address: form.address,
         contact_number: form.contact,
+
         service_type: form.service,
         medical_condition: form.condition,
+
         duration_type: form.durationType,
         number_of_days: form.numDays,
+
         preferred_date: form.prefDate,
         time_slot: form.timeSlot,
+
         notes: form.notes,
       });
+
       if (res.data.success) {
         setShowModal(false);
         setSubmitted(true);
@@ -469,9 +554,22 @@ export default function PatientBookHomeService() {
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold" style={{ color: "#1a1a1a" }}>
-            Booking Submitted!
-          </h2>
+          <h2 className="text-xl font-bold">Booking Submitted Successfully</h2>
+
+          <div className="space-y-2">
+            <p>
+              <strong>Booking ID:</strong> {bookingId}
+            </p>
+
+            <p>
+              <strong>Status:</strong> Pending Assignment
+            </p>
+
+            <p>
+              <strong>Expected Confirmation:</strong>
+              Within 30 Minutes
+            </p>
+          </div>
           <p className="text-sm leading-relaxed" style={{ color: "#888" }}>
             Thank you,{" "}
             <strong style={{ color: "#1a1a1a" }}>{form.fullName}</strong>. Our
@@ -581,6 +679,32 @@ export default function PatientBookHomeService() {
             <ErrorMsg msg={errors.contact} />
           </div>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <div>
+            <FieldLabel>Patient Age</FieldLabel>
+            <InputField
+              type="number"
+              value={form.patientAge}
+              onChange={(e) => set("patientAge", e.target.value)}
+              placeholder="Enter age"
+            />
+          </div>
+
+          <div>
+            <FieldLabel>Patient Gender</FieldLabel>
+            <select
+              value={form.patientGender}
+              onChange={(e) => set("patientGender", e.target.value)}
+              className="w-full px-3 py-3 rounded-xl border"
+            >
+              <option value="">Select Gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
         <div>
           <FieldLabel>Address</FieldLabel>
           <InputField
@@ -591,6 +715,64 @@ export default function PatientBookHomeService() {
             hasError={!!errors.address}
           />
           <ErrorMsg msg={errors.address} />
+        </div>
+
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={getCurrentLocation}
+            className="px-4 py-2 rounded-xl text-white text-sm font-medium"
+            style={{
+              background: "linear-gradient(135deg,#185FA5,#378ADD)",
+            }}
+          >
+            📍 Use Current Location
+          </button>
+
+          {form.locationCaptured && (
+            <div
+              className="mt-3 p-3 rounded-xl"
+              style={{
+                background: "#EAF7EE",
+                border: "1px solid #B8E3C3",
+              }}
+            >
+              <p className="text-sm font-medium" style={{ color: "#2E7D32" }}>
+                ✅ Current Location Captured
+              </p>
+
+              <p className="text-xs mt-1">Lat: {form.patientLat}</p>
+
+              <p className="text-xs">Lng: {form.patientLng}</p>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <SectionLabel>Caregiver Preference</SectionLabel>
+
+        <FieldLabel>Preferred Caregiver Gender</FieldLabel>
+
+        <select
+          value={form.genderPreference}
+          onChange={(e) => set("genderPreference", e.target.value)}
+          className="w-full px-3 py-3 rounded-xl border"
+        >
+          <option value="">No Preference</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+
+        <div className="mt-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.emergencyBooking}
+              onChange={(e) => set("emergencyBooking", e.target.checked)}
+            />
+            Need Emergency Service (within 2 hours)
+          </label>
         </div>
       </Card>
 
@@ -631,6 +813,19 @@ export default function PatientBookHomeService() {
             </button>
           ))}
         </div>
+      </Card>
+
+      <Card>
+        <SectionLabel>Prescription Upload</SectionLabel>
+
+        <FieldLabel optional>Upload Prescription / Medical Report</FieldLabel>
+
+        <input
+          type="file"
+          accept=".jpg,.jpeg,.png,.pdf"
+          onChange={(e) => set("prescription", e.target.files[0])}
+          className="w-full p-3 rounded-xl border"
+        />
       </Card>
 
       {/* ── Medical Condition ── */}

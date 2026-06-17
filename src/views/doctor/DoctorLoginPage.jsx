@@ -5,6 +5,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { notify } from "../../utils/notify";
 import { DoctorLoginApi } from "../../services/doctor/DoctorLoginApi";
 import loginimageImg from "../../assets/loginimage.webp";
+import api from "../../services/api";
+import { useLocation } from "react-router-dom";
 
 const DoctorLoginPage = () => {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ const DoctorLoginPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,24 +33,42 @@ const DoctorLoginPage = () => {
     navigate("/forgot-password");
   };
 
+  useEffect(() => {
+    if (location.state?.message) {
+      notify.info(location.state.message);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const res = await DoctorLoginApi({
         identifier: formValues.identifier,
         password: formValues.password,
+        portal: "DOCTOR",
       });
+
       const token = res.data.data.token;
       const redirect = res.data.redirect;
       const nextStep = res.data.nextStep;
       const status = res.data.status;
+      const paymentStatus =
+        res.data?.paymentStatus || res.data?.data?.paymentStatus || "inactive";
+
       const loggedInUser = {
         role: "DOCTOR",
         identifier: formValues.identifier,
         status,
+        paymentStatus,
       };
+
       window.dispatchEvent(new Event("userLogin"));
+
+      // ================= DASHBOARD =================
 
       if (redirect === "dashboard") {
         if (rememberMe) {
@@ -57,19 +78,105 @@ const DoctorLoginPage = () => {
           sessionStorage.setItem("token", token);
           sessionStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
         }
-        notify.success("Doctor login successful");
-        navigate("/doctordashboard");
-        return;
+
+        try {
+          const subRes = await api.get("/razorpay/subscriptions/active", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (subRes?.data?.success && subRes?.data?.data?.subscription) {
+            notify.success("Doctor login successful");
+
+            // update latest payment status
+            loggedInUser.paymentStatus = "active";
+
+            if (rememberMe) {
+              localStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(loggedInUser),
+              );
+            } else {
+              sessionStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(loggedInUser),
+              );
+            }
+
+            navigate("/doctordashboard");
+          } else {
+            loggedInUser.paymentStatus = "inactive";
+
+            if (rememberMe) {
+              localStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(loggedInUser),
+              );
+            } else {
+              sessionStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(loggedInUser),
+              );
+            }
+
+            notify.info("Please complete subscription payment");
+
+            navigate("/payment", {
+              replace: true,
+            });
+          }
+        } catch (err) {
+          console.error(err);
+
+          if (err?.response?.status === 404) {
+            loggedInUser.paymentStatus = "inactive";
+
+            if (rememberMe) {
+              localStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(loggedInUser),
+              );
+            } else {
+              sessionStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(loggedInUser),
+              );
+            }
+
+            notify.info("Please complete subscription payment");
+
+            navigate("/payment", {
+              replace: true,
+            });
+
+            return;
+          }
+
+          notify.error("Unable to verify subscription. Please try again.");
+
+          return;
+        }
       }
+
+      // ================= RESUME REGISTRATION =================
+
       if (redirect === "resume") {
         notify.info("Resume your registration");
+
         sessionStorage.setItem("tempToken", token);
+
         navigate(`/doctorregistration?step=${nextStep}`);
         return;
       }
+
+      // ================= WAITING APPROVAL =================
+
       if (redirect === "waiting-approval") {
         notify.info("Your profile is under verification");
+
         sessionStorage.setItem("tempToken", token);
+
         navigate("/approvalstatuspage");
         return;
       }
@@ -83,27 +190,40 @@ const DoctorLoginPage = () => {
   };
 
   useEffect(() => {
-    const loginToken = localStorage.getItem("token");
-    const raw = localStorage.getItem("loggedInUser");
-    const tempToken = sessionStorage.getItem("tempToken");
+    const loginToken =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    // ✅ LOGIN FLOW
+    const raw =
+      localStorage.getItem("loggedInUser") ||
+      sessionStorage.getItem("loggedInUser");
+
     if (loginToken && raw) {
       const user = JSON.parse(raw);
 
       if (user.role === "DOCTOR") {
-        if (user.status === "APPROVED") {
-          navigate("/doctordashboard", { replace: true });
+        if (user.status === "APPROVED" && user.paymentStatus === "active") {
+          navigate("/doctordashboard", {
+            replace: true,
+          });
+          return;
+        }
+
+        if (user.status === "APPROVED" && user.paymentStatus !== "active") {
+          navigate("/payment", {
+            replace: true,
+          });
           return;
         }
 
         if (user.status === "PENDING") {
-          navigate("/approvalstatuspage", { replace: true });
+          navigate("/approvalstatuspage", {
+            replace: true,
+          });
           return;
         }
       }
     }
-  }, []);
+  }, [navigate]);
 
   const inputCls = (field) =>
     `w-full px-4 py-2.5 rounded-lg text-sm text-gray-800 outline-none border transition-colors duration-150 ${

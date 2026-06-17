@@ -179,7 +179,7 @@ talk_doctor_desc2:
     
       labTest: "Lab Test",
       medicine: "Medicine Delivery",
-      booknurse: "Book Nurse/ Home Care Service",
+      booknurse: "Home Nursing Care Service booking",
       onlineAppointment: "Online Book Appointment",
       bloodDonor: "Find Blood Doner",
       manualbooking:" Manual Booking Appointment",

@@ -183,7 +183,7 @@ ambulance_desc:
   
   labTest: "लैब टेस्ट",
   medicine: "दवा डिलीवरी",
-  booknurse: "नर्स/होम केयर सेवा बुक करें",
+  booknurse: "होम नर्सिंग केयर सेवा बुक करें",
   onlineAppointment: "ऑनलाइन अपॉइंटमेंट बुक करें",
   bloodDonor: "रक्तदाता खोजें",
   manualbooking: " मैनुअल बुकिंग",

@@ -90,7 +90,6 @@
 // };
 // const Router = () => {
 
-
 //   return (
 //     <BrowserRouter>
 //     <RouteHandler />
@@ -225,8 +224,6 @@
 
 // export default Router;
 
-
-
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "../utils/Layout/Layout";
 
@@ -295,13 +292,13 @@ import Certificaterequest from "../module/doctor/pages/Certificaterequest";
 import VerifyCertificate from "../utils/VerifyCertificate";
 import PatientBookHomeService from "../landingpage/PatientBookHomeService";
 import AdminHomeCareBookings from "../admin/AdminHomeCareBookings";
-import RazorpayPaymentPage from "../pages/RazorpayPaymentPage";
 import PaymentPage from "../pages/PaymentPage";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentFailed from "../pages/PaymentFailed";
 import MySubscription from "../pages/MySubscription";
 import LabRegistration from "../views/lab/LabRegistration";
 import BookLabTest from "../views/lab/BookLabTest";
+import ConsultationPage from "../module/patient/pages/ConsultationPage";
 
 const Router = () => {
   return (
@@ -310,10 +307,8 @@ const Router = () => {
         {/* 🌐 Public Layout */}
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
-          <Route path="payment" element={<RazorpayPaymentPage />} />
-          <Route path="subscription" element={<PaymentPage/>} />
-         
-          
+          <Route path="payment" element={<PaymentPage />} />
+
           <Route path="payment-success" element={<PaymentSuccess />} />
           <Route path="payment-failed" element={<PaymentFailed />} />
 
@@ -331,17 +326,19 @@ const Router = () => {
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/home-service-booking" element={<PatientBookHomeService />} />
-           <Route path="labregister" element={<LabRegistration />} />
-            <Route path="book-labtest" element={<BookLabTest />} />
-
+          <Route
+            path="/home-service-booking"
+            element={<PatientBookHomeService />}
+          />
+          <Route path="labregister" element={<LabRegistration />} />
+          <Route path="book-labtest" element={<BookLabTest />} />
 
           <Route
             path="/verify/:certificateId"
             element={<VerifyCertificate />}
           />
         </Route>
-       
+
         {/* comming soon section */}
         <Route path="/medicine" element={<ComingSoon />} />
         <Route path="/blood-donor" element={<ComingSoon />} />
@@ -396,7 +393,7 @@ const Router = () => {
           <Route path="appointment" element={<AppointmentHistory />} />
           <Route path="prescription/:id" element={<AddPrescription />} />
           <Route path="certificaterequest" element={<Certificaterequest />} />
-           <Route path="mysubscription" element={<MySubscription />} />
+          <Route path="mysubscription" element={<MySubscription />} />
 
           <Route path="reviews" element={<DoctorReviews />} />
         </Route>
@@ -411,6 +408,10 @@ const Router = () => {
             </ProtectedRoute>
           }
         >
+          <Route
+            path="consultation/:consultationId"
+            element={<ConsultationPage />}
+          />
           <Route index element={<PatientDashboard />} />
           <Route path="dashboard" element={<PatientDashboard />} />
 

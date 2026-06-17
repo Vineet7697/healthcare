@@ -70,3 +70,12 @@ export const submitDoctorReview = (data) =>
   api.post("/patient/doctor-feedback", data);
 
 export const qrBookVisit = (data) => api.post("/patient/visit/qr-book", data);
+
+// export const updatePatient = (
+//   id,
+//   body
+// ) =>
+//   api.patch(
+//     `/patient/${id}`,
+//     body
+//   );

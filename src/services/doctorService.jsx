@@ -87,3 +87,5 @@ export const carryForwardRemaining = (slot) =>
 /* ================= REVIEWS ================= */
 export const getDoctorReviews = (page = 1) =>
   api.get(`/doctor/reviews?page=${page}`);
+
+

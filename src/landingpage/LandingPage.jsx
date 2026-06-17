@@ -21,34 +21,6 @@ const LandingPage = () => {
   const t = lang[language];
   const [doctors, setDoctors] = useState([]);
 
-  //   const doctors = [
-  //   {
-  //     name: "Dr. Praveen Singh",
-  //     specialty: "Cardiologist",
-  //     experience: "12 Years",
-  //     rating: "4.9",
-  //     image:
-  //       "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d",
-  //   },
-
-  //   {
-  //     name: "Dr. Pooja Sharma",
-  //     specialty: "Dermatologist",
-  //     experience: "8 Years",
-  //     rating: "4.8",
-  //     image:
-  //       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2",
-  //   },
-
-  //   {
-  //     name: "Dr. Neha Verma",
-  //     specialty: "Pediatrician",
-  //     experience: "10 Years",
-  //     rating: "4.9",
-  //     image:
-  //       "https://images.unsplash.com/photo-1594824476967-48c8b964273f",
-  //   },
-  // ];
 
   useEffect(() => {
     fetchDoctors();

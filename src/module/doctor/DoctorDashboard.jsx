@@ -117,6 +117,45 @@ const DoctorDashboard = () => {
 
   const { profile, profileImage } = useDoctorProfile();
 
+useEffect(() => {
+  const checkSubscription = async () => {
+    try {
+      const res = await api.get("/razorpay/subscriptions/active");
+
+if (!res.data?.data?.subscription) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("loggedInUser");
+
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("loggedInUser");
+
+  navigate("/doctorloginpage", {
+    replace: true,
+  });
+
+  return;
+}
+
+      loadDashboard();
+    } catch (err) {
+  console.error(err);
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("loggedInUser");
+
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("loggedInUser");
+
+  navigate("/doctorloginpage", {
+    replace: true,
+  });
+}
+  };
+
+  checkSubscription();
+}, [navigate]);
+
+
   const loadDashboard = async () => {
     try {
       const res = await api.get("/doctor/dashboard");
@@ -131,10 +170,6 @@ const DoctorDashboard = () => {
       console.error("Dashboard load failed", err);
     }
   };
-
-  useEffect(() => {
-    loadDashboard();
-  }, []);
 
   const toggleAvailability = async () => {
     const newStatus = !isOnline;
