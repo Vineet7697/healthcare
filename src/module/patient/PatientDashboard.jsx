@@ -6,6 +6,7 @@ import {
   cancelAppointment,
 } from "../../services/patientService";
 import { Plus, Users, Calendar, Clock } from "lucide-react";
+import { FaFlask } from "react-icons/fa";
 import { notify } from "../../utils/notify";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
@@ -82,7 +83,7 @@ export default function PatientDashboard() {
               city: appt.city,
               languages: appt.languages,
               rating: appt.rating,
-            }))
+            })),
           );
         }
       })
@@ -112,15 +113,17 @@ export default function PatientDashboard() {
           prev.map((appt) =>
             appt.id === cancelAppointmentId
               ? { ...appt, status: "CANCELLED" }
-              : appt
-          )
+              : appt,
+          ),
         );
         setSelectedAppointment((prev) => ({ ...prev, status: "CANCELLED" }));
         setShowCancelPopup(false);
       }
     } catch (err) {
       console.log(err);
-      notify.error(err?.response?.data?.message || "Failed to cancel appointment");
+      notify.error(
+        err?.response?.data?.message || "Failed to cancel appointment",
+      );
     }
   };
 
@@ -128,7 +131,7 @@ export default function PatientDashboard() {
     if (activeTab === "today") {
       const today = new Date().toDateString();
       return appointments.filter(
-        (a) => new Date(a.date).toDateString() === today
+        (a) => new Date(a.date).toDateString() === today,
       );
     }
     if (activeTab === "next7") {
@@ -254,10 +257,7 @@ export default function PatientDashboard() {
                 )}
               </span>
             </div>
-            <p
-              className=" text-[14px] mt-2"
-              style={{ color: "#64748B" }}
-            >
+            <p className=" text-[14px] mt-2" style={{ color: "#64748B" }}>
               {todayToken.type} Visit
             </p>
           </div>
@@ -303,9 +303,9 @@ export default function PatientDashboard() {
               color="#2563EB"
             />
             <Action
-              icon={<Users size={20} />}
-              label="Family"
-              onClick={() => navigate("/client/family")}
+              icon={<FaFlask size={20} />}
+              label="Lab Test Book"
+              onClick={() => navigate("/client/lab-tests")}
               color="#14B8A6"
             />
           </div>
@@ -465,7 +465,7 @@ export default function PatientDashboard() {
       </div>
 
       {/* ── Appointment Details Modal ── */}
-  {showDetails && selectedAppointment && (
+      {showDetails && selectedAppointment && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
           onClick={() => setShowDetails(false)}
@@ -526,7 +526,6 @@ export default function PatientDashboard() {
             </div>
 
             <div className="px-6 py-5 space-y-5">
-
               {/* ── Doctor Row ── */}
               <div
                 className="flex items-center justify-between p-4 rounded-2xl"
@@ -603,7 +602,14 @@ export default function PatientDashboard() {
                     value={new Date(selectedAppointment.date).toDateString()}
                     icon={
                       <>
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
                         <line x1="16" y1="2" x2="16" y2="6" />
                         <line x1="8" y1="2" x2="8" y2="6" />
                         <line x1="3" y1="10" x2="21" y2="10" />
@@ -758,7 +764,6 @@ export default function PatientDashboard() {
                   </button>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -794,8 +799,8 @@ export default function PatientDashboard() {
             </h2>
 
             <p className="text-sm text-[#64748B] text-center leading-relaxed mb-8">
-              Are you sure you want to cancel this appointment?
-              This action cannot be undone.
+              Are you sure you want to cancel this appointment? This action
+              cannot be undone.
             </p>
 
             <div className="grid grid-cols-2 gap-3">
@@ -871,7 +876,9 @@ function SimpleField({ label, value }) {
   return (
     <div className="space-y-1">
       <span className="text-xs text-[#94A3B8]">{label}</span>
-      <p className="text-sm font-semibold text-[#0F172A] break-words">{value}</p>
+      <p className="text-sm font-semibold text-[#0F172A] break-words">
+        {value}
+      </p>
     </div>
   );
 }

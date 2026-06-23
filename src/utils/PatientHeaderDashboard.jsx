@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 import { useImage } from "../context/ImageContext";
+import CartPage from "../views/labtest/CartPage";
+// import socket from "../services/socket";
 import {
   getPatientNotifications,
   getPatientUnreadCount,
@@ -83,7 +85,7 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
     fetchNotifications();
     fetchUnread();
     const interval = setInterval(() => {
@@ -94,6 +96,25 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     }, 10000);
     return () => clearInterval(interval);
   }, [notificationOpen]);
+
+  // useEffect(() => {
+  //   fetchNotifications();
+
+  //   socket.emit("join", {
+  //     userId: loggedInUser.id,
+  //     role: "patient",
+  //   });
+
+  //   socket.on("notification", (data) => {
+  //     setNotifications((prev) => [data, ...prev]);
+
+  //     setUnreadCount((prev) => prev + 1);
+  //   });
+
+  //   return () => {
+  //     socket.off("notification");
+  //   };
+  // }, []);
 
   const handleNotificationClick = async (id) => {
     try {
@@ -140,11 +161,7 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
 
         {/* Center */}
         <div className="flex-1 flex justify-center items-center gap-4">
-          <img
-            src="/images/logo.webp"
-            alt="logo"
-            className="h-8 md:hidden"
-          />
+          <img src="/images/logo.webp" alt="logo" className="h-8 md:hidden" />
           {location.pathname === "/client/dashboard" && (
             <button
               onClick={() => handleNavigate("/client/book-appointment")}
@@ -156,6 +173,12 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
         </div>
 
         <div className="flex items-center gap-3 relative">
+          {/* <div>
+            <p className="px-4 py-6 text-center text-gray-500 text-sm" 
+            onClick={navigate("/client/cart")}
+            > 🛒</p>
+           
+          </div> */}
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {

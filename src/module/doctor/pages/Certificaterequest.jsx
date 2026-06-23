@@ -404,7 +404,6 @@ function ReviewPatient({
   };
 
   const handleApproveClick = async () => {
-    console.log("approve clicked",handleApproveClick);
     if (loading) return;
     const e = validate();
     if (Object.keys(e).length > 0) {
@@ -423,41 +422,6 @@ function ReviewPatient({
     }
     await onReject();
   };
-
-  // if (submitted) {
-  //   return (
-  //     <div className="p-6 flex flex-col items-center justify-center min-h-72 gap-5">
-  //       <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center">
-  //         <svg
-  //           width="28"
-  //           height="28"
-  //           viewBox="0 0 24 24"
-  //           fill="none"
-  //           stroke="#0f766e"
-  //           strokeWidth="2.5"
-  //           strokeLinecap="round"
-  //           strokeLinejoin="round"
-  //         >
-  //           <path d="M5 13l4 4L19 7" />
-  //         </svg>
-  //       </div>
-  //       <div className="text-center">
-  //         <p className="text-base font-semibold text-gray-800 mb-1">
-  //           Certificate Approved!
-  //         </p>
-  //         <p className="text-sm text-gray-400">
-  //           The certificate has been digitally signed and issued.
-  //         </p>
-  //       </div>
-  //       <button
-  //         onClick={onBack}
-  //         className="mt-1 px-6 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
-  //       >
-  //         Back to Requests
-  //       </button>
-  //     </div>
-  //   );
-  // }
 
   const infoRows = [
     [
@@ -974,6 +938,7 @@ export default function Certificaterequest() {
   };
 
   const handleApprove = async () => {
+     console.log("handleApprove called");
     try {
       setLoading(true);
 

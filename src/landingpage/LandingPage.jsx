@@ -72,7 +72,7 @@ const LandingPage = () => {
       img: labTesting,
       label: t.labTest || "Lab Tests",
       sub: "Sample Pickup at Your Door",
-      link: "/book-labtest",
+      link: "/lab-tests",
       tagBg: "bg-sky-500",
       tag: "HOME",
       accentColor: "#0099ee",

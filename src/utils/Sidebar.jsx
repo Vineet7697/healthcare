@@ -10,7 +10,9 @@ import {
   FaChartBar,
   FaUserMd,
   FaFileMedical,
-
+  FaFlask,
+  FaBoxOpen,
+  FaClipboardList,
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -31,14 +33,27 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
     { key: "appointment", label: "Appointments", icon: <FaCalendarAlt /> },
     { key: "manualbooking", label: "Manual Booking", icon: <FaEdit /> },
-    { key: "Certificaterequest", label: "Certificate Requests", icon: <FaFileMedical /> },
-    { key: "mysubscription", label: "My Subscription", icon: <FaUsers /> }
+    {
+      key: "Certificaterequest",
+      label: "Certificate Requests",
+      icon: <FaFileMedical />,
+    },
+    { key: "mysubscription", label: "My Subscription", icon: <FaUsers /> },
   ];
 
   const patientNav = [
     { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
     { key: "family", label: "Family Members", icon: <FaUsers /> },
-    { key: "myappointment", label: "Appointments History", icon: <FaCalendarCheck /> },
+    {
+      key: "myappointment",
+      label: "Appointments History",
+      icon: <FaCalendarCheck />,
+    },
+    {
+      key: "mylabbookings",
+      label: "My Lab Bookings",
+      icon: <FaFlask />,
+    },
     { key: "mycertificate", label: "My Certificates", icon: <FaFileMedical /> },
   ];
 
@@ -46,7 +61,26 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { key: "dashboard", label: "Admin Dashboard", icon: <FaChartBar /> },
     { key: "doctors", label: "Doctors", icon: <FaUserMd /> },
     { key: "contact-requests", label: "Enquiries", icon: <FaEdit /> },
-    { key: "homecare-bookings", label: "Home Care Bookings", icon: <FaCalendarCheck /> },
+    {
+      key: "homecare-bookings",
+      label: "Home Care Bookings",
+      icon: <FaCalendarCheck />,
+    },
+    {
+      key: "lab-test",
+      label: "Lab Tests",
+      icon: <FaFlask />,
+    },
+    {
+      key: "lab-packages",
+      label: "Lab Packages",
+      icon: <FaBoxOpen />,
+    },
+    {
+      key: "lab-bookings",
+      label: "Lab Bookings",
+      icon: <FaClipboardList />,
+    },
   ];
 
   const navItems =
@@ -70,7 +104,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     if (window.innerWidth < 768) setIsOpen(false);
   };
 
- 
   return (
     <>
       <aside
@@ -83,11 +116,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         `}
         style={{ backgroundColor: "#0072BC" }}
       >
-        <div className={`flex items-center p-5 mb-2  ${isOpen ? "justify-between bg-white border-r-2 border-gray-300" : "justify-center "  }  `}>
+        <div
+          className={`flex items-center p-5 mb-2  ${isOpen ? "justify-between bg-white border-r-2 border-gray-300" : "justify-center "}  `}
+        >
           {isOpen && (
             <div className="flex items-center gap-2 select-none ">
               <img src="/images/logo.webp" alt="Yo Doctor" className="h-10" />
-              
             </div>
           )}
           <button
@@ -95,10 +129,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             className="  text-2xl flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 hover:bg-white/20 flex-shrink-0"
             title={isOpen ? "Collapse sidebar " : "Expand sidebar "}
           >
-            {isOpen ? <FaBars className=" text-black" /> : <FaBars className=" text-white" />}
+            {isOpen ? (
+              <FaBars className=" text-black" />
+            ) : (
+              <FaBars className=" text-white" />
+            )}
           </button>
         </div>
-        
+
         <nav className="flex-1 space-y-1 px-3">
           {navItems.map((item) => {
             const isActive = location.pathname === getRoute(item.key);
@@ -113,9 +151,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   ${isActive ? "text-white" : "text-blue-100 hover:text-white"}
                   ${!isOpen && "justify-center"}
                 `}
-                style={{ backgroundColor: isActive ? "rgba(255,255,255,0.25)" : undefined }}
-                onMouseOver={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)"; }}
-                onMouseOut={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = ""; }}
+                style={{
+                  backgroundColor: isActive
+                    ? "rgba(255,255,255,0.25)"
+                    : undefined,
+                }}
+                onMouseOver={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(255,255,255,0.15)";
+                }}
+                onMouseOut={(e) => {
+                  if (!isActive) e.currentTarget.style.backgroundColor = "";
+                }}
               >
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-white" />
@@ -124,7 +172,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 <div className="text-2xl flex-shrink-0">{item.icon}</div>
 
                 {isOpen && (
-                  <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>
+                  <span className="font-medium text-sm whitespace-nowrap">
+                    {item.label}
+                  </span>
                 )}
 
                 {!isOpen && tooltip === item.key && (
@@ -139,10 +189,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             );
           })}
         </nav>
-
       </aside>
-
-      
     </>
   );
 };
