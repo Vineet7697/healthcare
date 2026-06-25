@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "./LogoutModal";
 import { useImage } from "../context/ImageContext";
+import { useSocket } from "../context/SocketContext";
 import {
   getDoctorNotifications,
   getDoctorUnreadCount,
@@ -37,6 +38,7 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
+  const { socket, connected } = useSocket();
 
   useEffect(() => {
     const syncUser = () => setLoggedInUser(getStoredUser());
@@ -83,27 +85,57 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     }
   };
 
-  useEffect(() => {
-    fetchNotifications();
-    fetchUnread();
-    const interval = setInterval(() => {
-      if (!notificationOpen) {
-        fetchNotifications();
-        fetchUnread();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [notificationOpen]);
+useEffect(() => {
+  fetchNotifications();
+  fetchUnread();
+}, []);
+useEffect(() => {
+  if (!socket || !connected) return;
 
-  const handleNotificationClick = async (id) => {
-    try {
-      await markDoctorNotificationRead(id);
-      fetchNotifications();
-      fetchUnread();
-    } catch (err) {
-      console.error(err);
-    }
+  const handleNotification = (payload) => {
+    setNotifications((prev) => {
+      const exists = prev.some(
+        (item) =>
+          item.id === payload.id ||
+          (
+            item.title === payload.title &&
+            item.message === payload.message &&
+            item.appointmentId === payload.appointmentId
+          )
+      );
+
+      if (exists) return prev;
+
+      return [payload, ...prev];
+    });
+
+    setUnreadCount((prev) => prev + 1);
   };
+
+  socket.on("notification", handleNotification);
+
+  return () => {
+    socket.off("notification", handleNotification);
+  };
+}, [socket, connected]);
+
+const handleNotificationClick = async (id) => {
+  try {
+    await markDoctorNotificationRead(id);
+
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? { ...n, is_read: true }
+          : n
+      )
+    );
+
+    setUnreadCount((prev) => Math.max(prev - 1, 0));
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");

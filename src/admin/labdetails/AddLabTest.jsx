@@ -24,7 +24,7 @@ export default function AddLabTest() {
     tier: "essential",
     type: "test",
     description: "",
-    image: "",
+    image: null,
     is_popular: false,
   });
 
@@ -52,6 +52,13 @@ export default function AddLabTest() {
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      image: e.target.files[0],
     }));
   };
 
@@ -132,7 +139,7 @@ export default function AddLabTest() {
         tier: "essential",
         type: "test",
         description: "",
-        image: "",
+        image: null,
         is_popular: false,
       });
 
@@ -306,14 +313,26 @@ export default function AddLabTest() {
             </h2>
 
             <div>
-              <label className={labelClass}>Image URL</label>
+              <label className={labelClass}>Upload Image</label>
+
               <input
-                name="image"
-                value={form.image}
-                onChange={handleChange}
-                placeholder="https://..."
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
                 className={inputClass}
               />
+
+              {form.image && (
+                <img
+                  src={
+                    typeof form.image === "string"
+                      ? form.image
+                      : URL.createObjectURL(form.image)
+                  }
+                  alt="Preview"
+                  className="w-28 h-28 mt-3 rounded-lg object-cover border"
+                />
+              )}
             </div>
 
             <label className="flex items-center gap-2.5 text-sm text-[#0F172A] cursor-pointer bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 w-fit">

@@ -385,6 +385,7 @@ function ReviewPatient({
   onReject,
   onBack,
   loading,
+  actionLoading,
 }) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -442,7 +443,6 @@ function ReviewPatient({
         <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
           Review Request
         </h1>
-       
       </div>
 
       <div
@@ -608,43 +608,93 @@ function ReviewPatient({
               <button
                 type="button"
                 onClick={handleApproveClick}
-                disabled={loading}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white text-md font-medium rounded-xl hover:bg-teal-700 active:scale-95 transition-all"
+                disabled={actionLoading !== ""}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white text-md font-medium rounded-xl hover:bg-teal-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
-                Approve & Generate Certificate
+                {actionLoading === "approve" ? (
+                  <>
+                    <svg
+                      className="w-5 h-5 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Approving...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                    Approve & Generate Certificate
+                  </>
+                )}
               </button>
 
               <button
                 type="button"
                 onClick={handleRejectClick}
-                disabled={loading}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-md font-medium rounded-xl hover:bg-red-100 active:scale-95 transition-all"
+                disabled={actionLoading !== ""}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 text-md font-medium rounded-xl hover:bg-red-100 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
               >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-                Reject
+                {actionLoading === "reject" ? (
+                  <>
+                    <svg
+                      className="w-5 h-5 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Rejecting...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                    Reject
+                  </>
+                )}
               </button>
             </div>
             <p className="text-md text-gray-400 leading-relaxed">
@@ -875,6 +925,7 @@ export default function Certificaterequest() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState("");
 
   const [form, setForm] = useState({
     validity: "1 month",
@@ -938,9 +989,8 @@ export default function Certificaterequest() {
   };
 
   const handleApprove = async () => {
-     console.log("handleApprove called");
     try {
-      setLoading(true);
+      setActionLoading("approve");
 
       await approveRequest(selectedRequest.id, {
         doctor_notes: form.notes,
@@ -950,7 +1000,6 @@ export default function Certificaterequest() {
 
       notify.success("Certificate Approved Successfully");
 
-      // 🔥 YAHI LAGANA HAI (IMPORTANT)
       setRequests((prev) =>
         prev.map((r) =>
           r.id === selectedRequest.id.toString()
@@ -958,17 +1007,19 @@ export default function Certificaterequest() {
             : r,
         ),
       );
+
       setActiveTab("issued");
     } catch (error) {
-      console.error("Approval Error:", error);
+      console.error(error);
     } finally {
-      setLoading(false);
+      setActionLoading("");
     }
   };
 
   const handleReject = async () => {
     try {
-      setLoading(true);
+      setActionLoading("reject");
+
       await rejectRequest(selectedRequest.id, {
         doctor_notes: form.notes,
       });
@@ -985,9 +1036,9 @@ export default function Certificaterequest() {
 
       setActiveTab("requests");
     } catch (error) {
-      console.error("Rejection Error:", error);
+      console.error(error);
     } finally {
-      setLoading(false);
+      setActionLoading("");
     }
   };
 
@@ -1026,6 +1077,7 @@ export default function Certificaterequest() {
           onReject={handleReject}
           onBack={() => setActiveTab("requests")}
           loading={loading}
+          actionLoading={actionLoading}
         />
       )}
       {activeTab === "issued" && <IssuedCerts onViewPdf={handleViewPdf} />}

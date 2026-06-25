@@ -12,7 +12,7 @@ import {
   FaDownload,
   FaTimes,
 } from "react-icons/fa";
-// import { QRCodeCanvas } from "qrcode.react";
+import { useSocket } from "../../context/SocketContext";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../utils/notify";
 import api from "../../services/api";
@@ -109,6 +109,7 @@ const DoctorDashboard = () => {
   const [slot, setSlot] = useState("MORNING");
   const [reason, setReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
+  const { socket, connected } = useSocket();
 
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrValue, setQrValue] = useState("");
@@ -156,6 +157,8 @@ if (!res.data?.data?.subscription) {
 }, [navigate]);
 
 
+
+
   const loadDashboard = async () => {
     try {
       const res = await api.get("/doctor/dashboard");
@@ -170,6 +173,42 @@ if (!res.data?.data?.subscription) {
       console.error("Dashboard load failed", err);
     }
   };
+
+  useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleQueueUpdate = (data) => {
+    setDashboard((prev) => ({
+      ...prev,
+      todayQueue: data.currentToken || prev.todayQueue,
+    }));
+
+    notify.success(
+      `Now Serving Token #${data.currentToken}`
+    );
+  };
+
+  socket.on("queue-updated", handleQueueUpdate);
+
+  return () => {
+    socket.off("queue-updated", handleQueueUpdate);
+  };
+}, [socket, connected]);
+useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleNewAppointment = () => {
+    loadDashboard();
+
+   notify.success(data.message || "New appointment received.");
+  };
+
+  socket.on("appointment-requested", handleNewAppointment);
+
+  return () => {
+    socket.off("appointment-requested", handleNewAppointment);
+  };
+}, [socket, connected]);
 
   const toggleAvailability = async () => {
     const newStatus = !isOnline;

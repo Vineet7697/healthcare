@@ -4,7 +4,7 @@ import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 import { useImage } from "../context/ImageContext";
 import CartPage from "../views/labtest/CartPage";
-// import socket from "../services/socket";
+import { useSocket } from "../context/SocketContext";
 import {
   getPatientNotifications,
   getPatientUnreadCount,
@@ -28,6 +28,7 @@ const DEFAULT_AVATAR =
 const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { socket, connected } = useSocket();
 
   const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
   const { image, setImage } = useImage();
@@ -85,42 +86,52 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     }
   };
 
-    useEffect(() => {
-    fetchNotifications();
-    fetchUnread();
-    const interval = setInterval(() => {
-      if (!notificationOpen) {
-        fetchNotifications();
-        fetchUnread();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [notificationOpen]);
+useEffect(() => {
+  fetchNotifications();
+  fetchUnread();
+}, []);
 
-  // useEffect(() => {
-  //   fetchNotifications();
+useEffect(() => {
+  if (!socket || !connected) return;
 
-  //   socket.emit("join", {
-  //     userId: loggedInUser.id,
-  //     role: "patient",
-  //   });
+const handleNotification = (payload) => {
+  setNotifications((prev) => {
+    const exists = prev.some(
+      (item) =>
+        item.id === payload.id ||
+        (
+          item.title === payload.title &&
+          item.message === payload.message &&
+          item.appointmentId === payload.appointmentId
+        )
+    );
 
-  //   socket.on("notification", (data) => {
-  //     setNotifications((prev) => [data, ...prev]);
+    if (exists) return prev;
 
-  //     setUnreadCount((prev) => prev + 1);
-  //   });
+    return [payload, ...prev];
+  });
 
-  //   return () => {
-  //     socket.off("notification");
-  //   };
-  // }, []);
+  setUnreadCount((prev) => prev + 1);
+};
+
+  socket.on("notification", handleNotification);
+
+  return () => {
+    socket.off("notification", handleNotification);
+  };
+}, [socket, connected]);
 
   const handleNotificationClick = async (id) => {
     try {
       await markPatientNotificationRead(id);
-      fetchNotifications();
-      fetchUnread();
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+      );
+
+      setUnreadCount((prev) => Math.max(prev - 1, 0));
+      // fetchNotifications();
+      // fetchUnread();
     } catch (err) {
       console.error(err);
     }
@@ -173,12 +184,6 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
         </div>
 
         <div className="flex items-center gap-3 relative">
-          {/* <div>
-            <p className="px-4 py-6 text-center text-gray-500 text-sm" 
-            onClick={navigate("/client/cart")}
-            > 🛒</p>
-           
-          </div> */}
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSocket } from "../../context/SocketContext";
 import {
   getPatientDashboard,
   getTokenStatus,
@@ -49,7 +50,7 @@ export default function PatientDashboard() {
   const [showDetails, setShowDetails] = useState(false);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [cancelAppointmentId, setCancelAppointmentId] = useState(null);
-
+  const { socket, connected } = useSocket();
   const isMyTurn =
     tokenStatus?.yourToken === tokenStatus?.nowServing &&
     tokenStatus?.status === "IN_PROGRESS";
@@ -95,6 +96,86 @@ export default function PatientDashboard() {
     if (todayToken?.appointmentId) fetchTokenStatus(todayToken.appointmentId);
   }, [todayToken]);
 
+  useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleStatusUpdate = (data) => {
+    setAppointments((prev) =>
+      prev.map((appt) =>
+        appt.id === data.appointmentId
+          ? {
+              ...appt,
+              status: data.status,
+            }
+          : appt
+      )
+    );
+
+    if (selectedAppointment?.id === data.appointmentId) {
+      setSelectedAppointment((prev) => ({
+        ...prev,
+        status: data.status,
+      }));
+    }
+
+    notify.success(data.message);
+  };
+
+  socket.on("appointment-status-updated", handleStatusUpdate);
+
+  return () => {
+    socket.off("appointment-status-updated", handleStatusUpdate);
+  };
+}, [socket, connected, selectedAppointment]);
+useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleAppointmentStarted = (data) => {
+    setAppointments((prev) =>
+      prev.map((appt) =>
+        appt.id === data.appointmentId
+          ? {
+              ...appt,
+              status: "IN_PROGRESS",
+            }
+          : appt
+      )
+    );
+
+    notify.success("Your consultation has started.");
+  };
+
+  socket.on("appointment-started", handleAppointmentStarted);
+
+  return () => {
+    socket.off("appointment-started", handleAppointmentStarted);
+  };
+}, [socket, connected]);
+useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleCompleted = (data) => {
+    setAppointments((prev) =>
+      prev.map((appt) =>
+        appt.id === data.appointmentId
+          ? {
+              ...appt,
+              status: "COMPLETED",
+            }
+          : appt
+      )
+    );
+
+    notify.success("Appointment completed.");
+  };
+
+  socket.on("appointment-completed", handleCompleted);
+
+  return () => {
+    socket.off("appointment-completed", handleCompleted);
+  };
+}, [socket, connected]);
+
   const fetchTokenStatus = async (appointmentId) => {
     try {
       const res = await getTokenStatus(appointmentId);
@@ -103,6 +184,23 @@ export default function PatientDashboard() {
       console.error("Token status error:", err);
     }
   };
+
+  useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleQueueUpdate = (data) => {
+    setTokenStatus((prev) => ({
+      ...prev,
+      nowServing: data.currentToken,
+    }));
+  };
+
+  socket.on("queue-updated", handleQueueUpdate);
+
+  return () => {
+    socket.off("queue-updated", handleQueueUpdate);
+  };
+}, [socket, connected]);
 
   const handleCancelAppointment = async () => {
     try {

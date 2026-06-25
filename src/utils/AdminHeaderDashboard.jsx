@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
-
+import { useSocket } from "../context/SocketContext";
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -27,7 +27,7 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-
+const { socket, connected } = useSocket();
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
@@ -57,21 +57,34 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     }
   };
 
-  const markNotificationRead = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/admin/notifications/${id}/read`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
+const markNotificationRead = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await fetch(
+      `${import.meta.env.VITE_API_URL}/admin/notifications/${id}/read`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
-      fetchNotifications();
-    } catch (error) {
-      console.error("Mark read error:", error);
-    }
-  };
+      }
+    );
+
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? { ...n, is_read: true }
+          : n
+      )
+    );
+
+    setUnreadCount((prev) => Math.max(prev - 1, 0));
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
     const syncImage = () => {
@@ -82,17 +95,39 @@ const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     return () => window.removeEventListener("profileImageUpdated", syncImage);
   }, []);
 
-  useEffect(() => {
-    fetchNotifications();
+useEffect(() => {
+  fetchNotifications();
+}, []);
 
-    const interval = setInterval(() => {
-      if (!notificationOpen) {
-        fetchNotifications();
-      }
-    }, 10000);
+useEffect(() => {
+  if (!socket || !connected) return;
 
-    return () => clearInterval(interval);
-  }, [notificationOpen]);
+  const handleNotification = (payload) => {
+    setNotifications((prev) => {
+      const exists = prev.some(
+        (item) =>
+          item.id === payload.id ||
+          (
+            item.title === payload.title &&
+            item.message === payload.message &&
+            item.appointmentId === payload.appointmentId
+          )
+      );
+
+      if (exists) return prev;
+
+      return [payload, ...prev];
+    });
+
+    setUnreadCount((prev) => prev + 1);
+  };
+
+  socket.on("notification", handleNotification);
+
+  return () => {
+    socket.off("notification", handleNotification);
+  };
+}, [socket, connected]);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {

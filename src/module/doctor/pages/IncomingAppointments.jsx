@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { notify } from "../../../utils/notify";
 import api from "../../../services/api";
+import { useSocket } from "../../../context/SocketContext";
 import { respondAppointment, autoAcceptAppointments } from "../../../services/doctorService";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
@@ -36,6 +37,7 @@ const Appointments = () => {
   const [processingId, setProcessingId] = useState(null);
   const [filter, setFilter] = useState("ALL");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { socket, connected } = useSocket();
 
   const loadAppointments = useCallback(async () => {
     try {
@@ -49,11 +51,41 @@ const Appointments = () => {
     }
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
+  loadAppointments();
+}, [loadAppointments]);
+
+useEffect(() => {
+  if (!socket || !connected) return;
+
+  const handleNewAppointment = () => {
     loadAppointments();
-    const interval = setInterval(loadAppointments, 10000);
-    return () => clearInterval(interval);
-  }, [loadAppointments]);
+    notify.success("New appointment received");
+  };
+
+  const handleStatusUpdate = () => {
+    loadAppointments();
+  };
+
+  socket.on("appointment-requested", handleNewAppointment);
+
+  socket.on(
+    "appointment-status-updated",
+    handleStatusUpdate
+  );
+
+  return () => {
+    socket.off(
+      "appointment-requested",
+      handleNewAppointment
+    );
+
+    socket.off(
+      "appointment-status-updated",
+      handleStatusUpdate
+    );
+  };
+}, [socket, connected, loadAppointments]);
 
   const handleAutoAccept = async () => {
     try {
