@@ -173,7 +173,7 @@ export default function Confirmation() {
             </button>
 
             <button
-              onClick={() => navigate("/client/my-lab-bookings")}
+              onClick={() => navigate("/client/mylabbookings")}
               className="border-2 border-green-600 text-green-600 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 cursor-pointer"
             >
               <ClipboardList size={18} />

@@ -5,11 +5,10 @@ import LogoutModal from "./LogoutModal";
 import { useImage } from "../context/ImageContext";
 import { useSocket } from "../context/SocketContext";
 import {
-  getDoctorNotifications,
-  getDoctorUnreadCount,
-  markDoctorNotificationRead,
+  getNotifications,
+  getUnreadNotificationCount,
+  markNotificationRead,
 } from "../services/notificationService";
-import api from "../services/api";
 
 const getStoredUser = () => {
   const raw = localStorage.getItem("loggedInUser");
@@ -69,7 +68,7 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await getDoctorNotifications();
+      const res = await getNotifications();
       setNotifications(res.data.notifications || []);
     } catch (err) {
       console.error(err);
@@ -78,7 +77,7 @@ const DoctorHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
 
   const fetchUnread = async () => {
     try {
-      const res = await getDoctorUnreadCount();
+      const res = await getUnreadNotificationCount();
       setUnreadCount(res.data.unreadCount || 0);
     } catch (err) {
       console.error(err);
@@ -121,7 +120,7 @@ useEffect(() => {
 
 const handleNotificationClick = async (id) => {
   try {
-    await markDoctorNotificationRead(id);
+    await markNotificationRead(id);
 
     setNotifications((prev) =>
       prev.map((n) =>

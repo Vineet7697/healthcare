@@ -10,6 +10,8 @@ import landingImage from "../assets/images/landingimg.webp";
 import labTesting from "../assets/images/lab-test.png";
 import medicineDelivery from "../assets/images/medicine_delivery.png";
 import homecareservices from "../assets/images/home_care_services.png";
+import image1 from "../assets/images/image1.png";
+import image2 from "../assets/images/image2.png";
 import qrBooking from "../assets/images/qr-booking.png";
 import onlineBooking from "../assets/images/online-booking.png";
 import certificate from "../assets/images/certificate.png";
@@ -20,7 +22,6 @@ const LandingPage = () => {
   const { language, lang } = useLanguage();
   const t = lang[language];
   const [doctors, setDoctors] = useState([]);
-
 
   useEffect(() => {
     fetchDoctors();
@@ -72,7 +73,7 @@ const LandingPage = () => {
       img: labTesting,
       label: t.labTest || "Lab Tests",
       sub: "Sample Pickup at Your Door",
-      link: "/lab-tests",
+      link: "/clientloginpage?redirect=/client/lab-tests",
       tagBg: "bg-sky-500",
       tag: "HOME",
       accentColor: "#0099ee",
@@ -203,7 +204,7 @@ const LandingPage = () => {
           </div>
 
           {/* RIGHT — doctor image */}
-          <div className="hidden md:flex relative w-[700px] h-[400px] mt-10">
+          <div className="hidden md:flex relative w-[600px] h-[400px] mt-10">
             <Swiper
               modules={[Autoplay, Pagination]}
               autoplay={{
@@ -245,12 +246,10 @@ const LandingPage = () => {
                           <span> Doctor Of The Month 🏆</span>
                         </div>
                         <div className="flex justify-between mt-4 text-sm">
-                           <span>{doctor.experience_years} Years Exp.</span>
+                          <span>{doctor.experience_years} Years Exp.</span>
                         </div>
 
-                        <div className="mt-4 inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-300 text-xs font-semibold">
-                         
-                        </div>
+                        <div className="mt-4 inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-300 text-xs font-semibold"></div>
                       </div>
                     </div>
                   </SwiperSlide>
@@ -312,6 +311,37 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
+
+<div className="hidden md:flex justify-center items-center  py-16">
+  <div className="w-full max-w-6xl h-[600px]">
+    <Swiper
+      modules={[Autoplay, Pagination]}
+      autoplay={{
+        delay: 3000,
+        disableOnInteraction: false,
+      }}
+      pagination={{ clickable: true }}
+      loop={true}
+      className="w-full  rounded-4xl overflow-hidden "
+    >
+      <SwiperSlide className="flex items-center justify-center">
+        <img
+          src={image1}
+          alt="YoDoctor Banner"
+          className="w-full h-full object-contain"
+        />
+      </SwiperSlide>
+
+      <SwiperSlide className="flex items-center justify-center">
+        <img
+          src={image2}
+          alt="YoDoctor Banner"
+          className="w-full h-full object-contain"
+        />
+      </SwiperSlide>
+    </Swiper>
+  </div>
+</div>
 
         <style>{`
           @keyframes cardFloat {

@@ -189,7 +189,7 @@ const handleSubmit = async (e) => {
             {/* Contact chips */}
             <div className="flex flex-col gap-3 items-center md:items-start">
               {[
-                { icon: ICONS.phone, label: "+91 7084630273",           href: "tel:+917084630273",               color: "#7ec8f8" },
+                { icon: ICONS.phone, label: "+91 9277207339",           href: "tel:+91 9277207339",               color: "#7ec8f8" },
                 { icon: ICONS.mail,  label: "founder@yodoctor.in",  href: "mailto:founder@yodoctor.in",  color: "#a5f3c0" },
                 { icon: ICONS.pin,   label: "Jhansi, Uttar Pradesh",    href: "#map",                            color: "#fcd34d" },
                 { icon: ICONS.clock, label: "Mon – Sat · 9 AM – 8 PM", href: null,                              color: "#c4b5fd" },
@@ -335,7 +335,7 @@ const handleSubmit = async (e) => {
             {[
               { icon: ICONS.pin,   title: t.location, sub: "Jhansi, Uttar Pradesh",   color: "#0072BC", href: "#map" },
               { icon: ICONS.mail,  title: t.email_us, sub: "founder@yodoctor.in", color: "#7c3aed", href: "mailto:founder@yodoctor.in" },
-              { icon: ICONS.phone, title: t.call_us,  sub: "+91 7084630273",           color: "#059669", href: "tel:+917084630273" },
+              { icon: ICONS.phone, title: t.call_us,  sub: "+91 9277207339",           color: "#059669", href: "tel:+91 9277207339" },
             ].map((c, i) => (
               <a key={i} href={c.href}
                 className="flex flex-col items-center text-center rounded-2xl py-8 px-5 transition-all duration-250"

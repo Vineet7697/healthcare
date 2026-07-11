@@ -85,25 +85,10 @@ const PaymentPage = () => {
       if (loading) return;
 
       if (!selectedPlan) {
-        notify("Please select a plan to continue", "error");
+        notify.warning("Please select a plan to continue", "error");
         return;
       }
-      if (selectedPlan.id === "plan_trial") {
-        setLoading(true);
 
-        await api.post("/razorpay/subscriptions/create", {
-          planId: selectedPlan.id,
-          billing: "monthly",
-          isUpgrade,
-        });
-
-        setLoading(false);
-
-        navigate("/doctordashboard/mysubscription");
-
-        return;
-      }
-      setLoading(true);
 
       const billingType = billing === "yearly" ? "yearly" : "monthly";
 
@@ -118,7 +103,7 @@ const PaymentPage = () => {
       if (!razorpaySubscriptionId) {
         setLoading(false);
 
-        notify("Subscription ID not received", "error");
+        notify.error("Subscription ID not received", "error");
 
         return;
       }
@@ -128,7 +113,7 @@ const PaymentPage = () => {
       if (!localSubscriptionId) {
         setLoading(false);
 
-        notify("Local subscription ID not received", "error");
+        notify.error("Local subscription ID not received", "error");
 
         return;
       }
@@ -210,7 +195,7 @@ const PaymentPage = () => {
       if (!window.Razorpay) {
         setLoading(false);
 
-        notify("Razorpay SDK not loaded", "error");
+        notify.error("Razorpay SDK not loaded", "error");
 
         return;
       }
@@ -239,7 +224,7 @@ const PaymentPage = () => {
 
       setLoading(false);
 
-      notify(err?.response?.data?.message || "Payment failed", "error");
+      notify.error(err?.response?.data?.message || "Payment failed", "error");
     }
   };
   return (

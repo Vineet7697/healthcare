@@ -7,7 +7,10 @@ export const getPatientDashboard = () => api.get("/patient/dashboard");
 export const searchVisitDoctors = (params) =>
   api.get("/patient/visit/doctors", { params });
 
-export const getCities = () => api.get("/patient/cities");
+export const getCities = (search = "") =>
+  api.get("/patient/cities", {
+    params: { search },
+  });
 
 export const getDiseases = () => api.get("/patient/diseases");
 

@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
+import { FaBars, FaBell, FaSignOutAlt, FaShoppingCart } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 import { useImage } from "../context/ImageContext";
 import CartPage from "../views/labtest/CartPage";
 import { useSocket } from "../context/SocketContext";
+import { useCart } from "../context/CartContext";
 import {
-  getPatientNotifications,
-  getPatientUnreadCount,
-  markPatientNotificationRead,
+  getNotifications,
+  getUnreadNotificationCount,
+  markNotificationRead,
 } from "../services/notificationService";
 import { getProfileImageApi } from "../services/PatientProfileImageApi";
 
@@ -28,6 +29,7 @@ const DEFAULT_AVATAR =
 const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { items = [] } = useCart();
   const { socket, connected } = useSocket();
 
   const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
@@ -70,7 +72,7 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await getPatientNotifications();
+      const res = await getNotifications();
       setNotifications(res.data.notifications || []);
     } catch (err) {
       console.error(err);
@@ -79,51 +81,49 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
 
   const fetchUnread = async () => {
     try {
-      const res = await getPatientUnreadCount();
+      const res = await getUnreadNotificationCount();
       setUnreadCount(res.data.unreadCount || 0);
     } catch (err) {
       console.error(err);
     }
   };
 
-useEffect(() => {
-  fetchNotifications();
-  fetchUnread();
-}, []);
+  useEffect(() => {
+    fetchNotifications();
+    fetchUnread();
+  }, []);
 
-useEffect(() => {
-  if (!socket || !connected) return;
+  useEffect(() => {
+    if (!socket || !connected) return;
 
-const handleNotification = (payload) => {
-  setNotifications((prev) => {
-    const exists = prev.some(
-      (item) =>
-        item.id === payload.id ||
-        (
-          item.title === payload.title &&
-          item.message === payload.message &&
-          item.appointmentId === payload.appointmentId
-        )
-    );
+    const handleNotification = (payload) => {
+      setNotifications((prev) => {
+        const exists = prev.some(
+          (item) =>
+            item.id === payload.id ||
+            (item.title === payload.title &&
+              item.message === payload.message &&
+              item.appointmentId === payload.appointmentId),
+        );
 
-    if (exists) return prev;
+        if (exists) return prev;
 
-    return [payload, ...prev];
-  });
+        return [payload, ...prev];
+      });
 
-  setUnreadCount((prev) => prev + 1);
-};
+      setUnreadCount((prev) => prev + 1);
+    };
 
-  socket.on("notification", handleNotification);
+    socket.on("notification", handleNotification);
 
-  return () => {
-    socket.off("notification", handleNotification);
-  };
-}, [socket, connected]);
+    return () => {
+      socket.off("notification", handleNotification);
+    };
+  }, [socket, connected]);
 
   const handleNotificationClick = async (id) => {
     try {
-      await markPatientNotificationRead(id);
+      await markNotificationRead(id);
 
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
@@ -181,9 +181,36 @@ const handleNotification = (payload) => {
               Book Appointment
             </button>
           )}
+          {location.pathname === "/client/dashboard" && (
+            <button
+              onClick={() => handleNavigate("/client/lab-tests")}
+              className="hidden md:flex px-6 py-2 rounded-full bg-gradient-to-br from-[#2277f7] to-[#52abd4] text-white text-md font-medium"
+            >
+              Book Labt Test
+            </button>
+          )}
+          {location.pathname === "/client/dashboard" && (
+            <button
+              onClick={() => handleNavigate("/client/apply-certificate")}
+              className="hidden md:flex px-6 py-2 rounded-full bg-gradient-to-br from-[#2277f7] to-[#52abd4] text-white text-md font-medium"
+            >
+              Apply Certificate
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-3 relative">
+          <button
+            onClick={() => navigate("/client/cart")}
+            className="relative p-2 rounded-full hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition"
+          >
+            <FaShoppingCart className="text-2xl" />
+            {items.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+                {items.length}
+              </span>
+            )}
+          </button>
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {

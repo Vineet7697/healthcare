@@ -3,18 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt } from "react-icons/fa";
 import LogoutModal from "../utils/LogoutModal";
 import { useSocket } from "../context/SocketContext";
+
+import {
+  getNotifications,
+  getUnreadNotificationCount,
+  markNotificationRead,
+} from "../services/notificationService";
 const DEFAULT_AVATAR =
   "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
-const getStoredUser = () => {
-  const raw = localStorage.getItem("loggedInUser");
-  if (!raw || raw === "undefined") return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-};
+
 
 const AdminHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
@@ -37,39 +35,29 @@ const { socket, connected } = useSocket();
     navigate(path);
   };
 
-  const fetchNotifications = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/admin/notifications`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      const data = await res.json();
-
-      if (data.notifications) {
-        setNotifications(data.notifications);
-        setUnreadCount(data.notifications.filter((n) => !n.is_read).length);
-      }
-    } catch (error) {
-      console.error("Notification fetch error:", error);
-    }
-  };
-
-const markNotificationRead = async (id) => {
+const fetchNotifications = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const res = await getNotifications();
+    setNotifications(res.data.notifications || []);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-    await fetch(
-      `${import.meta.env.VITE_API_URL}/admin/notifications/${id}/read`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+const fetchUnread = async () => {
+  try {
+    const res = await getUnreadNotificationCount();
+    setUnreadCount(res.data.unreadCount || 0);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+
+const handleNotificationClick = async (id) => {
+  try {
+    await markNotificationRead(id);
 
     setNotifications((prev) =>
       prev.map((n) =>
@@ -80,9 +68,8 @@ const markNotificationRead = async (id) => {
     );
 
     setUnreadCount((prev) => Math.max(prev - 1, 0));
-
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -97,30 +84,36 @@ const markNotificationRead = async (id) => {
 
 useEffect(() => {
   fetchNotifications();
+  fetchUnread();
 }, []);
 
 useEffect(() => {
   if (!socket || !connected) return;
 
-  const handleNotification = (payload) => {
-    setNotifications((prev) => {
-      const exists = prev.some(
-        (item) =>
-          item.id === payload.id ||
-          (
-            item.title === payload.title &&
-            item.message === payload.message &&
-            item.appointmentId === payload.appointmentId
-          )
-      );
+ const handleNotification = (payload) => {
+  let added = false;
 
-      if (exists) return prev;
+  setNotifications((prev) => {
+    const exists = prev.some(
+      (item) =>
+        item.id === payload.id ||
+        (
+          item.title === payload.title &&
+          item.message === payload.message &&
+          item.appointmentId === payload.appointmentId
+        )
+    );
 
-      return [payload, ...prev];
-    });
+    if (exists) return prev;
 
+    added = true;
+    return [payload, ...prev];
+  });
+
+  if (added) {
     setUnreadCount((prev) => prev + 1);
-  };
+  }
+};
 
   socket.on("notification", handleNotification);
 
@@ -228,7 +221,7 @@ useEffect(() => {
                     notifications.map((note) => (
                       <li
                         key={note.id}
-                        onClick={() => markNotificationRead(note.id)}
+                        onClick={() => handleNotificationClick(note.id)}
                         className={`flex gap-3 px-4 py-3 border-b hover:bg-cyan-50 cursor-pointer transition ${
                           !note.is_read
                             ? "bg-cyan-50 border-l-4 border-cyan-500"

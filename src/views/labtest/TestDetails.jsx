@@ -71,11 +71,17 @@ export default function TestDetails() {
 
       {/* Hero image */}
       <div className="h-44 sm:h-56 md:h-64 rounded-2xl overflow-hidden mb-5 sm:mb-6 relative shadow-card">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="w-full h-full object-cover"
-        />
+       <img
+  src={
+    item.image?.startsWith("http")
+      ? item.image
+      : `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}${
+          item.image.startsWith("/") ? "" : "/"
+        }${item.image}`
+  }
+  alt={item.name}
+  className="w-full h-full object-cover"
+/>
         <div className="absolute inset-0 bg-gradient-to-t from-dark/60 to-transparent" />
         <div className="absolute bottom-3 sm:bottom-4 left-4 sm:left-5 right-4 sm:right-5">
           <span className="bg-blue-100 text-blue-700 text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-1 rounded-full">

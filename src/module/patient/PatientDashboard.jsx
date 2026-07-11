@@ -406,6 +406,7 @@ useEffect(() => {
               onClick={() => navigate("/client/lab-tests")}
               color="#14B8A6"
             />
+           
           </div>
         </div>
       </div>

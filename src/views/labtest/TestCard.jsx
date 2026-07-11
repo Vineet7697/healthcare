@@ -14,7 +14,13 @@ export default function TestCard({ item }) {
       {/* Image */}
       <div className="h-28 sm:h-32 bg-gray-100 overflow-hidden relative">
         <img
-          src={item.image}
+          src={
+            item.image?.startsWith("http")
+              ? item.image
+              : `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}${
+                  item.image.startsWith("/") ? "" : "/"
+                }${item.image}`
+          }
           alt={item.name}
           className="w-full h-full object-cover"
         />

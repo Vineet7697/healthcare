@@ -3,10 +3,26 @@ import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
 const STATUS_STYLES = {
-  confirmed: { bg: "bg-[#06B6D4]/10", text: "text-[#06B6D4]", dot: "bg-[#06B6D4]" },
-  pending: { bg: "bg-[#F59E0B]/10", text: "text-[#F59E0B]", dot: "bg-[#F59E0B]" },
-  completed: { bg: "bg-[#22C55E]/10", text: "text-[#22C55E]", dot: "bg-[#22C55E]" },
-  cancelled: { bg: "bg-[#EF4444]/10", text: "text-[#EF4444]", dot: "bg-[#EF4444]" },
+  confirmed: {
+    bg: "bg-[#06B6D4]/10",
+    text: "text-[#06B6D4]",
+    dot: "bg-[#06B6D4]",
+  },
+  pending: {
+    bg: "bg-[#F59E0B]/10",
+    text: "text-[#F59E0B]",
+    dot: "bg-[#F59E0B]",
+  },
+  completed: {
+    bg: "bg-[#22C55E]/10",
+    text: "text-[#22C55E]",
+    dot: "bg-[#22C55E]",
+  },
+  cancelled: {
+    bg: "bg-[#EF4444]/10",
+    text: "text-[#EF4444]",
+    dot: "bg-[#EF4444]",
+  },
   default: { bg: "bg-[#EEF2FF]", text: "text-[#2563EB]", dot: "bg-[#2563EB]" },
 };
 
@@ -71,13 +87,22 @@ export default function MyLabBookings() {
     <div className="min-h-screen bg-[#F8FAFC] px-4 py-6 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0F172A]">
-            My Lab Bookings
-          </h1>
-          <p className="text-sm text-[#64748B] mt-1">
-            Track and manage all your lab test bookings in one place
-          </p>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0F172A]">
+              My Lab Bookings
+            </h1>
+            <p className="text-sm text-[#64748B] mt-1">
+              Track and manage all your lab test bookings in one place
+            </p>
+          </div>
+
+          <button
+            className="bg-blue-700 cursor-pointer px-4 py-2 text-white rounded-xl self-start sm:self-auto"
+            onClick={() => navigate("/client/lab-tests")}
+          >
+            Book Lab Test
+          </button>
         </div>
 
         {/* Empty State */}
@@ -176,7 +201,9 @@ export default function MyLabBookings() {
 
                       <button
                         onClick={() =>
-                          navigate(`/client/my-lab-bookings/${booking.booking_id}`)
+                          navigate(
+                            `/client/my-lab-bookings/${booking.booking_id}`,
+                          )
                         }
                         className="inline-flex items-center gap-1 text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
                       >

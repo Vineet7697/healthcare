@@ -17,7 +17,11 @@ export default function PaymentSuccess() {
         console.log("ACTIVE SUB RESPONSE =>", res.data);
         console.log("SUBSCRIPTION =>", res.data.data?.subscription);
 
-        setSubscription(res.data.data.subscription);
+       if (res.data.data.hasSubscription) {
+  setSubscription(res.data.data.subscription);
+} else {
+  navigate("/payment");
+}
       } catch (err) {
         console.error("ACTIVE SUB ERROR =>", err);
       } finally {

@@ -141,6 +141,8 @@ const AdminDashboard = () => {
                   icon={<FiUsers size={16} />}
                   accent="#0ea5a0"
                   lightBg="#e6f7f7"
+                   onClick={() => navigate("/admin/patients")}
+
                 />
                 <StatCard
                   title="Today's Appts"
@@ -261,13 +263,7 @@ const AdminDashboard = () => {
                   onClick={() => navigate("/admin/doctors")}
                   icon={<FiUserCheck size={16} />}
                 />
-                <ActionCard
-                  title="Notifications"
-                  count={null}
-                  description="View all admin notifications"
-                  onClick={() => navigate("/admin/notifications")}
-                  icon={<FiBell size={16} />}
-                />
+               
               </div>
             </section>
           </>

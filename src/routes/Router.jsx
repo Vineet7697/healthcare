@@ -90,6 +90,7 @@ import AddLabTest from "../admin/labdetails/AddLabTest";
 import LabPackages from "../admin/labdetails/LabPackages";
 import AddLabPackage from "../admin/labdetails/AddLabPackage";
 import LabBookingDetails from "../admin/labdetails/LabBookingDetails";
+import AdminPatients from "../admin/AdminPatients";
 
 const Router = () => {
   return (
@@ -157,6 +158,8 @@ const Router = () => {
             <Route path="dashboard" element={<AdminDashboard />} />
 
             <Route path="doctors" element={<AdminDoctor />} />
+            <Route path="Patients" element={<AdminPatients />} />
+
             <Route
               path="doctorsverification/:id"
               element={<AdminDoctorVerification />}

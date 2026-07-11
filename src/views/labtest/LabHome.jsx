@@ -45,7 +45,13 @@ function PackageCard({ pkg }) {
     >
       <div className="h-32 sm:h-36 overflow-hidden bg-gray-100">
         <img
-          src={pkg.image}
+          src={
+            pkg.image?.startsWith("http")
+              ? pkg.image
+              : `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}${
+                  pkg.image.startsWith("/") ? "" : "/"
+                }${pkg.image}`
+          }
           alt={pkg.name}
           className="w-full h-full object-cover"
         />
@@ -342,7 +348,7 @@ export default function LabHome() {
             href="tel:+919876543210"
             className="bg-white text-[#2563EB] font-bold rounded-xl px-5 sm:px-6 py-3 text-sm flex items-center gap-2 hover:bg-blue-50 transition shrink-0 w-full sm:w-auto justify-center"
           >
-            <Phone size={16} /> Call +91 98765 43210
+            <Phone size={16} /> Call +91 9277207339
           </a>
         </div>
       </section>

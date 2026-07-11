@@ -411,11 +411,11 @@ const Help = () => {
                   <div className="space-y-2">
                     <a href="mailto:founder@yodoctor.in" className="flex items-center gap-2 text-xs font-semibold rounded-lg px-3 py-2"
                       style={{ background: "#0072BC", color: "#fff" }}>
-                      <Icon d={ICONS.mail} size={13} color="#fff" /> yodoctor99099@gmail.com
+                      <Icon d={ICONS.mail} size={13} color="#fff" /> founder@yodoctor.in
                     </a>
                     <a href="tel:+918839003275" className="flex items-center gap-2 text-xs font-semibold rounded-lg px-3 py-2"
                       style={{ background: "rgba(255,255,255,0.08)", color: "rgba(200,220,255,0.9)" }}>
-                      <Icon d={ICONS.phone} size={13} color="#7ec8f8" /> +91-7084630273
+                      <Icon d={ICONS.phone} size={13} color="#7ec8f8" /> +91 9277207339
                     </a>
                   </div>
                 </div>
@@ -446,10 +446,10 @@ const Help = () => {
                       style={{ background: "#0072BC" }}>
                       <Icon d={ICONS.mail} size={15} color="#fff" /> Email Support
                     </a>
-                    <a href="tel:+918839003275"
+                    <a href="tel:+91 9277207339"
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold"
                       style={{ background: "rgba(255,255,255,0.1)", color: "rgba(220,235,255,0.9)" }}>
-                      <Icon d={ICONS.phone} size={15} color="#7ec8f8" /> +91-7084630273
+                      <Icon d={ICONS.phone} size={15} color="#7ec8f8" /> +91 9277207339
                     </a>
                   </div>
                 </div>

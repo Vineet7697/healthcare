@@ -1,27 +1,17 @@
 import api from "./api";
 
-/* ================= DOCTOR ================= */
+// Get all notifications
+export const getNotifications = () =>
+  api.get("/notifications");
 
-export const getDoctorNotifications = () =>
-  api.get("/doctor/notifications");
+// Get unread count
+export const getUnreadNotificationCount = () =>
+  api.get("/notifications/unread-count");
 
-export const getDoctorUnreadCount = () =>
-  api.get("/doctor/notifications/unread-count");
+// Mark single notification as read
+export const markNotificationRead = (id) =>
+  api.put(`/notifications/${id}/read`);
 
-export const markDoctorNotificationRead = (id) =>
-  api.put(`/doctor/notifications/${id}/read`);
-
-export const markAllDoctorNotificationsRead = () =>
-  api.put("/doctor/notifications/read-all");
-
-
-/* ================= PATIENT ================= */
-
-export const getPatientNotifications = () =>
-  api.get("/patient/notifications");
-
-export const markPatientNotificationRead = (id) =>
-  api.put(`/patient/notifications/${id}/read`);
-
-export const getPatientUnreadCount = () =>
-  api.get("/patient/notifications/unread-count");
+// Mark all notifications as read
+export const markAllNotificationsRead = () =>
+  api.put("/notifications/read-all");

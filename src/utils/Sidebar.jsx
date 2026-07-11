@@ -14,6 +14,7 @@ import {
   FaBoxOpen,
   FaClipboardList,
 } from "react-icons/fa";
+import { FiUsers } from "react-icons/fi";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
@@ -60,6 +61,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const adminNav = [
     { key: "dashboard", label: "Admin Dashboard", icon: <FaChartBar /> },
     { key: "doctors", label: "Doctors", icon: <FaUserMd /> },
+    { key: "patients", label: "Patients", icon: <FiUsers /> },
     { key: "contact-requests", label: "Enquiries", icon: <FaEdit /> },
     {
       key: "homecare-bookings",

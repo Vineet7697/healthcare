@@ -39,33 +39,36 @@ const BookAppointmentPage = () => {
   const [searchParams] = useSearchParams();
   const isQR = searchParams.get("fromQR") === "true";
 
-useEffect(() => {
-  const fetchCurrentToken = async () => {
-    try {
-      if (!selectedSession) return;
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+const [paymentMethod, setPaymentMethod] = useState("CASH");
 
-      const appointmentDate =
-        selectedDateType === "today"
-          ? getLocalDate(0)
-          : selectedDateType === "tomorrow"
-            ? getLocalDate(1)
-            : customDate;
+  useEffect(() => {
+    const fetchCurrentToken = async () => {
+      try {
+        if (!selectedSession) return;
 
-      const res = await getCurrentToken({
-        doctorId,
-        appointmentDate,
-        appointmentSlot: selectedSession,
-      });
+        const appointmentDate =
+          selectedDateType === "today"
+            ? getLocalDate(0)
+            : selectedDateType === "tomorrow"
+              ? getLocalDate(1)
+              : customDate;
 
-      setCurrentToken(res.data.currentToken || 0);
-      console.log("API Response:", res.data);
-    } catch (err) {
-      console.error("Current token fetch failed:", err);
-    }
-  };
+        const res = await getCurrentToken({
+          doctorId,
+          appointmentDate,
+          appointmentSlot: selectedSession,
+        });
 
-  fetchCurrentToken();
-}, [doctorId, selectedDateType, customDate, selectedSession]);
+        setCurrentToken(res.data.currentToken || 0);
+        console.log("API Response:", res.data);
+      } catch (err) {
+        console.error("Current token fetch failed:", err);
+      }
+    };
+
+    fetchCurrentToken();
+  }, [doctorId, selectedDateType, customDate, selectedSession]);
 
   useEffect(() => {
     const loadFamilyMembers = async () => {
@@ -140,6 +143,8 @@ useEffect(() => {
       bookingFor: patientType,
       appointmentDate,
       slot: selectedSession,
+        paymentMethod: paymentMethod,
+  paymentStatus: "PENDING",
       familyMemberIds:
         patientType === "OTHER" ? [Number(selectedFamilyId)] : [],
     };
@@ -290,10 +295,7 @@ useEffect(() => {
 
         <div className="px-7 py-6 flex flex-col gap-6">
           <div>
-            <p
-              className=" text-[12px] font-bold uppercase tracking-widest mb-3"
-              
-            >
+            <p className=" text-[12px] font-bold uppercase tracking-widest mb-3">
               Step 1 — Who is this for?
             </p>
             <div className="flex flex-wrap gap-2">
@@ -361,15 +363,13 @@ useEffect(() => {
           </div>
 
           <div className="mt-4">
-            <p className="text-[12px] font-bold  mb-2">
-              📅 Available Days
-            </p>
+            <p className="text-[12px] font-bold  mb-2">📅 Available Days</p>
 
             <div className="flex flex-wrap gap-2">
               {formattedDays.map((day, index) => (
                 <div
                   key={index}
-                  className="px-3 py-1.5 rounded-full bg-[#DBEAFE] text-[#2563EB] text-[12px] font-semibold border border-[#93C5FD]"
+                  className="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-[12px] font-medium border border-gray-200 cursor-default select-none"
                 >
                   {day}
                 </div>
@@ -381,9 +381,7 @@ useEffect(() => {
           {!isQR && (
             <>
               <div>
-                <p
-                  className=" text-[12px] font-bold uppercase tracking-widest mb-3"
-                >
+                <p className=" text-[12px] font-bold uppercase tracking-widest mb-3">
                   Step 2 — Select Date
                 </p>
                 <div className="flex flex-wrap gap-2 items-center">
@@ -438,9 +436,7 @@ useEffect(() => {
               />
 
               <div>
-                <p
-                  className="text-[12px] font-bold uppercase tracking-widest mb-3"
-                >
+                <p className="text-[12px] font-bold uppercase tracking-widest mb-3">
                   Step 3 — Select Session
                 </p>
                 <div className="flex gap-3">
@@ -501,7 +497,7 @@ useEffect(() => {
             </>
           )}
           <button
-            onClick={handleConfirm}
+           onClick={() => setShowPaymentModal(true)}
             disabled={booking || (!isQR && !selectedSession)}
             className="w-full py-3.5 rounded-xl font-[family-name:var(--font-dm)] font-bold text-[15px] text-white cursor-pointer transition-all duration-250 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
@@ -542,6 +538,63 @@ useEffect(() => {
           )}
         </div>
       </div>
+
+      {showPaymentModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-[400px] shadow-xl">
+
+      <h2 className="text-xl font-bold mb-4">
+        Select Payment Method
+      </h2>
+
+      <div
+        className={`border rounded-xl p-4 cursor-pointer ${
+          paymentMethod === "CASH"
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-200"
+        }`}
+        onClick={() => setPaymentMethod("CASH")}
+      >
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="font-semibold">💵 Cash at Clinic</h3>
+            <p className="text-sm text-gray-500">
+              Pay consultation fee at clinic
+            </p>
+          </div>
+
+          <input
+            type="radio"
+            checked={paymentMethod === "CASH"}
+            readOnly
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={() => setShowPaymentModal(false)}
+          className="px-5 py-2 rounded-lg border"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={async () => {
+            setShowPaymentModal(false);
+            await handleConfirm();
+          }}
+          className="px-5 py-2 rounded-lg bg-blue-600 text-white"
+        >
+          Confirm
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 };

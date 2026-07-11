@@ -56,12 +56,13 @@ export default function AddLabTest() {
   };
 
   const handleImageChange = (e) => {
+    console.log(e.target.files[0]);
+
     setForm((prev) => ({
       ...prev,
       image: e.target.files[0],
     }));
   };
-
   const fetchTest = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -99,53 +100,57 @@ export default function AddLabTest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name) {
-      return notify.info("Test name required");
-    }
-
-    if (!form.category_id) {
-      return notify.info("Select category");
-    }
-
-    if (!form.price) {
-      return notify.info("Price required");
-    }
+    if (!form.name) return notify.info("Test name required");
+    if (!form.category_id) return notify.info("Select category");
+    if (!form.price) return notify.info("Price required");
 
     try {
-      const payload = {
-        ...form,
-        includes: includes.filter((item) => item.trim() !== ""),
-      };
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("category_id", form.category_id);
+      formData.append("tagline", form.tagline);
+      formData.append("price", form.price);
+      formData.append("mrp", form.mrp);
+      formData.append("parameters", form.parameters);
+      formData.append("report_time", form.report_time);
+      formData.append("fasting", form.fasting);
+      formData.append("tier", form.tier);
+      formData.append("type", form.type);
+      formData.append("description", form.description);
+      formData.append("is_popular", form.is_popular ? 1 : 0);
+
+      includes
+        .filter((item) => item.trim() !== "")
+        .forEach((item) => {
+          formData.append("includes[]", item);
+        });
+
+      if (form.image instanceof File) {
+        formData.append("image", form.image);
+      }
 
       if (isEdit) {
-        await api.put(`/admin/lab/tests/${id}`, payload);
+        await api.put(`/admin/lab/tests/${id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
         notify.success("Test Updated Successfully");
       } else {
-        await api.post("/admin/lab/tests", payload);
+        await api.post("/admin/lab/tests", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
         notify.success("Test Added Successfully");
       }
 
-      notify.success("Test Added Successfully");
-
-      setForm({
-        name: "",
-        category_id: "",
-        tagline: "",
-        price: "",
-        mrp: "",
-        parameters: "",
-        report_time: "",
-        fasting: "",
-        tier: "essential",
-        type: "test",
-        description: "",
-        image: null,
-        is_popular: false,
-      });
-
-      setIncludes([""]);
+      navigate("/admin/lab-test");
     } catch (err) {
-      console.log(err);
+      console.error(err);
       notify.error("Something went wrong");
     }
   };

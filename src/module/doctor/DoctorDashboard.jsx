@@ -159,20 +159,23 @@ if (!res.data?.data?.subscription) {
 
 
 
-  const loadDashboard = async () => {
-    try {
-      const res = await api.get("/doctor/dashboard");
-      setDashboard({
-        pendingRequests: res.data.pendingRequests || 0,
-        todayQueue: res.data.todayQueue || 0,
-        completedToday: res.data.completedToday || 0,
-      });
-      setDoctorName(res.data.doctorName || "Doctor");
-      setIsOnline(res.data.isAvailable ?? true);
-    } catch (err) {
-      console.error("Dashboard load failed", err);
-    }
-  };
+const loadDashboard = async () => {
+  try {
+    const res = await api.get("/doctor/dashboard");
+
+    setDashboard({
+      pendingRequests: res.data.pendingRequests || 0,
+      todayQueue: res.data.todayQueue || 0,
+      completedToday: res.data.completedToday || 0,
+    });
+
+    setDoctorName(res.data.doctor?.doctorName || "Doctor");
+    setIsOnline(res.data.doctor?.isAvailable ?? true);
+
+  } catch (err) {
+    console.error("Dashboard load failed", err);
+  }
+};
 
   useEffect(() => {
   if (!socket || !connected) return;
@@ -200,7 +203,7 @@ useEffect(() => {
   const handleNewAppointment = () => {
     loadDashboard();
 
-   notify.success(data.message || "New appointment received.");
+    notify.success(data?.message || "New appointment received.");
   };
 
   socket.on("appointment-requested", handleNewAppointment);

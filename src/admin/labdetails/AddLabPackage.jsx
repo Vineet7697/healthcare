@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { notify } from "../../utils/notify";
 
 export default function AddLabPackage() {
+  const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [categories, setCategories] = useState([]);
   const { id } = useParams();
@@ -114,6 +115,13 @@ export default function AddLabPackage() {
     }));
   };
 
+  const handleImageChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      image: e.target.files[0],
+    }));
+  };
+
   const handleTestSelect = (id) => {
     if (selectedTests.includes(id)) {
       setSelectedTests(selectedTests.filter((item) => item !== id));
@@ -143,9 +151,11 @@ export default function AddLabPackage() {
     if (!form.category_id) {
       return notify.info("Select category");
     }
+
     if (!form.price) {
       return notify.info("Price required");
     }
+
     if (!form.mrp) {
       return notify.info("MRP required");
     }
@@ -159,62 +169,54 @@ export default function AddLabPackage() {
     }
 
     try {
-      const token = localStorage.getItem("token");
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("category_id", form.category_id);
+      formData.append("tagline", form.tagline);
+      formData.append("price", form.price);
+      formData.append("mrp", form.mrp);
+      formData.append("parameters", form.parameters);
+      formData.append("report_time", form.report_time);
+      formData.append("fasting", form.fasting);
+      formData.append("tier", form.tier);
+      formData.append("type", form.type);
+      formData.append("description", form.description);
+      formData.append("is_popular", form.is_popular ? 1 : 0);
+
+      selectedTests.forEach((testId) => {
+        formData.append("tests[]", testId);
+      });
+
+      // Image sirf tab bhejo jab nayi image select ki ho
+      if (form.image instanceof File) {
+        formData.append("image", form.image);
+      }
 
       if (isEdit) {
-        await api.put(
-          `/admin/lab/packages/${id}`,
-          {
-            ...form,
-            tests: selectedTests,
+        await api.put(`/admin/lab/packages/${id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        });
 
         notify.success("Package Updated Successfully");
       } else {
-        await api.post(
-          "/admin/lab/packages",
-          {
-            ...form,
-            tests: selectedTests,
+        await api.post("/admin/lab/packages", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        });
 
         notify.success("Package Added Successfully");
       }
 
-      setForm({
-        name: "",
-        category_id: "",
-        tagline: "",
-        price: "",
-        mrp: "",
-        parameters: "",
-        report_time: "",
-        fasting: "",
-        tier: "essential",
-        type: "package",
-        description: "",
-        image: "",
-        is_popular: false,
-      });
-
-      setSelectedTests([]);
+      navigate("/admin/lab-packages");
     } catch (error) {
       console.log(error);
       console.log(error.response?.data);
 
-      notify.error(error.response?.data?.message);
+      notify.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -382,14 +384,26 @@ export default function AddLabPackage() {
             </h2>
 
             <div>
-              <label className={labelClass}>Image URL</label>
+              <label className={labelClass}>Upload Image</label>
+
               <input
-                name="image"
-                value={form.image}
-                onChange={handleChange}
-                placeholder="https://..."
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
                 className={inputClass}
               />
+
+              {form.image && (
+                <img
+                  src={
+                    typeof form.image === "string"
+                      ? form.image
+                      : URL.createObjectURL(form.image)
+                  }
+                  alt="Preview"
+                  className="w-28 h-28 mt-3 rounded-lg object-cover border"
+                />
+              )}
             </div>
 
             <label className="flex items-center gap-2.5 text-sm text-[#0F172A] cursor-pointer bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 w-fit">
