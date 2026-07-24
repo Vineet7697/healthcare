@@ -163,19 +163,7 @@ return (
                     >
                       📅 Book Appointment
                     </button>
-                    <button
-                      onClick={() => {
-                        if (doctor.phone) {
-                          const phone = doctor.phone.replace(/\D/g, "");
-                          window.open(`tel:${phone}`, "_self");
-                        } else {
-                          notify("Doctor's phone number is not available");
-                        }
-                      }}
-                      className="flex-1 sm:flex-none text-md sm:text-[15px] font-bold text-white px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-[#2ecc71] to-[#1aab5a] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center"
-                    >
-                      📞 Call Doctor
-                    </button>
+                   
                   </div>
 
                 </div>

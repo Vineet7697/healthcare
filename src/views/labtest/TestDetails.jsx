@@ -118,10 +118,10 @@ export default function TestDetails() {
 
         <div className="flex items-baseline gap-2 mb-5 flex-wrap">
           <span className="font-display font-extrabold text-[#0F172A] text-2xl sm:text-3xl">
-            ₹{item.price}
+            ₹{Number(item.price).toFixed(0)}
           </span>
           <span className="text-[#94A3B8] text-sm sm:text-base line-through">
-            ₹{item.mrp}
+            ₹{Number(item.mrp).toFixed(0)}
           </span>
           <span className="text-[#22C55E] text-sm font-semibold">
             Save ₹{item.mrp - item.price}

@@ -45,6 +45,7 @@ import LogoutModal from "../utils/LogoutModal";
 import AppointmentHistory from "../module/doctor/pages/AppointmentHistory";
 import Myappointmentpage from "../module/patient/pages/Myappointmentpage";
 import PatientbookAppointment from "../module/patient/pages/PatientbookAppointment";
+import DeleteAccountModal  from "../utils/DeleteAccountModal";
 import IncomingAppointments from "../module/doctor/pages/IncomingAppointments";
 import AdminDashboard from "../admin/AdminDashboard";
 import ProtectedRoute from "../routes/ProtectedRoute";
@@ -91,6 +92,8 @@ import LabPackages from "../admin/labdetails/LabPackages";
 import AddLabPackage from "../admin/labdetails/AddLabPackage";
 import LabBookingDetails from "../admin/labdetails/LabBookingDetails";
 import AdminPatients from "../admin/AdminPatients";
+import RefundPolicy from "../landingpage/RefundPolicy";
+import PrivacyPolicy from "../landingpage/PrivacyPolicy";
 
 const Router = () => {
   return (
@@ -104,6 +107,9 @@ const Router = () => {
 
             <Route path="payment-success" element={<PaymentSuccess />} />
             <Route path="payment-failed" element={<PaymentFailed />} />
+            <Route path="refund-policy" element={<RefundPolicy />} />
+            <Route path="privacy-policy" element={<PrivacyPolicy />} />
+            
 
             <Route path="clientloginpage" element={<ClientLoginPage />} />
             <Route path="clientregisterpage" element={<ClientRegisterPage />} />
@@ -123,18 +129,6 @@ const Router = () => {
               path="/home-service-booking"
               element={<PatientBookHomeService />}
             />
-            {/* lab test routes
-            <Route path="lab-tests" element={<LabHome />} />
-            <Route path="test/:id" element={<TestDetails />} />
-            <Route path="cart" element={<CartPage />} />
-            <Route path="search" element={<Search />} />
-            <Route path="booking" element={<Booking />} />
-            <Route path="confirmation" element={<Confirmation />} />
-            <Route path="/my-lab-bookings" element={<MyLabBookings />} />
-            <Route
-              path="/my-lab-bookings/:bookingId"
-              element={<BookingDetails />}
-            /> */}
 
             <Route
               path="/verify/:certificateId"
@@ -236,6 +230,7 @@ const Router = () => {
             <Route path="dashboard" element={<PatientDashboard />} />
 
             <Route path="profile" element={<ProfileSection />} />
+            <Route path="account-deletion" element={<DeleteAccountModal />} />
             <Route path="family" element={<FamilyMembers />} />
             <Route path="changepassword" element={<ChangePassword />} />
             <Route path="cards" element={<Cards />} />

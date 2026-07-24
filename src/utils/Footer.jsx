@@ -52,6 +52,18 @@ const Footer = () => {
           >
             Help
           </Link>
+          <Link
+            to="/refund-policy"
+            className="text-white/80 hover:text-white transition-colors duration-200"
+          >
+            Refund Policy
+          </Link>
+          <Link
+            to="/privacy-policy"
+            className="text-white/80 hover:text-white transition-colors duration-200"
+          >
+            Privacy Policy
+          </Link>
         </div>
 
         <div className="flex flex-col gap-2">

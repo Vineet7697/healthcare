@@ -514,30 +514,56 @@ export const validateStep7 = (checked) => {
 
 
 
-// Book Appoinmentpage validation
+// Book Lab Test Validation
 
-export const validateFamilyMember = (member) => {
+export const bookLabTest = (member) => {
   const errors = {};
 
-  if (!member.name.trim()) {
+  // Name
+  if (!member.name?.trim()) {
     errors.name = "Name is required";
+  } else if (!/^[A-Za-z ]+$/.test(member.name.trim())) {
+    errors.name = "Name should contain only letters";
   }
 
-  if (!member.age || isNaN(member.age) || member.age <= 0) {
+  // Age
+  if (!member.age) {
+    errors.age = "Age is required";
+  } else if (isNaN(member.age) || member.age < 1 || member.age > 120) {
     errors.age = "Please enter a valid age";
   }
 
-  if (!member.Aadhar || !/^\d{12}$/.test(member.Aadhar)) {
-    errors.Aadhar = "Aadhar must be a 12-digit number";
+  // Gender
+  if (!member.gender) {
+    errors.gender = "Please select gender";
   }
 
-  if (!member.MobileNumber || !/^[6-9]\d{9}$/.test(member.MobileNumber)) {
+  // Mobile Number
+  if (!member.MobileNumber?.trim()) {
+    errors.MobileNumber = "Mobile number is required";
+  } else if (!/^[6-9]\d{9}$/.test(member.MobileNumber)) {
     errors.MobileNumber = "Enter a valid 10-digit mobile number";
+  }
+
+  // Address
+  if (!member.address?.trim()) {
+    errors.address = "Address is required";
+  } else if (member.address.trim().length < 10) {
+    errors.address = "Please enter a complete address";
+  }
+
+  // Booking Date
+  if (!member.bookingDate) {
+    errors.bookingDate = "Please select a booking date";
+  }
+
+  // Booking Time
+  if (!member.bookingTime) {
+    errors.bookingTime = "Please select a time slot";
   }
 
   return errors;
 };
-
 // change password validation
 
 export const validatePasswordFields = (fields) => {

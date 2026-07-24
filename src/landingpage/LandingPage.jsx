@@ -15,7 +15,7 @@ import image2 from "../assets/images/image2.png";
 import qrBooking from "../assets/images/qr-booking.png";
 import onlineBooking from "../assets/images/online-booking.png";
 import certificate from "../assets/images/certificate.png";
-// import { use } from "react";
+
 
 const LandingPage = () => {
   const navigate = useNavigate();

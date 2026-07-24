@@ -67,10 +67,10 @@ function PackageCard({ pkg }) {
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-4 flex-wrap">
           <span className="font-display font-extrabold text-[#0F172A] text-2xl sm:text-3xl">
-            ₹{pkg.price}
+            ₹{Number(pkg.price).toFixed(0)}
           </span>
           <span className="text-[#94A3B8] text-sm line-through">
-            ₹{pkg.mrp}
+            ₹{Number(pkg.mrp).toFixed(0)}
           </span>
           <span className="bg-[#22C55E] text-white text-xs font-bold px-2 py-0.5 rounded-full">
             {discount}% OFF

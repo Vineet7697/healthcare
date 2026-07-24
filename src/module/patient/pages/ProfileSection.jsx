@@ -17,7 +17,6 @@ const DEFAULT_AVATAR =
 const formatDateForInput = (iso) =>
   iso ? new Date(iso).toISOString().split("T")[0] : "";
 
-
 function FloatingInput({ label, icon, readOnly, ...props }) {
   return (
     <div
@@ -123,7 +122,7 @@ export default function ProfileSection() {
     gender: "",
     dob: "",
   };
-const { setImage } = useImage();
+  const { setImage } = useImage();
   const [profile, setProfile] = useState(emptyProfile);
   const [profileImage, setProfileImage] = useState(DEFAULT_AVATAR);
   const [originalProfile, setOriginalProfile] = useState(emptyProfile);
@@ -153,9 +152,9 @@ const { setImage } = useImage();
 
         setProfileImage(imageUrl);
 
-      if (rawUrl) {
-  setImage(rawUrl); // ✅ global update
-}
+        if (rawUrl) {
+          setImage(rawUrl); // ✅ global update
+        }
       } catch (err) {
         console.error("Profile load error:", err);
         setProfileImage(DEFAULT_AVATAR);
@@ -164,37 +163,37 @@ const { setImage } = useImage();
     loadData();
   }, []);
 
-const handleImageChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
-    notify.error("Only image files allowed");
-    return;
-  }
+    if (!file.type.startsWith("image/")) {
+      notify.error("Only image files allowed");
+      return;
+    }
 
-  try {
-    const res = await uploadProfileImageApi(file);
+    try {
+      const res = await uploadProfileImageApi(file);
 
-    const rawUrl = res.data.imageUrl;
+      const rawUrl = res.data.imageUrl;
 
-    // ✅ UI ke liye cache-bust
-    const fullUrl = `${rawUrl}?t=${Date.now()}`;
+      // ✅ UI ke liye cache-bust
+      const fullUrl = `${rawUrl}?t=${Date.now()}`;
 
-    setProfileImage(fullUrl);
-setImage(rawUrl);
-    // ✅ clean URL store
+      setProfileImage(fullUrl);
+      setImage(rawUrl);
+      // ✅ clean URL store
 
-    notify.success("Profile image updated");
-  } catch {
-    notify.error("Image update failed");
-  }
-};
+      notify.success("Profile image updated");
+    } catch {
+      notify.error("Image update failed");
+    }
+  };
   const handleRemoveImage = async () => {
     try {
       await deleteProfileImageApi();
       setProfileImage(DEFAULT_AVATAR);
-      setImage(null); 
+      setImage(null);
       setShowDeleteModal(false);
       notify.success("Profile image removed");
     } catch {

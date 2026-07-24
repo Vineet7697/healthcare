@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { validateLoginForm } from "../../controllers/FormValidation";
@@ -8,6 +6,9 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { patientLoginApi } from "../../services/patient/PatientLoginApi";
 import { jwtDecode } from "jwt-decode";
 import { notify } from "../../utils/notify";
+import { auth, provider } from "../../firebase";
+import { signInWithPopup } from "firebase/auth";
+import api from "../../services/api";
 
 const ClientLoginPage = () => {
   const [identifier, setIdentifier] = useState("");
@@ -91,6 +92,62 @@ const ClientLoginPage = () => {
       notify.error(err.response?.data?.message || "Login failed");
     }
   };
+
+  const handleGoogleLogin = async () => {
+  try {
+
+    const result = await signInWithPopup(auth, provider);
+
+    const firebaseToken = await result.user.getIdToken();
+
+    const res = await api.post("/auth/google-login", {
+      token: firebaseToken,
+      portal: "USER",
+    });
+
+    const token = res.data.data.token;
+
+    const decoded = jwtDecode(token);
+
+    const role = decoded.role?.toUpperCase();
+
+    const loggedInUser = {
+      role,
+      identifier: decoded.email,
+    };
+
+    if (rememberMe) {
+      localStorage.setItem("token", token);
+      localStorage.setItem(
+        "loggedInUser",
+        JSON.stringify(loggedInUser)
+      );
+    } else {
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem(
+        "loggedInUser",
+        JSON.stringify(loggedInUser)
+      );
+    }
+
+    notify.success("Login Successful");
+
+    if (redirect) {
+      navigate(redirect);
+    } else {
+      navigate("/client/dashboard");
+    }
+
+  } catch (err) {
+
+    console.log(err);
+
+    notify.error(
+      err.response?.data?.message ||
+      "Google Login Failed"
+    );
+  }
+};
 
   const inputCls = (field) =>
     `w-full px-4 py-2.5 rounded-lg text-md text-gray-800 outline-none border transition-colors duration-150 ${
@@ -194,7 +251,7 @@ const ClientLoginPage = () => {
 
           <button
             type="button"
-            onClick={() => notify.info("Google login is not available yet.")}
+            onClick={handleGoogleLogin}
             className="w-full flex items-center justify-center gap-2.5 py-2.5 cursor-pointer rounded-lg border border-gray-200 hover:bg-gray-50 text-md font-medium text-gray-700 transition-colors duration-150"
           >
             <img src="/images/google.webp" alt="Google" className="h-4 w-4" />

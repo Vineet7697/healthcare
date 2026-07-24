@@ -87,7 +87,11 @@ export default function Booking() {
   const navigate = useNavigate();
   const dates = getDates();
   const [submitting, setSubmitting] = useState(false);
-
+  const [errors, setErrors] = useState({
+    name: "",
+    age: "",
+    phone: "",
+  });
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("Male");
@@ -114,6 +118,48 @@ export default function Booking() {
       </div>
     );
 
+  const validateField = (field, value) => {
+    let error = "";
+
+    switch (field) {
+      case "name":
+        if (!value.trim()) {
+          error = "Name is required";
+        } else if (!/^[A-Za-z ]+$/.test(value)) {
+          error = "Only alphabets are allowed";
+        } else if (value.trim().length < 3) {
+          error = "Minimum 3 characters required";
+        }
+        break;
+
+      case "age":
+        if (!value) {
+          error = "Age is required";
+        } else if (isNaN(value) || value < 1 || value > 120) {
+          error = "Age must be between 1 and 120";
+        }
+        break;
+
+      case "phone":
+        if (!value) {
+          error = "Mobile number is required";
+        } else if (!/^[6-9]\d{9}$/.test(value)) {
+          error = "Enter a valid 10 digit mobile number";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [field]: error,
+    }));
+
+    return error === "";
+  };
+
   function detectLocation() {
     if (!navigator.geolocation) return;
     setLocating(true);
@@ -135,12 +181,26 @@ export default function Booking() {
       () => setLocating(false),
     );
   }
-
   const canConfirm =
-    name.trim() && age.trim() && phone.trim() && address.trim() && selectedSlot;
+    name.trim() &&
+    age.trim() &&
+    phone.trim() &&
+    address.trim() &&
+    selectedSlot &&
+    !errors.name &&
+    !errors.age &&
+    !errors.phone;
+
   const dateLabel = `${dates[selectedDate].label || dates[selectedDate].weekday} ${dates[selectedDate].day} ${dates[selectedDate].month}`;
 
   const handleConfirm = async () => {
+      const isNameValid = validateField("name", name);
+  const isAgeValid = validateField("age", age);
+  const isPhoneValid = validateField("phone", phone);
+
+  if (!isNameValid || !isAgeValid || !isPhoneValid || !address.trim() || !selectedSlot) {
+    return;
+  }
     if (!canConfirm) return;
 
     try {
@@ -314,10 +374,16 @@ export default function Booking() {
             </label>
             <input
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Arshita Sharma"
+              onChange={(e) => {
+                setName(e.target.value);
+                validateField("name", e.target.value);
+              }}
               className={inputCls}
             />
+
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+            )}
           </div>
           <div>
             <label className="text-xs font-bold text-[#64748B] block mb-1.5">
@@ -326,10 +392,16 @@ export default function Booking() {
             <input
               type="number"
               value={age}
-              onChange={(e) => setAge(e.target.value)}
-              placeholder="e.g. 32"
+              onChange={(e) => {
+                setAge(e.target.value);
+                validateField("age", e.target.value);
+              }}
               className={inputCls}
             />
+
+            {errors.age && (
+              <p className="text-red-500 text-xs mt-1">{errors.age}</p>
+            )}
           </div>
           <div>
             <label className="text-xs font-bold text-[#64748B] block mb-1.5">
@@ -338,10 +410,17 @@ export default function Booking() {
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setPhone(value);
+                validateField("phone", value);
+              }}
               className={inputCls}
             />
+
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
           </div>
           <div>
             <label className="text-xs font-bold text-[#64748B] block mb-1.5">

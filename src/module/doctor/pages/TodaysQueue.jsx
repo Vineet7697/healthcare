@@ -154,7 +154,7 @@ const TodaysQueue = () => {
       loadNextPatient();
     };
     refreshAll();
-    const interval = setInterval(refreshAll, 5000);
+    const interval = setInterval(refreshAll, 10000);
     return () => clearInterval(interval);
   }, [loadQueue, loadCurrentPatient, loadNextPatient]);
 

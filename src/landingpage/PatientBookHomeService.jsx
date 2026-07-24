@@ -459,26 +459,36 @@ export default function PatientBookHomeService() {
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      const res = await api.post("/patient/bookhomecare", {
-        full_name: form.fullName,
+const payload = {
+  full_name: form.fullName,
 
-        patient_latitude: form.patientLat,
-        patient_longitude: form.patientLng,
+  patient_age: Number(form.patientAge),
+  patient_gender: form.patientGender,
 
-        address: form.address,
-        contact_number: form.contact,
+  patient_latitude: form.patientLat,
+  patient_longitude: form.patientLng,
 
-        service_type: form.service,
-        medical_condition: form.condition,
+  gender_preference: form.genderPreference || "Any",
+  emergency_booking: form.emergencyBooking ? 1 : 0,
 
-        duration_type: form.durationType,
-        number_of_days: form.numDays,
+  address: form.address,
+  contact_number: form.contact,
 
-        preferred_date: form.prefDate,
-        time_slot: form.timeSlot,
+  service_type: form.service,
+  medical_condition: form.condition,
 
-        notes: form.notes,
-      });
+  duration_type: form.durationType,
+  number_of_days: Number(form.numDays),
+
+  preferred_date: form.prefDate,
+  time_slot: form.timeSlot,
+
+  notes: form.notes,
+};
+
+console.log("Payload:", payload);
+
+const res = await api.post("/patient/bookhomecare", payload);
 
       if (res.data.success) {
         setShowModal(false);

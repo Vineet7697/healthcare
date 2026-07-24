@@ -8,6 +8,8 @@ import loginimageImg from "../../assets/loginimage.webp";
 import api from "../../services/api";
 import { useLocation } from "react-router-dom";
 
+
+
 const DoctorLoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -189,6 +191,8 @@ const DoctorLoginPage = () => {
     }
   };
 
+
+
   useEffect(() => {
     const loginToken =
       localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -345,6 +349,13 @@ const DoctorLoginPage = () => {
                 Register
               </button>
             </div>
+             {/* <button
+                type="button"
+                className="flex-1 text-[#0086C3] cursor-pointer border border-[#0086C3]/40 hover:bg-[#0086C3]/5 font-semibold text-sm py-2.5 rounded-lg transition-colors duration-150"
+              >
+                Check Status
+              </button> */}
+
           </form>
         </div>
 

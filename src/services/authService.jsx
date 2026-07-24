@@ -15,3 +15,11 @@ export const verifyReset = (token) => {
 export const resetPassword = (data) => {
   return api.post("/auth/reset-password", data);
 };
+
+// ================= DELETE ACCOUNT =================
+
+export const deleteAccount = (data) => {
+  return api.delete("/auth/account-deletion", {
+    data,
+  });
+};

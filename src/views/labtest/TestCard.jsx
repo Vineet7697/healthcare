@@ -10,9 +10,9 @@ export default function TestCard({ item }) {
     : 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-border shadow-card hover:shadow-cardHover transition flex flex-col overflow-hidden">
+    <div className="bg-white rounded-2xl border-b-blue-700 shadow-card hover:shadow-cardHover transition flex flex-col overflow-hidden">
       {/* Image */}
-      <div className="h-28 sm:h-32 bg-gray-100 overflow-hidden relative">
+      <div className="h-28 sm:h-32 bg-gray-100 overflow-hidden relative ">
         <img
           src={
             item.image?.startsWith("http")
@@ -58,10 +58,10 @@ export default function TestCard({ item }) {
         <div className="flex items-center justify-between mt-auto gap-2 flex-wrap sm:flex-nowrap">
           <div className="min-w-0">
             <span className="font-display font-bold text-[#0F172A] text-base sm:text-lg">
-              ₹{item.price}
+              ₹{Number(item.price).toFixed(0)}
             </span>
             <span className="text-[11px] sm:text-xs text-[#94A3B8] line-through ml-1 sm:ml-1.5">
-              ₹{item.mrp}
+             ₹{Number(item.mrp).toFixed(0)}
             </span>
           </div>
           <div className="flex gap-1.5 shrink-0">

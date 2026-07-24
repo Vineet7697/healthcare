@@ -412,7 +412,7 @@ const PatientbookAppointment = () => {
           </div>
         </div>
       </section>
-
+{/* 
       <section className="bg-[#f5f6fa] py-16 px-6 md:px-20 min-h-screen">
         <div className="flex flex-col md:flex-row justify-around items-center gap-10">
           <div className="text-center md:text-left max-w-lg">
@@ -473,7 +473,7 @@ const PatientbookAppointment = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
     </>
   );
 };
