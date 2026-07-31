@@ -35,9 +35,10 @@ const STATUS_STYLE = {
 };
 
 const FILTERS = [
+  { key: "ALL",   label: "All" },
   { key: "TODAY", label: "Today" },
   { key: "7DAYS", label: "Last 7 Days" },
-  { key: "ALL",   label: "All" },
+  
 ];
 
 const STAT_CARDS = [
@@ -109,7 +110,7 @@ const TableRow = ({ a, onAction }) => (
       {new Date(a.date).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
     </td>
     <td className="px-5 py-4"><StatusBadge status={a.status} /></td>
-    <td className="px-5 py-4"><ActionBtn appointment={a} onClick={onAction} /></td>
+    {/* <td className="px-5 py-4"><ActionBtn appointment={a} onClick={onAction} /></td> */}
   </tr>
 );
 
@@ -279,7 +280,7 @@ const AppointmentHistory = () => {
                 <table className="w-full text-left min-w-[640px]">
                   <thead>
                     <tr className="border-b border-black/[0.06]">
-                      {["Patient", "Type", "Token", "Date & Time", "Status", "Action"].map((h) => (
+                      {["Patient", "Type", "Token", "Date & Time", "Status"].map((h) => (
                         <th key={h} className="text-[14px] font-bold tracking-widest uppercase text-[#6b7f8a] px-5 py-4 whitespace-nowrap">
                           {h}
                         </th>

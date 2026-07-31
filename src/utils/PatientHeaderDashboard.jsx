@@ -145,8 +145,6 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
       );
 
       setUnreadCount((prev) => Math.max(prev - 1, 0));
-      // fetchNotifications();
-      // fetchUnread();
     } catch (err) {
       console.error(err);
     }

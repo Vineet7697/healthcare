@@ -78,20 +78,34 @@ const DoctorDetailPage = () => {
       </div>
     );
   }
-const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const formattedDays = doctor?.availableDays
-  ? Array.isArray(doctor.availableDays)
-    ? doctor.availableDays
-        .sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
-        .join(", ")
-    : doctor.availableDays
-  : "Not Available";
+  const formattedDays = doctor?.availableDays
+    ? Array.isArray(doctor.availableDays)
+      ? doctor.availableDays
+          .sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+          .join(", ")
+      : doctor.availableDays
+    : "Not Available";
 
-  const infoItems = [ 
+  const infoItems = [
     { label: "Clinic Name", value: doctor.clinicName, icon: "🏥" },
     { label: "City", value: doctor.city, icon: "📍" },
     { label: "Address", value: doctor.address, icon: "🗺️" },
+    {
+      label: "Location",
+      value: (
+        <a
+          href={doctor.maps_link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          Open Clinic Location
+        </a>
+      ),
+      icon: "📍",
+    },
     { label: "License No", value: doctor.licenseNumber, icon: "📋" },
     {
       label: "Consultation Fee",
@@ -99,7 +113,18 @@ const formattedDays = doctor?.availableDays
       icon: "💰",
       highlight: true,
     },
+
     { label: "Timings", value: doctor.timings, icon: "🕐" },
+    {
+      label: "Morning",
+      value: doctor.sessionTimings?.morning,
+      icon: "🌅",
+    },
+    {
+      label: "Evening",
+      value: doctor.sessionTimings?.evening,
+      icon: "🌙",
+    },
 
     {
       label: "Available Days",
@@ -108,6 +133,29 @@ const formattedDays = doctor?.availableDays
       full: true,
     },
   ];
+
+  const getStatus = () => {
+    if (!doctor.available_today) {
+      return {
+        text: "Not Available",
+        color: "bg-orange-100 text-orange-700  text-center py-1 font-bold",
+      };
+    }
+
+    if (!doctor.is_available) {
+      return {
+        text: "Not Available",
+        color: "bg-red-100 text-red-700 text-center py-1 font-bold",
+      };
+    }
+
+    return {
+      text: "Available",
+      color: "bg-green-100 text-green-700 text-center py-1 font-bold",
+    };
+  };
+
+  const status = getStatus();
 
   return (
     <div
@@ -165,9 +213,10 @@ const formattedDays = doctor?.availableDays
                     }}
                   />
                   <span
-                    className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-emerald-400"
-                    style={{ border: "2px solid #fff" }}
-                  />
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status.color}`}
+                  >
+                    {status.text}
+                  </span>
                 </div>
 
                 <div className="pb-1">
@@ -193,12 +242,12 @@ const formattedDays = doctor?.availableDays
                         ⭐ {doctor.rating} / 5
                       </span>
                     )}
-                    {doctor.experience && (
+                    {doctor.experience_years && (
                       <span
                         className="font-[family-name:var(--font-dm)] text-[12px] font-semibold px-3 py-0.5 rounded-full"
                         style={{ color: "#166534", background: "#dcfce7" }}
                       >
-                        🩺 {doctor.experience} yrs exp
+                        🩺 {doctor.experience_years} yrs exp
                       </span>
                     )}
                   </div>
@@ -300,7 +349,12 @@ const formattedDays = doctor?.availableDays
                 📅 Book Appointment
               </button>
               <button
-                onClick={() => navigate(`/client/apply-certificate?doctorId=${doctor.doctorId}`, { state: { doctor } })}
+                onClick={() =>
+                  navigate(
+                    `/client/apply-certificate?doctorId=${doctor.doctorId}`,
+                    { state: { doctor } },
+                  )
+                }
                 className="w-full  font-bold text-[15px] text-white py-3 rounded-xl cursor-pointer transition-all duration-250 hover:-translate-y-0.5 mb-2"
                 style={{
                   background: "linear-gradient(135deg,#0086C3,#00b4d8)",
@@ -315,7 +369,7 @@ const formattedDays = doctor?.availableDays
                     "0 4px 14px rgba(0,134,195,0.35)")
                 }
               >
-         ➕ Apply Certificate
+                ➕ Apply Certificate
               </button>
 
               {doctor.description && (

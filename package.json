@@ -17,6 +17,7 @@
     "@livekit/components-styles": "^1.2.0",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.9",
+    "@react-google-maps/api": "^2.20.8",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",

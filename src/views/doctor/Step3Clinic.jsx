@@ -262,7 +262,7 @@ const Step3Clinic = ({ formData, setFormData, nextStep, prevStep }) => {
                 </div>
 
                 <div>
-                  <label className={labelCls}>Landmark</label>
+                  <label className={labelCls}>Landmark </label>
                   <input name="landmark" value={data.landmark} onChange={e => handleChange(index, e)}
                     placeholder="e.g. Near City Mall" className={inputCls("landmark", index)} />
                 </div>

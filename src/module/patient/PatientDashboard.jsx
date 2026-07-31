@@ -81,6 +81,7 @@ export default function PatientDashboard() {
               consultationFee: appt.consultationFee,
               clinic: appt.clinic_name,
               address: appt.address,
+              maps_link: appt.maps_link,
               city: appt.city,
               languages: appt.languages,
               rating: appt.rating,
@@ -97,84 +98,84 @@ export default function PatientDashboard() {
   }, [todayToken]);
 
   useEffect(() => {
-  if (!socket || !connected) return;
+    if (!socket || !connected) return;
 
-  const handleStatusUpdate = (data) => {
-    setAppointments((prev) =>
-      prev.map((appt) =>
-        appt.id === data.appointmentId
-          ? {
-              ...appt,
-              status: data.status,
-            }
-          : appt
-      )
-    );
+    const handleStatusUpdate = (data) => {
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt.id === data.appointmentId
+            ? {
+                ...appt,
+                status: data.status,
+              }
+            : appt,
+        ),
+      );
 
-    if (selectedAppointment?.id === data.appointmentId) {
-      setSelectedAppointment((prev) => ({
-        ...prev,
-        status: data.status,
-      }));
-    }
+      if (selectedAppointment?.id === data.appointmentId) {
+        setSelectedAppointment((prev) => ({
+          ...prev,
+          status: data.status,
+        }));
+      }
 
-    notify.success(data.message);
-  };
+      notify.success(data.message);
+    };
 
-  socket.on("appointment-status-updated", handleStatusUpdate);
+    socket.on("appointment-status-updated", handleStatusUpdate);
 
-  return () => {
-    socket.off("appointment-status-updated", handleStatusUpdate);
-  };
-}, [socket, connected, selectedAppointment]);
-useEffect(() => {
-  if (!socket || !connected) return;
+    return () => {
+      socket.off("appointment-status-updated", handleStatusUpdate);
+    };
+  }, [socket, connected, selectedAppointment]);
+  useEffect(() => {
+    if (!socket || !connected) return;
 
-  const handleAppointmentStarted = (data) => {
-    setAppointments((prev) =>
-      prev.map((appt) =>
-        appt.id === data.appointmentId
-          ? {
-              ...appt,
-              status: "IN_PROGRESS",
-            }
-          : appt
-      )
-    );
+    const handleAppointmentStarted = (data) => {
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt.id === data.appointmentId
+            ? {
+                ...appt,
+                status: "IN_PROGRESS",
+              }
+            : appt,
+        ),
+      );
 
-    notify.success("Your consultation has started.");
-  };
+      notify.success("Your consultation has started.");
+    };
 
-  socket.on("appointment-started", handleAppointmentStarted);
+    socket.on("appointment-started", handleAppointmentStarted);
 
-  return () => {
-    socket.off("appointment-started", handleAppointmentStarted);
-  };
-}, [socket, connected]);
-useEffect(() => {
-  if (!socket || !connected) return;
+    return () => {
+      socket.off("appointment-started", handleAppointmentStarted);
+    };
+  }, [socket, connected]);
+  useEffect(() => {
+    if (!socket || !connected) return;
 
-  const handleCompleted = (data) => {
-    setAppointments((prev) =>
-      prev.map((appt) =>
-        appt.id === data.appointmentId
-          ? {
-              ...appt,
-              status: "COMPLETED",
-            }
-          : appt
-      )
-    );
+    const handleCompleted = (data) => {
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt.id === data.appointmentId
+            ? {
+                ...appt,
+                status: "COMPLETED",
+              }
+            : appt,
+        ),
+      );
 
-    notify.success("Appointment completed.");
-  };
+      notify.success("Appointment completed.");
+    };
 
-  socket.on("appointment-completed", handleCompleted);
+    socket.on("appointment-completed", handleCompleted);
 
-  return () => {
-    socket.off("appointment-completed", handleCompleted);
-  };
-}, [socket, connected]);
+    return () => {
+      socket.off("appointment-completed", handleCompleted);
+    };
+  }, [socket, connected]);
 
   const fetchTokenStatus = async (appointmentId) => {
     try {
@@ -186,21 +187,21 @@ useEffect(() => {
   };
 
   useEffect(() => {
-  if (!socket || !connected) return;
+    if (!socket || !connected) return;
 
-  const handleQueueUpdate = (data) => {
-    setTokenStatus((prev) => ({
-      ...prev,
-      nowServing: data.currentToken,
-    }));
-  };
+    const handleQueueUpdate = (data) => {
+      setTokenStatus((prev) => ({
+        ...prev,
+        nowServing: data.currentToken,
+      }));
+    };
 
-  socket.on("queue-updated", handleQueueUpdate);
+    socket.on("queue-updated", handleQueueUpdate);
 
-  return () => {
-    socket.off("queue-updated", handleQueueUpdate);
-  };
-}, [socket, connected]);
+    return () => {
+      socket.off("queue-updated", handleQueueUpdate);
+    };
+  }, [socket, connected]);
 
   const handleCancelAppointment = async () => {
     try {
@@ -406,7 +407,6 @@ useEffect(() => {
               onClick={() => navigate("/client/lab-tests")}
               color="#14B8A6"
             />
-           
           </div>
         </div>
       </div>
@@ -651,6 +651,12 @@ useEffect(() => {
                       {selectedAppointment.specialization}
                     </p>
                     <p
+                      className="text-[13px] font-semibold mt-0.5"
+                      style={{ color: "#2563EB" }}
+                    >
+                      {selectedAppointment.qualification}
+                    </p>
+                    <p
                       className="text-[12px] mt-0.5"
                       style={{ color: "#94A3B8" }}
                     >
@@ -775,19 +781,47 @@ useEffect(() => {
                     value={selectedAppointment.languages}
                   />
                   <SimpleField label="City" value={selectedAppointment.city} />
-                  <div className="col-span-2 space-y-1">
-                    <span
-                      className="text-[11px] font-semibold uppercase tracking-wide"
-                      style={{ color: "#94A3B8" }}
-                    >
-                      Address
-                    </span>
-                    <p
-                      className="text-[13px] font-semibold break-words"
-                      style={{ color: "#0F172A" }}
-                    >
-                      {selectedAppointment.address}
-                    </p>
+                  <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Address */}
+                    <div className="space-y-1">
+                      <span
+                        className="text-[11px] font-semibold uppercase tracking-wide"
+                        style={{ color: "#94A3B8" }}
+                      >
+                        Address
+                      </span>
+                      <p
+                        className="text-[13px] font-semibold break-words"
+                        style={{ color: "#0F172A" }}
+                      >
+                        {selectedAppointment.address}
+                      </p>
+                    </div>
+
+                    {/* Maps Link */}
+                    <div className="space-y-1 flex flex-col">
+                      <span
+                        className="text-[11px] font-semibold uppercase tracking-wide"
+                        style={{ color: "#94A3B8" }}
+                      >
+                        Maps Link
+                      </span>
+
+                      {selectedAppointment.maps_link ? (
+                        <a
+                          href={selectedAppointment.maps_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
+                        >
+                          📍 Get Directions
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 text-sm">
+                          Location not available
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

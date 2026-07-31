@@ -61,15 +61,6 @@ const LandingPage = () => {
   }, [navigate]);
   const heroCards = [
     {
-      img: medicineDelivery,
-      label: t.medicine || "24/7 Medicines",
-      sub: "Essentials at your doorstep",
-      link: "/medicine",
-      tagBg: "bg-amber-500",
-      tag: "24 / 7",
-      accentColor: "#f5a623",
-    },
-    {
       img: labTesting,
       label: t.labTest || "Lab Tests",
       sub: "Sample Pickup at Your Door",
@@ -113,6 +104,15 @@ const LandingPage = () => {
       tag: "HOME CARE",
       tagBg: "bg-green-500",
       accentColor: "#22c55e",
+    },
+     {
+      img: medicineDelivery,
+      label: t.medicine || "24/7 Medicines",
+      sub: "Essentials at your doorstep",
+      link: "/medicine",
+      tagBg: "bg-amber-500",
+      tag: "24 / 7",
+      accentColor: "#f5a623",
     },
   ];
 

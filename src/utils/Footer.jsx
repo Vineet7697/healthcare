@@ -70,54 +70,35 @@ const Footer = () => {
           <span className="font-semibold text-base sm:text-lg pb-1.5 border-b border-white/40 w-fit tracking-wide">
             For Patients
           </span>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
             Ask Free Health Questions
-          </a>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          </p>
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
+            {" "}
             Search for Doctors
-          </a>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          </p>
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
+            {" "}
             Search for Clinics
-          </a>
+          </p>
         </div>
 
         <div className="flex flex-col gap-2">
           <span className="font-semibold text-base sm:text-lg pb-1.5 border-b border-white/40 w-fit tracking-wide">
             For Doctors
           </span>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
             Yo Doctor Consult
-          </a>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          </p>
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
             Yo Doctor Health Feed
-          </a>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          </p>
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
             Yo Doctor Profile
-          </a>
-          <a
-            href="#"
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
+          </p>
+          <p className="text-white/80 hover:text-white transition-colors duration-200">
             For Clinics
-          </a>
+          </p>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -126,7 +107,7 @@ const Footer = () => {
           </span>
           <a
             href="https://www.facebook.com/share/1DSX3bCXAc/  "
-             target="_blank"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-white/80 hover:text-white transition-colors duration-200"
           >
@@ -167,7 +148,7 @@ const Footer = () => {
           a <span className="font-semibold">human touch</span>
         </span>
         <p className="text-xs sm:text-sm text-white/80">
-        Copyright &copy; 2026, Levesque Private Limited. All rights reserved.
+          Copyright &copy; 2026, Levesque Private Limited. All rights reserved.
         </p>
       </div>
     </footer>
