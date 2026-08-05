@@ -113,8 +113,6 @@ const DoctorDetailPage = () => {
       icon: "💰",
       highlight: true,
     },
-
-    { label: "Timings", value: doctor.timings, icon: "🕐" },
     {
       label: "Morning",
       value: doctor.sessionTimings?.morning,
@@ -125,12 +123,12 @@ const DoctorDetailPage = () => {
       value: doctor.sessionTimings?.evening,
       icon: "🌙",
     },
+     { label: "Timings", value: doctor.timings, icon: "🕐" },
 
     {
       label: "Available Days",
       value: formattedDays,
       icon: "📅",
-      full: true,
     },
   ];
 

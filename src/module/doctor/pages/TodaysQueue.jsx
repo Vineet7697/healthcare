@@ -448,7 +448,7 @@ const TodaysQueue = () => {
                     onClick={handleStopOnly}
                     className="self-start bg-red-600 text-white font-semibold px-4 py-2 rounded-full"
                   >
-                    ⏹ Stop Patient
+                    ⏹ Finish Patient
                   </button>
                 )
               ) : (

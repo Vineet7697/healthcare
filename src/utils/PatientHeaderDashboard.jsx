@@ -1,16 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaBell, FaSignOutAlt, FaShoppingCart } from "react-icons/fa";
-import LogoutModal from "../utils/LogoutModal";
-import DeleteAccountModal from "../utils/DeleteAccountModal";
 import { useImage } from "../context/ImageContext";
 import CartPage from "../views/labtest/CartPage";
 import { useSocket } from "../context/SocketContext";
 import { useCart } from "../context/CartContext";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+
 import { notify } from "../utils/notify";
-import { deleteAccount } from "../services/authService";
+
 import {
   getNotifications,
   getUnreadNotificationCount,
@@ -43,9 +40,6 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const profileImage = image || DEFAULT_AVATAR;
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [password, setPassword] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
@@ -100,13 +94,7 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     fetchUnread();
   }, []);
 
-  useEffect(() => {
-    if (location.pathname === "/client/account-deletion") {
-      setIsDeleteModalOpen(true);
-    } else {
-      setIsDeleteModalOpen(false);
-    }
-  }, [location.pathname]);
+
 
   useEffect(() => {
     if (!socket || !connected) return;
@@ -155,72 +143,6 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     setNotificationOpen(false);
     navigate(path);
   };
-
-  // const handleLogout = () => {
-  //   localStorage.removeItem("loggedInUser");
-  //   localStorage.removeItem("profileImage");
-  //   localStorage.removeItem("token");
-  //   setLoggedInUser(null);
-  //   setImage(null);
-  //   setIsLogoutModalOpen(false);
-  //   window.dispatchEvent(new Event("userLogout"));
-  //   navigate("/");
-  // };
-
-  const handleLogout = async () => {
-    try {
-      // Firebase logout
-      await signOut(auth);
-    } catch (err) {
-      console.error("Firebase Logout Error:", err);
-    }
-
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("profileImage");
-    localStorage.removeItem("token");
-
-    sessionStorage.removeItem("loggedInUser");
-    sessionStorage.removeItem("profileImage");
-    sessionStorage.removeItem("token");
-
-    setLoggedInUser(null);
-    setImage(null);
-    setIsLogoutModalOpen(false);
-
-    window.dispatchEvent(new Event("userLogout"));
-
-    navigate("/");
-  };
-
-  const openDeleteModal = () => {
-    navigate("/client/account-deletion");
-  };
-
-const handleDeleteAccount = async (password) => {
-  try {
-    const res = await deleteAccount({ password });
-
-    if (res.data.success) {
-      // Firebase logout
-      await signOut(auth);
-
-      // Clear storage
-      localStorage.clear();
-      sessionStorage.clear();
-
-      // Close modal
-      setIsDeleteModalOpen(false);
-
-      // Notify app
-      window.dispatchEvent(new Event("userLogout"));
-
-      // Redirect to Home Page
-      navigate("/", { replace: true });
-    }
-  } catch (err) {
-    notify.error(err.response?.data?.message || "Something went wrong");
-  }
-};
 
   if (!loggedInUser) return null;
 
@@ -352,71 +274,26 @@ const handleDeleteAccount = async (password) => {
             )}
           </div>
 
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => {
-                setProfileOpen((p) => !p);
-                setNotificationOpen(false);
-              }}
-              className="p-1 rounded-full hover:bg-gray-100 transition"
-            >
-              <img
-                src={profileImage}
-                alt="avatar"
-                className="w-12 h-12 rounded-full border object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = DEFAULT_AVATAR;
-                }}
-              />
-            </button>
-
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border z-20">
-                <ul className="py-2 text-sm">
-                  <li
-                    onClick={() => handleNavigate("/client/profile")}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    👤 My Profile
-                  </li>
-                  <li
-                    onClick={() => handleNavigate("/client/changepassword")}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    🔒 Change Password
-                  </li>
-                  <li
-                    onClick={() => setIsLogoutModalOpen(true)}
-                    className="flex items-center gap-3 w-full text-sm px-5 py-2 text-red-600 hover:bg-gray-100 cursor-pointer border-t"
-                  >
-                    <FaSignOutAlt /> Logout
-                  </li>
-
-                  <li
-                    onClick={openDeleteModal}
-                    className="px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer"
-                  >
-                    🗑️ Delete My Account
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+<button
+  onClick={() => {
+    setNotificationOpen(false);
+    navigate("/client/profile");
+  }}
+  className="p-1 rounded-full hover:bg-gray-100 transition cursor-pointer"
+  title="My Profile"
+>
+  <img
+    src={profileImage}
+    alt="Profile"
+    className="w-12 h-12 rounded-full border object-cover"
+    onError={(e) => {
+      e.target.onerror = null;
+      e.target.src = DEFAULT_AVATAR;
+    }}
+  />
+</button>
         </div>
       </div>
-
-      <LogoutModal
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogout}
-      />
-
-      <DeleteAccountModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => navigate("/client/profile")}
-        onConfirm={handleDeleteAccount}
-      />
     </nav>
   );
 };

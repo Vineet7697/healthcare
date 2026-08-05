@@ -64,9 +64,10 @@ import QRRedirect from "../module/doctor/pages/QRRedirect";
 import ContactRequests from "../admin/ContactRequests";
 import Mycertificate from "../module/patient/pages/Mycertificate";
 import RequestCertificate from "../module/patient/pages/RequestCertificate";
+import PatientBookHomeService from "../module/patient/pages/PatientBookHomeService";
 import Certificaterequest from "../module/doctor/pages/Certificaterequest";
 import VerifyCertificate from "../utils/VerifyCertificate";
-import PatientBookHomeService from "../landingpage/PatientBookHomeService";
+
 import AdminHomeCareBookings from "../admin/AdminHomeCareBookings";
 import PaymentPage from "../pages/PaymentPage";
 import PaymentSuccess from "../pages/PaymentSuccess";
@@ -109,11 +110,11 @@ const Router = () => {
             <Route path="payment-failed" element={<PaymentFailed />} />
             <Route path="refund-policy" element={<RefundPolicy />} />
             <Route path="privacy-policy" element={<PrivacyPolicy />} />
-            
+            <Route path="qr-redirect" element={<QRRedirect />} />
 
             <Route path="clientloginpage" element={<ClientLoginPage />} />
             <Route path="clientregisterpage" element={<ClientRegisterPage />} />
-            <Route path="/qr-redirect" element={<QRRedirect />} />
+            
             <Route path="about" element={<About />} />
             <Route path="service" element={<Service />} />
             <Route path="contact" element={<Contact />} />
@@ -125,10 +126,7 @@ const Router = () => {
 
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route
-              path="/home-service-booking"
-              element={<PatientBookHomeService />}
-            />
+
 
             <Route
               path="/verify/:certificateId"
@@ -228,6 +226,10 @@ const Router = () => {
             />
             <Route index element={<PatientDashboard />} />
             <Route path="dashboard" element={<PatientDashboard />} />
+                        <Route
+              path="home-service-booking"
+              element={<PatientBookHomeService />}
+            />
 
             <Route path="profile" element={<ProfileSection />} />
             <Route path="account-deletion" element={<DeleteAccountModal />} />

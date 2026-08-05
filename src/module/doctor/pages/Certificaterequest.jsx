@@ -405,14 +405,20 @@ function ReviewPatient({
   };
 
   const handleApproveClick = async () => {
-    if (loading) return;
+    if (actionLoading) return;
+
     const e = validate();
+
     if (Object.keys(e).length > 0) {
       setErrors(e);
       return;
     }
-    await onApprove();
-    setSubmitted(true);
+
+    const success = await onApprove();
+
+    if (success) {
+      setSubmitted(true);
+    }
   };
 
   const handleRejectClick = async () => {
@@ -988,33 +994,51 @@ export default function Certificaterequest() {
     }
   };
 
-  const handleApprove = async () => {
-    try {
-      setActionLoading("approve");
+const handleApprove = async () => {
+  if (!selectedRequest?.id) {
+    notify.error("Invalid certificate request");
+    return false;
+  }
 
-      await approveRequest(selectedRequest.id, {
-        doctor_notes: form.notes,
-        fitness_status: form.fitnessStatus,
-        validity: form.validity,
-      });
+  try {
+    setActionLoading("approve");
 
-      notify.success("Certificate Approved Successfully");
+    await approveRequest(selectedRequest.id, {
+      doctor_notes: form.notes?.trim() || "",
+      fitness_status: form.fitnessStatus,
+      validity: form.validity,
+    });
 
-      setRequests((prev) =>
-        prev.map((r) =>
-          r.id === selectedRequest.id.toString()
-            ? { ...r, status: "approved", statusText: "Approved" }
-            : r,
-        ),
-      );
+    notify.success("Certificate Approved Successfully");
 
-      setActiveTab("issued");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setActionLoading("");
-    }
-  };
+    setRequests((prev) =>
+      prev.map((r) =>
+        String(r.id) === String(selectedRequest.id)
+          ? {
+              ...r,
+              status: "approved",
+              statusText: "Approved",
+            }
+          : r
+      )
+    );
+
+    setActiveTab("issued");
+
+    return true;
+  } catch (error) {
+    console.error("Certificate approve error:", error);
+
+    notify.error(
+      error?.response?.data?.message ||
+        "Certificate approval failed"
+    );
+
+    return false;
+  } finally {
+    setActionLoading("");
+  }
+};
 
   const handleReject = async () => {
     try {

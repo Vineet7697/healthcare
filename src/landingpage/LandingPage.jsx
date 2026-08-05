@@ -100,7 +100,7 @@ const LandingPage = () => {
       img: homecareservices,
       label: t.booknurse || "Book Nurse",
       sub: "Care at your home",
-      link: "/home-service-booking",
+      link: "/clientloginpage?redirect=/client/home-service-booking",
       tag: "HOME CARE",
       tagBg: "bg-green-500",
       accentColor: "#22c55e",

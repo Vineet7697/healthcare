@@ -1,7 +1,7 @@
 import { useState } from "react";
-import api from "../services/api";
-import { validateHomeCareForm } from "../controllers/FormValidation";
-import { notify } from "../utils/notify";
+import api from "../../../services/api";
+import { validateHomeCareForm } from "../../../controllers/FormValidation";
+import { notify } from "../../../utils/notify";
 
 const SERVICES = [
   {
@@ -602,8 +602,7 @@ const res = await api.post("/patient/bookhomecare", payload);
   // ── Main Form ───────────────────────────────────────────────────────────────
   return (
     <div
-      // px-3 on mobile → px-4 on sm → px-6 on md; max-w grows with screen
-      className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pt-6 sm:pt-10 pb-10 mt-14"
+      className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pt-6 sm:pt-10 pb-10 "
       style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}
     >
       {/* ── Header ── */}
@@ -739,23 +738,7 @@ const res = await api.post("/patient/bookhomecare", payload);
             📍 Use Current Location
           </button>
 
-          {form.locationCaptured && (
-            <div
-              className="mt-3 p-3 rounded-xl"
-              style={{
-                background: "#EAF7EE",
-                border: "1px solid #B8E3C3",
-              }}
-            >
-              <p className="text-sm font-medium" style={{ color: "#2E7D32" }}>
-                ✅ Current Location Captured
-              </p>
-
-              <p className="text-xs mt-1">Lat: {form.patientLat}</p>
-
-              <p className="text-xs">Lng: {form.patientLng}</p>
-            </div>
-          )}
+         
         </div>
       </Card>
 
