@@ -45,7 +45,7 @@ import LogoutModal from "../utils/LogoutModal";
 import AppointmentHistory from "../module/doctor/pages/AppointmentHistory";
 import Myappointmentpage from "../module/patient/pages/Myappointmentpage";
 import PatientbookAppointment from "../module/patient/pages/PatientbookAppointment";
-import DeleteAccountModal  from "../utils/DeleteAccountModal";
+import DeleteAccountModal from "../utils/DeleteAccountModal";
 import IncomingAppointments from "../module/doctor/pages/IncomingAppointments";
 import AdminDashboard from "../admin/AdminDashboard";
 import ProtectedRoute from "../routes/ProtectedRoute";
@@ -65,6 +65,8 @@ import ContactRequests from "../admin/ContactRequests";
 import Mycertificate from "../module/patient/pages/Mycertificate";
 import RequestCertificate from "../module/patient/pages/RequestCertificate";
 import PatientBookHomeService from "../module/patient/pages/PatientBookHomeService";
+import HomeCareHistory from "../module/patient/pages/HomeCareHistory";
+import HomeCareBookingDetails from "../module/patient/pages/HomeCareBookingDetails";
 import Certificaterequest from "../module/doctor/pages/Certificaterequest";
 import VerifyCertificate from "../utils/VerifyCertificate";
 
@@ -114,7 +116,7 @@ const Router = () => {
 
             <Route path="clientloginpage" element={<ClientLoginPage />} />
             <Route path="clientregisterpage" element={<ClientRegisterPage />} />
-            
+
             <Route path="about" element={<About />} />
             <Route path="service" element={<Service />} />
             <Route path="contact" element={<Contact />} />
@@ -126,7 +128,6 @@ const Router = () => {
 
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-
 
             <Route
               path="/verify/:certificateId"
@@ -163,6 +164,7 @@ const Router = () => {
               path="homecare-bookings"
               element={<AdminHomeCareBookings />}
             />
+
 
             <Route path="lab-bookings" element={<LabBookings />} />
             <Route path="lab-test" element={<LabTests />} />
@@ -226,7 +228,7 @@ const Router = () => {
             />
             <Route index element={<PatientDashboard />} />
             <Route path="dashboard" element={<PatientDashboard />} />
-                        <Route
+            <Route
               path="home-service-booking"
               element={<PatientBookHomeService />}
             />
@@ -253,7 +255,12 @@ const Router = () => {
             <Route path="edit-family/:id" element={<AddFamilyPage />} />
 
             <Route path="patientqueuepage" element={<PatientQueuePage />} />
+            <Route path="homecarehistory" element={<HomeCareHistory/>} />
 
+            <Route
+              path="homecarehistory/:id"
+              element={<HomeCareBookingDetails />}
+            />
             <Route path="doctor-profile/:id" element={<DoctorDetailPage />} />
             <Route path="lab-tests" element={<LabHome />} />
             <Route path="test/:id" element={<TestDetails />} />

@@ -358,12 +358,12 @@ const TodaysQueue = () => {
         </div>
 
         <div className="animate-fade-up [animation-delay:0.13s] grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <ActionBtn
+          {/* <ActionBtn
             icon={<FaClock />}
             label="Incoming Appointments"
             color="cyan"
             onClick={() => navigate("/doctordashboard/incoming")}
-          />
+          /> */}
           <ActionBtn
             icon={<FaStepForward />}
             label="Skip Appointment"

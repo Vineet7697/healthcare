@@ -35,9 +35,9 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
   const { socket, connected } = useSocket();
 
   const [loggedInUser, setLoggedInUser] = useState(getStoredUser);
-  const { image, setImage } = useImage();
+  const { patientImage } = useImage();
 
-  const profileImage = image || DEFAULT_AVATAR;
+  const profileImage = patientImage || DEFAULT_AVATAR;
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -93,8 +93,6 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
     fetchNotifications();
     fetchUnread();
   }, []);
-
-
 
   useEffect(() => {
     if (!socket || !connected) return;
@@ -274,24 +272,24 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
             )}
           </div>
 
-<button
-  onClick={() => {
-    setNotificationOpen(false);
-    navigate("/client/profile");
-  }}
-  className="p-1 rounded-full hover:bg-gray-100 transition cursor-pointer"
-  title="My Profile"
->
-  <img
-    src={profileImage}
-    alt="Profile"
-    className="w-12 h-12 rounded-full border object-cover"
-    onError={(e) => {
-      e.target.onerror = null;
-      e.target.src = DEFAULT_AVATAR;
-    }}
-  />
-</button>
+          <button
+            onClick={() => {
+              setNotificationOpen(false);
+              navigate("/client/profile");
+            }}
+            className="p-1 rounded-full hover:bg-gray-100 transition cursor-pointer"
+            title="My Profile"
+          >
+            <img
+              src={profileImage}
+              alt="Profile"
+              className="w-12 h-12 rounded-full border object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = DEFAULT_AVATAR;
+              }}
+            />
+          </button>
         </div>
       </div>
     </nav>

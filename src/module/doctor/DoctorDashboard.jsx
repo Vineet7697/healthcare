@@ -11,12 +11,12 @@ import {
   FaQrcode,
   FaDownload,
   FaTimes,
+  FaClock,
 } from "react-icons/fa";
-import { useSocket } from "../../context/SocketContext";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../utils/notify";
 import api from "../../services/api";
-
+import { useImage } from "../../context/ImageContext";
 import {
   cancelRemainingAppointments,
   updateClinicStatus,
@@ -97,121 +97,34 @@ const ActionCard = ({ icon, title, subtitle, onClick, accent = false }) => (
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
-
-  const [dashboard, setDashboard] = useState({
-    pendingRequests: 0,
-    todayQueue: 0,
-    completedToday: 0,
-  });
   const [doctorName, setDoctorName] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [slot, setSlot] = useState("MORNING");
   const [reason, setReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
-  const { socket, connected } = useSocket();
 
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrValue, setQrValue] = useState("");
   const [doctorId, setDoctorId] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
 
-  const { profile, profileImage } = useDoctorProfile();
+ const { profile } = useDoctorProfile();
+const { doctorImage } = useImage();
 
 useEffect(() => {
-  const checkSubscription = async () => {
+  loadDashboard();
+}, []);
+
+  const loadDashboard = async () => {
     try {
-      const res = await api.get("/razorpay/subscriptions/active");
-
-if (!res.data?.data?.subscription) {
-  localStorage.removeItem("token");
-  localStorage.removeItem("loggedInUser");
-
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("loggedInUser");
-
-  navigate("/doctorloginpage", {
-    replace: true,
-  });
-
-  return;
-}
-
-      loadDashboard();
+      const res = await api.get("/doctor/dashboard");
+      setDoctorName(res.data.doctor?.doctorName || "Doctor");
+      setIsOnline(res.data.doctor?.isAvailable ?? true);
     } catch (err) {
-  console.error(err);
-
-  localStorage.removeItem("token");
-  localStorage.removeItem("loggedInUser");
-
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("loggedInUser");
-
-  navigate("/doctorloginpage", {
-    replace: true,
-  });
-}
+      console.error("Dashboard load failed", err);
+    }
   };
-
-  checkSubscription();
-}, [navigate]);
-
-
-
-
-const loadDashboard = async () => {
-  try {
-    const res = await api.get("/doctor/dashboard");
-
-    setDashboard({
-      pendingRequests: res.data.pendingRequests || 0,
-      todayQueue: res.data.todayQueue || 0,
-      completedToday: res.data.completedToday || 0,
-    });
-
-    setDoctorName(res.data.doctor?.doctorName || "Doctor");
-    setIsOnline(res.data.doctor?.isAvailable ?? true);
-
-  } catch (err) {
-    console.error("Dashboard load failed", err);
-  }
-};
-
-  useEffect(() => {
-  if (!socket || !connected) return;
-
-  const handleQueueUpdate = (data) => {
-    setDashboard((prev) => ({
-      ...prev,
-      todayQueue: data.currentToken || prev.todayQueue,
-    }));
-
-    notify.success(
-      `Now Serving Token #${data.currentToken}`
-    );
-  };
-
-  socket.on("queue-updated", handleQueueUpdate);
-
-  return () => {
-    socket.off("queue-updated", handleQueueUpdate);
-  };
-}, [socket, connected]);
-useEffect(() => {
-  if (!socket || !connected) return;
-
-  const handleNewAppointment = () => {
-    loadDashboard();
-
-    notify.success(data?.message || "New appointment received.");
-  };
-
-  socket.on("appointment-requested", handleNewAppointment);
-
-  return () => {
-    socket.off("appointment-requested", handleNewAppointment);
-  };
-}, [socket, connected]);
 
   const toggleAvailability = async () => {
     const newStatus = !isOnline;
@@ -260,41 +173,41 @@ useEffect(() => {
     }
   };
 
-const downloadQR = async () => {
-  try {
-    const res = await api.post(
-      "/doctor/download-qr",
-      {
-        qrValue,
-        doctorName,
-        specialization: profile?.specialization,
-      },
-      {
-        responseType: "blob", 
-      }
-    );
+  const downloadQR = async () => {
+    try {
+      const res = await api.post(
+        "/doctor/download-qr",
+        {
+          qrValue,
+          doctorName,
+          specialization: profile?.specialization,
+        },
+        {
+          responseType: "blob",
+        },
+      );
 
-    const url = window.URL.createObjectURL(new Blob([res.data]));
+      const url = window.URL.createObjectURL(new Blob([res.data]));
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `doctor-${doctorId}-qr.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } catch (err) {
-    console.error("Download failed", err);
-    notify.error("Failed to download QR");
-  }
-};
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `doctor-${doctorId}-qr.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error("Download failed", err);
+      notify.error("Failed to download QR");
+    }
+  };
   const greeting = (() => {
     const h = new Date().getHours();
 
-  if (h >= 5 && h < 12) return "Good Morning";
-  if (h >= 12 && h < 17) return "Good Afternoon";
-  if (h >= 17 && h < 21) return "Good Evening";
-  if (h >= 21 && h < 24) return "Good Late Night";
-  return "Good Night";
+    if (h >= 5 && h < 12) return "Good Morning";
+    if (h >= 12 && h < 17) return "Good Afternoon";
+    if (h >= 17 && h < 21) return "Good Evening";
+    if (h >= 21 && h < 24) return "Good Late Night";
+    return "Good Night";
   })();
 
   return (
@@ -332,7 +245,7 @@ const downloadQR = async () => {
           </button>
         </div>
 
-        <div className=" [animation-delay:0.07s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+        <div className=" [animation-delay:0.07s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-15 mb-14">
           <div
             className="bg-white border border-black/[0.07] rounded-[18px] p-6 flex gap-4 items-center"
             style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
@@ -342,7 +255,7 @@ const downloadQR = async () => {
               style={{ boxShadow: "0 4px 14px rgba(14,116,144,0.18)" }}
             >
               <img
-                src={profileImage || FALLBACK_IMAGE}
+                src={doctorImage || FALLBACK_IMAGE}
                 alt="doctor"
                 className="w-full h-full rounded-[12px] object-cover border-2 border-white block"
                 onError={(e) => {
@@ -359,15 +272,15 @@ const downloadQR = async () => {
                 {doctorName}
               </h2>
               <p className="font-dm text-[14px] text-[#6b7f8a] mt-0.5 truncate">
-                {profile.specialization}
+                {profile?.specialization || "Specialist"}
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[13px] text-[#9fb0b8]">
-                  {profile.experience_years} yrs exp
+                  {profile?.experience_years ?? 0} yrs exp
                 </span>
                 <span className="w-1 h-1 bg-[#d1dde3] rounded-full" />
                 <span className="text-[13px] text-[#9fb0b8]">
-                  {profile.rating ? Number(profile.rating).toFixed(1) : "N/A"}{" "}
+                  {profile?.rating ? Number(profile.rating).toFixed(1) : "N/A"}{" "}
                   ⭐
                 </span>
               </div>
@@ -381,38 +294,61 @@ const downloadQR = async () => {
             onClick={() => navigate("/doctordashboard/livequeue")}
           />
           <ActionCard
-            icon={<FaBook />}
-            title="Manual Booking"
-            subtitle="Register a walk-in patient manually"
-            onClick={() => navigate("/doctordashboard/manualbooking")}
+            icon={<FaClock />}
+            title="Incoming Appointments"
+            subtitle="View and manage incoming appointments"
+            onClick={() => navigate("/doctordashboard/incoming")}
+            tagColor="bg-orange-50 text-orange-500"
+            iconColor="bg-orange-50 text-orange-500"
           />
         </div>
 
-        <div className="[animation-delay:0.13s] grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-          <StatCard
+        <div className="[animation-delay:0.13s] grid grid-cols-1 sm:grid-cols-3 gap-15 mb-14">
+          {/* <StatCard
             icon={<FaBook />}
             label="Pending Requests"
             value={dashboard.pendingRequests}
             tag="New"
             tagColor="bg-orange-50 text-orange-500"
             iconColor="bg-orange-50 text-orange-500"
+          /> */}
+
+          <ActionCard
+            icon={<FaExclamationTriangle className="text-red-500" />}
+            title="Emergency Cancellations"
+            subtitle="Cancel remaining slot appointments"
+            onClick={() => setShowCancelModal(true)}
           />
-          <StatCard
+          <ActionCard
+            icon={<FaStar />}
+            title="Patient Reviews"
+            subtitle="Read feedback from your patients"
+            onClick={() => navigate("/doctordashboard/reviews")}
+          />
+
+          <ActionCard
+            icon={<FaBook />}
+            title="Manual Booking"
+            subtitle="Register a walk-in patient manually"
+            onClick={() => navigate("/doctordashboard/manualbooking")}
+          />
+
+          {/* <StatCard
             icon={<FaUser />}
             label="Today's Queue"
             value={dashboard.todayQueue}
             tag="Today"
             tagColor="bg-[#ecfeff] text-[#0e7490]"
             iconColor="bg-[#ecfeff] text-[#0e7490]"
-          />
-          <StatCard
+          /> */}
+          {/* <StatCard
             icon={<FaCheckCircle />}
             label="Completed Today"
             value={dashboard.completedToday}
             tag="Done"
             tagColor="bg-emerald-50 text-emerald-600"
             iconColor="bg-emerald-50 text-emerald-600"
-          />
+          /> */}
         </div>
 
         <div className=" [animation-delay:0.19s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -443,19 +379,6 @@ const downloadQR = async () => {
               Show QR Code
             </button>
           </div>
-
-          <ActionCard
-            icon={<FaExclamationTriangle className="text-red-500" />}
-            title="Emergency Cancellations"
-            subtitle="Cancel remaining slot appointments"
-            onClick={() => setShowCancelModal(true)}
-          />
-          <ActionCard
-            icon={<FaStar />}
-            title="Patient Reviews"
-            subtitle="Read feedback from your patients"
-            onClick={() => navigate("/doctordashboard/reviews")}
-          />
         </div>
       </div>
 

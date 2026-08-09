@@ -19,6 +19,7 @@ import {
   FaTrashAlt,
   FaChevronDown,
   FaChevronUp,
+  FaUserNurse,
 } from "react-icons/fa";
 import { FiUsers } from "react-icons/fi";
 import { signOut } from "firebase/auth";
@@ -122,6 +123,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       label: "Book Nurse",
       icon: <FaBoxOpen />,
     },
+    {
+  key: "homecarehistory",
+  label: "Home Care History",
+  icon: <FaUserNurse />,
+},
     { key: "mycertificate", label: "My Certificates", icon: <FaFileMedical /> },
   ];
 
@@ -157,11 +163,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const getRoute = (key) => {
     if (role === "DOCTOR") {
-      if (key === "dashboard") return "/doctordashboard";
+      if (key === "dashboard") return "/doctordashboard/dashboard";
       return `/doctordashboard/${key}`;
     }
     if (role === "ADMIN") {
-      if (key === "dashboard") return "/admin";
+      if (key === "dashboard") return "/admin/dashboard";
       return `/admin/${key}`;
     }
     if (key === "dashboard") return "/client/dashboard";
