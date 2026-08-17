@@ -97,6 +97,7 @@ import LabBookingDetails from "../admin/labdetails/LabBookingDetails";
 import AdminPatients from "../admin/AdminPatients";
 import RefundPolicy from "../landingpage/RefundPolicy";
 import PrivacyPolicy from "../landingpage/PrivacyPolicy";
+import CertificateDoctorsCards from "../module/patient/pages/CertificateDoctorsCards";
 
 const Router = () => {
   return (
@@ -253,6 +254,8 @@ const Router = () => {
             <Route path="mycertificate" element={<Mycertificate />} />
             <Route path="addfamilypage" element={<AddFamilyPage />} />
             <Route path="edit-family/:id" element={<AddFamilyPage />} />
+            <Route path="certificatedoctors" element={<CertificateDoctorsCards />} />
+            
 
             <Route path="patientqueuepage" element={<PatientQueuePage />} />
             <Route path="homecarehistory" element={<HomeCareHistory/>} />

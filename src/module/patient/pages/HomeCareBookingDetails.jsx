@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { notify } from "../../../utils/notify";
 import {
   FaUserNurse,
   FaMapMarkerAlt,
@@ -116,7 +117,7 @@ const HomeCareBookingDetails = () => {
     } catch (err) {
       console.error("Cancel booking error:", err);
 
-      alert(err.response?.data?.message || "Unable to cancel booking.");
+      notify.info(err.response?.data?.message || "Unable to cancel booking.");
     } finally {
       setCancelling(false);
     }

@@ -506,7 +506,7 @@ export default function PatientDashboard() {
 
             {/* Apply Certificate */}
             <button
-              onClick={() => navigate("/client/apply-certificate")}
+              onClick={() => navigate("/client/certificatedoctors")}
               className="rounded-2xl w-50 flex flex-col items-center justify-center py-6 gap-3 transition-all duration-200 cursor-pointer"
               style={{
                 background: "#FFFFFF",
@@ -1109,7 +1109,6 @@ export default function PatientDashboard() {
 }
 
 /* ── Small helper components ── */
-
 function InfoField({ label, value, icon, circle }) {
   return (
     <div>

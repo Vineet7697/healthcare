@@ -179,7 +179,7 @@ const PatientHeaderDashboard = ({ toggleSidebar, isSidebarOpen }) => {
           )}
           {location.pathname === "/client/dashboard" && (
             <button
-              onClick={() => handleNavigate("/client/apply-certificate")}
+              onClick={() => handleNavigate("/client/certificatedoctors")}
               className="hidden md:flex px-6 py-2 rounded-full bg-gradient-to-br from-[#2277f7] to-[#52abd4] text-white text-md font-medium"
             >
               Apply Certificate

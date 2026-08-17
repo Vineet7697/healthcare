@@ -12,6 +12,7 @@ import {
   FaDownload,
   FaTimes,
   FaClock,
+  FaFileMedical,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../utils/notify";
@@ -23,7 +24,7 @@ import {
   getMyQR,
 } from "../../services/doctorService";
 import useDoctorProfile from "../../hooks/doctorHooks/useDoctorProfile";
-
+import CertificateService from "./pages/CertificateService";
 const QRCodeCanvas = lazy(() =>
   import("qrcode.react").then((module) => ({
     default: module.QRCodeCanvas,
@@ -109,12 +110,24 @@ const DoctorDashboard = () => {
   const [doctorId, setDoctorId] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
 
- const { profile } = useDoctorProfile();
-const { doctorImage } = useImage();
+  const { profile } = useDoctorProfile();
+  const { doctorImage } = useImage();
 
-useEffect(() => {
-  loadDashboard();
-}, []);
+
+
+const [certificateEnabled, setCertificateEnabled] = useState(false);
+const [certificateFee, setCertificateFee] = useState(0);
+
+const [certificateModalOpen, setCertificateModalOpen] =
+  useState(false);
+
+const [certificateModalMode, setCertificateModalMode] =
+  useState("start");
+
+  useEffect(() => {
+    loadDashboard();
+    loadCertificateService();
+  }, []);
 
   const loadDashboard = async () => {
     try {
@@ -125,6 +138,30 @@ useEffect(() => {
       console.error("Dashboard load failed", err);
     }
   };
+
+  const loadCertificateService = async () => {
+  try {
+    const res = await api.get("/doctor/get-certificate");
+
+    if (res.data?.success && res.data?.data) {
+      const data = res.data.data;
+
+      setCertificateEnabled(Boolean(data.enabled));
+      setCertificateFee(Number(data.fee || 0));
+    } else {
+      setCertificateEnabled(false);
+      setCertificateFee(0);
+    }
+  } catch (err) {
+    console.error(
+      "Certificate service load failed:",
+      err
+    );
+
+    setCertificateEnabled(false);
+    setCertificateFee(0);
+  }
+};
 
   const toggleAvailability = async () => {
     const newStatus = !isOnline;
@@ -231,18 +268,20 @@ useEffect(() => {
               {doctorName || "Doctor"}
             </h1>
           </div>
-          <button
-            onClick={toggleAvailability}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition hover:-translate-y-px
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleAvailability}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition hover:-translate-y-px
               ${
                 isOnline
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                   : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200"
               }`}
-          >
-            {isOnline ? <FaToggleOn size={18} /> : <FaToggleOff size={18} />}
-            {isOnline ? "Available" : "Offline"}
-          </button>
+            >
+              {isOnline ? <FaToggleOn size={18} /> : <FaToggleOff size={18} />}
+              {isOnline ? "Available" : "Offline"}
+            </button>
+          </div>
         </div>
 
         <div className=" [animation-delay:0.07s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-15 mb-14">
@@ -294,25 +333,16 @@ useEffect(() => {
             onClick={() => navigate("/doctordashboard/livequeue")}
           />
           <ActionCard
-            icon={<FaClock />}
-            title="Incoming Appointments"
-            subtitle="View and manage incoming appointments"
-            onClick={() => navigate("/doctordashboard/incoming")}
+            icon={<FaFileMedical />}
+            title="Certificate Requests"
+            subtitle="View and manage certificate requests"
+            onClick={() => navigate("/doctordashboard/Certificaterequest")}
             tagColor="bg-orange-50 text-orange-500"
             iconColor="bg-orange-50 text-orange-500"
           />
         </div>
 
         <div className="[animation-delay:0.13s] grid grid-cols-1 sm:grid-cols-3 gap-15 mb-14">
-          {/* <StatCard
-            icon={<FaBook />}
-            label="Pending Requests"
-            value={dashboard.pendingRequests}
-            tag="New"
-            tagColor="bg-orange-50 text-orange-500"
-            iconColor="bg-orange-50 text-orange-500"
-          /> */}
-
           <ActionCard
             icon={<FaExclamationTriangle className="text-red-500" />}
             title="Emergency Cancellations"
@@ -332,26 +362,182 @@ useEffect(() => {
             subtitle="Register a walk-in patient manually"
             onClick={() => navigate("/doctordashboard/manualbooking")}
           />
-
-          {/* <StatCard
-            icon={<FaUser />}
-            label="Today's Queue"
-            value={dashboard.todayQueue}
-            tag="Today"
-            tagColor="bg-[#ecfeff] text-[#0e7490]"
-            iconColor="bg-[#ecfeff] text-[#0e7490]"
-          /> */}
-          {/* <StatCard
-            icon={<FaCheckCircle />}
-            label="Completed Today"
-            value={dashboard.completedToday}
-            tag="Done"
-            tagColor="bg-emerald-50 text-emerald-600"
-            iconColor="bg-emerald-50 text-emerald-600"
-          /> */}
         </div>
 
         <div className=" [animation-delay:0.19s] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<div className="max-w-md">
+  <div
+    className="
+      bg-white
+      rounded-[18px]
+      border border-slate-200
+      shadow-[0_3px_8px_rgba(15,23,42,0.10)]
+      p-6
+      flex flex-col
+      gap-5
+    "
+  >
+    {/* Header */}
+    <div className="flex items-start justify-between gap-4">
+
+      <div className="flex items-center gap-4">
+        <div
+          className="
+            w-14 h-14
+            rounded-2xl
+            bg-[#ecfbf5]
+            flex items-center justify-center
+            flex-shrink-0
+          "
+        >
+          <svg
+            className="w-7 h-7 text-[#00a875]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+              d="M9 12h6m-6 4h6M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+              d="M14 3v5h5"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <h2 className="text-[20px] font-semibold text-[#071a35]">
+            Certificate Service
+          </h2>
+
+          <p className="text-[15px] text-[#607594] mt-1">
+            Medical Certificate
+          </p>
+        </div>
+      </div>
+
+      {/* Status */}
+      <span
+        className={`
+          inline-flex items-center gap-2
+          px-3.5 py-1.5
+          rounded-full
+          text-[13px] font-semibold
+          ${
+            certificateEnabled
+              ? "bg-[#e9fbf3] text-[#08a876]"
+              : "bg-[#f1f5f9] text-[#64748b]"
+          }
+        `}
+      >
+        <span
+          className={`
+            w-2 h-2 rounded-full
+            ${
+              certificateEnabled
+                ? "bg-[#10b981]"
+                : "bg-[#94a3b8]"
+            }
+          `}
+        />
+
+        {certificateEnabled ? "Active" : "Inactive"}
+      </span>
+    </div>
+
+    {/* Active */}
+    {certificateEnabled ? (
+      <>
+        <p className="text-[16px] text-[#58708f] leading-[1.7]">
+          Allow patients to apply for medical certificates
+          through your profile.
+        </p>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[14px] text-[#58708f] mb-1">
+            Certificate Fee - <span className="text-[14px] font-bold text-[#071a35]"> ₹{Number(certificateFee).toLocaleString("en-IN")}</span>
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setCertificateModalMode("edit");
+            setCertificateModalOpen(true);
+          }}
+          className="
+            w-full
+            h-[52px]
+            rounded-[10px]
+            border border-[#2860ff]
+            text-[#2450d8]
+            text-[17px]
+            font-medium
+            flex items-center justify-center gap-3
+            hover:bg-[#f5f8ff]
+            transition
+          "
+        >
+          <svg
+            className="w-[17px] h-[17px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15.232 5.232l3.536 3.536M4 20h4l10.5-10.5a2.121 2.121 0 00-3-3L5 17v3z"
+            />
+          </svg>
+
+          Edit Service
+        </button>
+      </>
+    ) : (
+      <>
+        <p className="text-[18px] text-[#58708f] leading-[1.7]">
+          Certificate service is currently not available to
+          patients.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            setCertificateModalMode("start");
+            setCertificateModalOpen(true);
+          }}
+          className="
+            w-full
+            h-[51px]
+            rounded-[10px]
+            bg-[#2450d8]
+            text-white
+            text-[17px]
+            font-semibold
+            flex items-center justify-center gap-3
+            hover:bg-[#1f46c4]
+            transition
+          "
+        >
+          <span className="text-[25px] font-light leading-none">
+            +
+          </span>
+
+          Start Service
+        </button>
+      </>
+    )}
+  </div>
+</div>
+
           <div
             className="rounded-[18px] p-6 flex flex-col justify-between gap-4 text-white"
             style={{
@@ -538,6 +724,16 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+<CertificateService
+  openFromDashboard={certificateModalOpen}
+  initialMode={certificateModalMode}
+  onClose={() => setCertificateModalOpen(false)}
+  certificateEnabled={certificateEnabled}
+  certificateFee={certificateFee}
+  setCertificateEnabled={setCertificateEnabled}
+  setCertificateFee={setCertificateFee}
+/>
     </div>
   );
 };

@@ -303,7 +303,6 @@ function InputField({
       disabled={disabled}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
-      // py-3 on mobile for bigger tap target, py-2.5 on sm+
       className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl text-sm outline-none transition-all"
       style={{
         border: hasError
@@ -318,7 +317,7 @@ function InputField({
         opacity: disabled ? 0.55 : 1,
         cursor: disabled ? "not-allowed" : "text",
         fontFamily: "inherit",
-        fontSize: "16px", // prevents iOS zoom on focus
+        fontSize: "16px", 
       }}
     />
   );
@@ -343,7 +342,7 @@ function TextAreaField({ id, placeholder, value, onChange, minHeight = 80 }) {
         color: "#1a1a1a",
         boxShadow: focused ? "0 0 0 3px rgba(55,138,221,0.12)" : "none",
         fontFamily: "inherit",
-        fontSize: "16px", // prevents iOS zoom
+        fontSize: "16px", 
       }}
     />
   );
@@ -646,7 +645,6 @@ const res = await api.post("/patient/bookhomecare", payload);
       {/* ── Personal Details ── */}
       <Card>
         <SectionLabel>Personal Details</SectionLabel>
-        {/* Stack on mobile, 2-col on sm+ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
             <FieldLabel>Full Name</FieldLabel>
@@ -668,8 +666,8 @@ const res = await api.post("/patient/bookhomecare", payload);
               value={form.contact}
               maxLength={10}
               onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, ""); // sirf digits
-                if (value.length > 10) value = value.slice(0, 10); // hard limit
+                let value = e.target.value.replace(/\D/g, ""); 
+                if (value.length > 10) value = value.slice(0, 10);
                 set("contact", value);
               }}
               onKeyDown={(e) => {
@@ -777,14 +775,12 @@ const res = await api.post("/patient/bookhomecare", payload);
             Please select a service type.
           </p>
         )}
-        {/* 1-col mobile → 3-col sm+ */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {SERVICES.map((s) => (
             <button
               key={s.val}
               type="button"
               onClick={() => set("service", s.val)}
-              // horizontal layout on mobile, vertical on sm+
               className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-1.5 py-3 sm:py-4 px-4 sm:px-2 rounded-xl text-left sm:text-center transition-all cursor-pointer"
               style={form.service === s.val ? chipSelected : chipDefault}
             >
@@ -844,7 +840,6 @@ const res = await api.post("/patient/bookhomecare", payload);
               Please select a duration.
             </p>
           )}
-          {/* 2-col on mobile → 4-col on sm+ */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {DURATIONS.map((d) => (
               <button
@@ -859,7 +854,6 @@ const res = await api.post("/patient/bookhomecare", payload);
             ))}
           </div>
         </div>
-        {/* Stack on mobile → 2-col on sm+ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <FieldLabel>Number of Days</FieldLabel>
@@ -898,7 +892,6 @@ const res = await api.post("/patient/bookhomecare", payload);
             Please select a time slot.
           </p>
         )}
-        {/* 2-col on mobile → 4-col on sm+ */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {TIME_SLOTS.map((t) => (
             <button

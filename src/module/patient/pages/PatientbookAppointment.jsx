@@ -4,6 +4,7 @@ import QrScanner from "qr-scanner";
 import Typewriter from "typewriter-effect";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { notify } from "../../../utils/notify";
 import {
   getCities,
   getDiseases,
@@ -89,7 +90,7 @@ const validateQRAndNavigate = async (doctorId) => {
     if (!doctor?.hasActiveSubscription) {
       console.log("❌ SUBSCRIPTION INACTIVE CONDITION RUNNING");
 
-      alert("This doctor is currently unavailable for appointments");
+      notify.info("This doctor is currently unavailable for appointments");
       return;
     }
 
@@ -103,7 +104,7 @@ const validateQRAndNavigate = async (doctorId) => {
     console.error("❌ Backend response:", err.response?.data);
     console.error("❌ Status:", err.response?.status);
 
-    alert(
+    notify.info(
       err.response?.data?.message ||
         "This doctor is currently unavailable for appointments"
     );
@@ -230,7 +231,7 @@ const validateQRAndNavigate = async (doctorId) => {
           const doctorId = extractDoctorId(result.data);
 
           if (!doctorId) {
-            alert("Invalid QR code");
+            notify.info("Invalid QR code");
             return;
           }
 
@@ -263,13 +264,13 @@ const validateQRAndNavigate = async (doctorId) => {
       const doctorId = extractDoctorId(result.data);
       setDatas(result.data);
       if (!doctorId) {
-        alert("Invalid QR code");
+        notify.info("Invalid QR code");
         return;
       }
 
       await validateQRAndNavigate(doctorId);
     } catch {
-      alert("Could not read QR code from image");
+      notify.info("Could not read QR code from image");
     }
   };
 
